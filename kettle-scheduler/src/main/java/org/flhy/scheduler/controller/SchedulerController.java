@@ -244,7 +244,8 @@ public class SchedulerController {
 			directory = repository.getUserHomeDirectory();
 		
 		JobDetail jobDetail = getJobDetail(jobName);
-
+		
+		
 		JSONObject jsonObject = new JSONObject();
 		if(jobDetail.getJobClass().equals(TransRunner.class)) {
 			jsonObject.put("GraphType", "TransGraph");
@@ -293,9 +294,11 @@ public class SchedulerController {
 				
 				TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
 				jsonObject.put("triggerState", triggerState.name());
+				
 				jsonArray.add(jsonObject);
 			}
 		}
+		
 		JsonUtils.response(jsonArray);
 	}
 	

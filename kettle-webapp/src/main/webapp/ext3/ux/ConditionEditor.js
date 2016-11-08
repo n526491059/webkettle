@@ -38,6 +38,9 @@ Condition = Ext.extend(Ext.util.Observable, {
 	},
 	
 	getValue: function() {
+		if(!this.left_valuename)
+			return null;
+		
 		var value = {};
 		value.negate = this.negate;
 		value.operator = this.operator;
@@ -258,18 +261,29 @@ Condition = Ext.extend(Ext.util.Observable, {
 	}
 });
 
+/***
+ * 
+ * 条件编辑器，继承自Ext.Container
+ * 
+ * 
+ */
 ConditionEditor = Ext.extend(Ext.Container, {
 	
 	constructor: function(config) {
 		var c = config.value ? Ext.decode(config.value) : {};
 		
 		this.active_condition = new Condition(c);
+		this.fieldbefore = true;
 		this.parents = [];
 		ConditionEditor.superclass.constructor.call(this, config);
 	},
 	
 	onLayout : function(){
-		
+		this.datachange();
+	},
+	
+	datachange: function() {
+		// 移除
 		var first = this.el.first();
 		if(first) first.remove();
 		
@@ -277,10 +291,10 @@ ConditionEditor = Ext.extend(Ext.Container, {
 			'<table class="ConditionEditor">',
 				'<tr>',
 					'<td>',
-						'<table>',
+						'<table width="100%">',
 							'<tr class="control_area">',
 								'<td><div class="not_field"></div></td>',
-								'<td><div class="add_field"></div></td>',
+								'<td align="right"><div class="condition_add" style="width:16px;height: 16px"></div></td>',
 							'</tr>',
 						'</table>',
 					'</td>',
@@ -305,10 +319,10 @@ ConditionEditor = Ext.extend(Ext.Container, {
 		}
 		
 		if(this.parents.length > 0) {
-			var controlArea = this.el.child('tr.control_area', true);
+			var controlArea = this.el.child('tr.control_area td', true);
 			var template = new Ext.Template(['<td><div class="up_field"></div></td>',
-				'<td><div class="conditions_tip">级别' + this.parents.length+ '，选择《向上》到上一级</div></td>']);
-			template.append(controlArea, {});
+				'<td><div class="conditions_tip">级别{0}，选择《向上》到上一级</div></td>']);
+			template.insertAfter(controlArea, [this.parents.length]);
 		}
 		
 		this.initControls();
@@ -371,25 +385,29 @@ ConditionEditor = Ext.extend(Ext.Container, {
 	 },
 	
 	initControls: function() {
-		var not = this.el.child('div.not_field', true);
 		var me = this, active_condition = this.active_condition;
 		
+		var not = this.el.child('div.not_field', false);
 		if(not) {
 			var notControl = new ControlField({
 				width: 70,
-				value: 'NOT',
+				overCls: 'control_field_overCls',
+				emptyText: null,
 				renderTo: not
-			}); 
+			});
+			notControl.setValue(active_condition.isNegated() ? 'NOT' : null);
 			
 			if(active_condition.isNegated())
-				notControl.getEl().addClass('control_field_overCls');
+				notControl.getEl().addClass('control_field_selected');
 			
 			notControl.getEl().on('click', function() {
 				active_condition.setNegated(!active_condition.isNegated());
 				if(active_condition.isNegated()) {
-					notControl.getEl().addClass('control_field_overCls');
+					notControl.setValue('NOT');
+					notControl.addClass('control_field_selected');
 				} else {
-					notControl.getEl().removeClass('control_field_overCls');
+					notControl.setValue(null);
+					notControl.removeClass('control_field_selected');
 				}
 			});
 		}
@@ -407,23 +425,13 @@ ConditionEditor = Ext.extend(Ext.Container, {
 			});
 		}
 			
-		var add = this.el.child('div.add_field', true);
+		var add = this.el.child('div.condition_add', false);
 		if(add) {
-			var addControl = new ControlField({
-				width: 80,
-				value: '新增条件',
-				renderTo: add
-			});
-			
-			addControl.getEl().on('click', function() {
+			add.on('click', function() {
 				me.addCondition();
 				me.doLayout();
 			});
 		}	
-		
-		var graph = getActiveGraph().getGraph(), cell = graph.getSelectionCell();
-		var enc = new mxCodec(mxUtils.createXmlDocument());
-		var node = enc.encode(graph.getModel());
 		
 		var left = this.el.child('div.left_field', true);
 		if(left) {
@@ -441,9 +449,9 @@ ConditionEditor = Ext.extend(Ext.Container, {
 				});
 				dialog.show(null, function() {
 					dialog.load({
-						stepName: cell.getAttribute('label'),
-						graphXml: mxUtils.getPrettyXml(node),
-						before: true
+						stepName: me.getStepname(),
+						graphXml: getActiveGraph().toXml(),
+						before: me.fieldbefore
 					});
 				});
 			});
@@ -495,9 +503,9 @@ ConditionEditor = Ext.extend(Ext.Container, {
 				});
 				dialog.show(null, function() {
 					dialog.load({
-						stepName: cell.getAttribute('label'),
-						graphXml: mxUtils.getPrettyXml(node),
-						before: true
+						stepName: me.getStepname(),
+						graphXml: getActiveGraph().toXml(),
+						before: me.fieldbefore
 					});
 				});
 			});
@@ -557,7 +565,28 @@ ConditionEditor = Ext.extend(Ext.Container, {
 	},
 	
 	setValue: function(c) {
-		if(c) this.active_condition = new Condition(c);
+		if(Ext.isObject(c)) 
+			this.active_condition = new Condition(c);
+		else
+			this.active_condition = new Condition();
+		this.parents = [];
+		this.datachange();
+	},
+	
+	setStepname: function(stepname) {
+		this.stepname = stepname;
+	},
+	
+	getStepname: function() {
+		if(this.stepname)
+			return this.stepname;
+		
+		var cell = getActiveGraph().getGraph().getSelectionCell();
+		return cell.getAttribute('label');
+	},
+	
+	setFieldFrom: function(b) {
+		this.fieldbefore = b;
 	}
 	
 });

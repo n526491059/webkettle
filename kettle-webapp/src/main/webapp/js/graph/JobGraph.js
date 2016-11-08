@@ -1,11 +1,79 @@
+JobExecutor = Ext.extend(Ext.util.Observable, {
+	
+	executionId: null,
+	
+	constructor: function() {
+		this.addEvents('beforerun', 'run', 'result');
+		
+		this.on('run', function(executionId) {
+			this.executionId = executionId;
+			this.loadResult();
+		}, this);
+		
+	},
+	
+	loadResult: function() {
+		var me = this;
+		Ext.Ajax.request({
+			url: GetUrl('job/result.do'),
+			params: {executionId: this.executionId},
+			method: 'POST',
+			success: function(response) {
+				var result = Ext.decode(response.responseText);
+				
+				me.fireEvent('result', result);
+				if(!result.finished) {
+					setTimeout(function() { me.loadResult(); }, 100);
+				} else {
+					me.executionId = null;
+				}
+			},
+			failure: failureResponse
+		});
+	},
+
+	isRunning: function() {
+		return this.executionId != null;
+	}
+
+});
+
 JobGraph = Ext.extend(BaseGraph, {
 	iconCls: 'job',
-	saveUrl: GetUrl('job/save.do'),
-	sqlUrl: GetUrl('job/getSQL.do'),
-	runDialog: 'JobExecutionConfigurationDialog',
 	
 	initComponent: function() {
-		this.resultPanel = new JobResult({hidden: !this.showResult});
+		var resultPanel = new JobResult({hidden: !this.showResult});
+		
+		if(this.readOnly === false) {
+			var jobExecutor = this.jobExecutor = new JobExecutor();
+			jobExecutor.on('beforerun', function(executor, defaultExecutionConfig) {
+				var dialog = new JobExecutionConfigurationDialog();
+				dialog.show(null, function() {
+					dialog.initData(defaultExecutionConfig);
+				});
+			});
+			jobExecutor.on('result', function(result) {
+				resultPanel.loadLocal(result);
+			}, this);
+			
+			this.tbar = [{
+				iconCls: 'save', scope: this, tooltip: '保存这个任务', handler: this.save
+			}, '-', {
+				iconCls: 'run', scope: this, tooltip: '运行这个任务', handler: this.run
+			}, {
+				iconCls: 'stop', scope: this, tooltip: '停止这个任务', handler: this.stop
+			}, {
+				iconCls: 'SQLbutton', scope: this, tooltip: '产生需要运行这个转换的SQL', handler: this.getSQL
+			}, '-', {
+				iconCls: 'SlaveServer', scope: this, handler: this.showSlaves
+			}, '-', {
+				iconCls: 'show-results', scope: this, handler: this.showResultPanel
+			}];
+		}
+		
+		this.items = [resultPanel];
+		
+		
 		JobGraph.superclass.initComponent.call(this);
 		
 		
@@ -42,6 +110,61 @@ JobGraph = Ext.extend(BaseGraph, {
 			});
 			
 		}, this);
+	},
+	
+	toRun: function(executionId) {
+		var resultPanel = this.layout.south.panel;
+		if(!resultPanel.isVisible())
+			this.showResultPanel();
+		
+		this.jobExecutor.fireEvent('run', executionId);
+	},
+	
+	save: function() {
+		Ext.Ajax.request({
+			url: GetUrl('job/save.do'),
+			params: {graphXml: encodeURIComponent(this.toXml())},
+			method: 'POST',
+			success: function(response) {
+				decodeResponse(response, function(resObj) {
+					Ext.Msg.show({
+					   title: '系统提示',
+					   msg: resObj.message,
+					   buttons: Ext.Msg.OK,
+					   icon: Ext.MessageBox.INFO
+					});
+				});
+			},
+			failure: failureResponse
+		});
+	},
+	
+	run: function() {
+		var jobExecutor = this.jobExecutor;
+		if(jobExecutor.isRunning()) {
+			Ext.Msg.alert('系统提示', '任务正在执行，请稍后...');
+			return;
+		}
+		
+		// 获取执行参数
+		Ext.Ajax.request({
+			url: GetUrl('job/initRun.do'),
+			method: 'POST',
+			params: {graphXml: this.toXml()},
+			success: function(response) {
+				var resObj = Ext.decode(response.responseText);
+				jobExecutor.fireEvent('beforerun', jobExecutor, resObj);
+			},
+			failure: failureResponse
+		});
+		
+	},
+	
+	showResultPanel: function() {
+		var resultPanel = this.layout.south.panel;
+		
+		resultPanel.setVisible( !resultPanel.isVisible() );
+		this.doLayout();
 	},
 	
 	initContextMenu: function(menu, cell, evt) {
@@ -153,7 +276,9 @@ JobGraph = Ext.extend(BaseGraph, {
 						label.push(kettle.imageParallelHop);
 					
 					var edit = new mxCellAttributeChange(cell, 'label', Ext.encode(label));
-		        	graph.getModel().execute(edit); 
+		        	graph.getModel().execute(edit);
+		        	
+		        	cell.setStyle(null);
 		        } finally
 		        {
 		            graph.getModel().endUpdate();
@@ -177,7 +302,9 @@ JobGraph = Ext.extend(BaseGraph, {
 						label.push(kettle.imageParallelHop);
 					
 					var edit = new mxCellAttributeChange(cell, 'label', Ext.encode(label));
-		        	graph.getModel().execute(edit); 
+		        	graph.getModel().execute(edit);
+		        	
+		        	cell.setStyle(null);
 		        } finally
 		        {
 		            graph.getModel().endUpdate();

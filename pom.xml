@@ -11,6 +11,7 @@
 		<module>kettle-scheduler</module>
 	</modules>
 
+
 	<dependencies>
 		<dependency>
 			<groupId>xerces</groupId>
@@ -56,6 +57,11 @@
 		<dependency>
 			<groupId>org.pentaho.di</groupId>
 			<artifactId>kettle-ui-swt</artifactId>
+			<version>6.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.pentaho.di</groupId>
+			<artifactId>pentaho-vfs-browser</artifactId>
 			<version>6.0.1</version>
 		</dependency>
 		<dependency>

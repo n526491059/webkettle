@@ -125,7 +125,10 @@ JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 						decodeResponse(response, function(resObj) {
 							me.close();
 							setTimeout(function() {
-								getActiveGraph().fireEvent('doRun', resObj.message);
+//								getActiveGraph().fireEvent('doRun', resObj.message);
+								
+								getActiveGraph().toRun(resObj.message);
+								
 							}, 500);
 						});
 					},
@@ -243,17 +246,19 @@ JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 		this.addEvents('beforestart');
 	},
 	
-	initData: function(graphXml) {
-		var me = this;
-		Ext.Ajax.request({
-			url: GetUrl('job/initRun.do'),
-			method: 'POST',
-			params: {graphXml: graphXml},
-			success: function(response) {
-				me.setValue(Ext.decode(response.responseText));
-			},
-			failure: failureResponse
-		});
+	initData: function(defaultExecutionConfig) {
+//		var me = this;
+//		Ext.Ajax.request({
+//			url: GetUrl('job/initRun.do'),
+//			method: 'POST',
+//			params: {graphXml: graphXml},
+//			success: function(response) {
+//				me.setValue(Ext.decode(response.responseText));
+//			},
+//			failure: failureResponse
+//		});
+		
+		this.setValue(defaultExecutionConfig);
 	},
 	
 	initLocalData: function(data) {

@@ -50,7 +50,6 @@ import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.pentaho.di.repository.RepositoryElementMetaInterface;
 import org.pentaho.di.repository.RepositoryMeta;
 import org.pentaho.di.repository.RepositoryObjectType;
-import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.ui.core.PropsUI;
@@ -286,8 +285,10 @@ public class RepositoryController {
 		if(RepositoryObjectType.TRANSFORMATION.getTypeDescription().equals(type)) {
 			TransMeta transMeta = repository.loadTransformation(name, directory, null, true, null);
 			transMeta.setRepositoryDirectory(directory);
+	    	
 			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
 			String graphXml = codec.encode(transMeta);
+			
 			JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
 		} else if(RepositoryObjectType.JOB.getTypeDescription().equals(type)) {
 			JobMeta jobMeta = repository.loadJob(name, directory, null, null);
@@ -295,6 +296,7 @@ public class RepositoryController {
 	    	
 	    	GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
 			String graphXml = codec.encode(jobMeta);
+			
 			JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
 		}
 	}
@@ -308,47 +310,19 @@ public class RepositoryController {
 	@RequestMapping(method=RequestMethod.POST, value="/explorer")
 	protected @ResponseBody List explorer(@RequestParam String path, @RequestParam int loadElement) throws KettleException, IOException {
 		ArrayList list = new ArrayList();
+		
 		Repository repository = App.getInstance().getRepository();
 		RepositoryDirectoryInterface dir = null;
-		if(StringUtils.hasText(path)) {
+		if(StringUtils.hasText(path))
 			dir = repository.findDirectory(path);
-		} else {
+		else
 			dir = repository.getUserHomeDirectory();
-		}
+		
 		List<RepositoryDirectoryInterface> directorys = dir.getChildren();
 		for(RepositoryDirectoryInterface child : directorys) {
 			list.add(RepositoryNode.initNode(child.getName(), child.getPath()));
 		}
-
-		String mapath="";
-		if(repository instanceof KettleDatabaseRepositoryMeta) {
-			KettleDatabaseRepositoryMeta dtma = (KettleDatabaseRepositoryMeta) repository.getRepositoryMeta();
-			mapath = dtma.getName();
-		}else if(repository instanceof KettleFileRepositoryMeta){
-			KettleFileRepositoryMeta filema = (KettleFileRepositoryMeta) repository.getRepositoryMeta();
-			mapath = filema.getBaseDirectory();
-		}
-
-		//begin   the logic below work when the project run on linux system , because the order  'repository.getUserHomeDirectory()' is  effective only on windows  ---by children;
-		if(0==list.size()){
-			if(!StringUtils.isEmpty(path)){
-				mapath=mapath+path;
-			}
-			File madir = new File(mapath);
-		if(madir.isDirectory()) 
-		   { 
-		   File[] fList=madir.listFiles(); 
-		   for(int j=0;j<fList.length;j++) 
-		         { 		
-		          if(fList[j].isDirectory()) 
-			        if(!".meta".equals(fList[j].getName())){
-				     list.add(RepositoryNode.initNode(fList[j].getName(),"/"+fList[j].getName()));
-		        }
-		      } 
-		    }
-		  }
-		//end   the logic before work when the project run on linux system , because the order  'repository.getUserHomeDirectory()' is  effective only on windows---by children;	
-
+		
 		if(RepositoryNodeType.includeTrans(loadElement)) {
 			List<RepositoryElementMetaInterface> elements = repository.getTransformationObjects(dir.getObjectId(), false);
 			if(elements != null) {
@@ -357,6 +331,7 @@ public class RepositoryController {
 					if(!transPath.endsWith("/"))
 						transPath = transPath + '/';
 					transPath = transPath + e.getName();
+					
 					list.add(RepositoryNode.initNode(e.getName(),  transPath, e.getObjectType()));
 				}
 			}
@@ -370,10 +345,12 @@ public class RepositoryController {
 					if(!transPath.endsWith("/"))
 						transPath = transPath + '/';
 					transPath = transPath + e.getName();
+					
 					list.add(RepositoryNode.initNode(e.getName(),  transPath, e.getObjectType()));
 				}
 			}
 		}
+		
 		return list;
 	}
 	
@@ -666,6 +643,8 @@ public class RepositoryController {
 			    repository.init( repositoryMeta );
 			    repository.connect( jsonObject.optString("username"), jsonObject.optString("password") );
 			    
+			    
+			    
 			    Props.getInstance().setLastRepository( repositoryMeta.getName() );
 			    Props.getInstance().setLastRepositoryLogin( jsonObject.optString("username") );
 			    Props.getInstance().setProperty( PropsUI.STRING_START_SHOW_REPOSITORIES, jsonObject.optBoolean("atStartupShown") ? "Y" : "N");
@@ -682,7 +661,7 @@ public class RepositoryController {
 	/**
 	 * 获取资源库信息
 	 * 
-	 * @param
+	 * @param loginInfo
 	 * @throws IOException 
 	 * @throws KettleException 
 	 */
@@ -720,7 +699,7 @@ public class RepositoryController {
 	/**
 	 * 断开资源库
 	 * 
-	 * @param
+	 * @param loginInfo
 	 * @throws IOException 
 	 */
 	@ResponseBody

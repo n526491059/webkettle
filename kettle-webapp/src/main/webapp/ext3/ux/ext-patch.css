@@ -103,13 +103,22 @@ div.control_ct td {
 }
 .control_field {
 	border: 1px solid black;
+	background-image: none;
 	color: black;
 }
 
 .control_field_overCls {
 	color: red;
+	background-color: gray;
 	font-weight: bold;
 }
+
+
+.control_field_selected{
+	color: black;
+	font-weight: bold;
+}
+
 .left_field,.func_field,.right_field,.value_field,.up_field,.add_field {
 	margin: 5px 10px;
 }

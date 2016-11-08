@@ -44,7 +44,6 @@ public class TransExecutor implements Runnable {
 	private Trans trans = null;
 	private Map<StepMeta, String> stepLogMap = new HashMap<StepMeta, String>();
 	
-	
 	private TransSplitter transSplitter = null;
 	
 	private TransExecutor(TransExecutionConfiguration transExecutionConfiguration, TransMeta transMeta) {
@@ -59,6 +58,14 @@ public class TransExecutor implements Runnable {
 		TransExecutor transExecutor = new TransExecutor(transExecutionConfiguration, transMeta);
 		executors.put(transExecutor.getExecutionId(), transExecutor);
 		return transExecutor;
+	}
+	
+	public static TransExecutor getExecutor(String executionId) {
+		return executors.get(executionId);
+	}
+	
+	public static void remove(String executionId) {
+		executors.remove(executionId);
 	}
 
 	public String getExecutionId() {
@@ -98,13 +105,19 @@ public class TransExecutor implements Runnable {
 		        }
 		        boolean initialized = false;
 		        trans = new Trans( transMeta );
+		        
+		        trans.setSafeModeEnabled( executionConfiguration.isSafeModeEnabled() );
+		        trans.setGatheringMetrics( executionConfiguration.isGatheringMetrics() );
+		        trans.setLogLevel( executionConfiguration.getLogLevel() );
+		        trans.setReplayDate( executionConfiguration.getReplayDate() );
+		        trans.setRepository( executionConfiguration.getRepository() );
+		        
 		        try {
 		            trans.prepareExecution( args );
 					capturePreviewData(trans, transMeta.getSteps());
 		            initialized = true;
 		        } catch ( KettleException e ) {
 		        	e.printStackTrace();
-//		        	log.logError( trans.getName() + ": preparing transformation execution failed", e );
 		            checkErrorVisuals();
 		        }
 		        
@@ -158,6 +171,7 @@ public class TransExecutor implements Runnable {
 						executionConfiguration.getVariables().put(param, value);
 					}
 				}
+
 				try {
 					Trans.executeClustered(transSplitter, executionConfiguration);
 				} catch (Exception e) {
@@ -498,6 +512,14 @@ public class TransExecutor implements Runnable {
     	}
 		
 		return jsonArray;
+	}
+	
+	public void stop() {
+		trans.stopAll();
+	}
+	
+	public void resume() {
+		trans.resumeRunning();
 	}
 	
 	public JSONObject getPreviewData() {

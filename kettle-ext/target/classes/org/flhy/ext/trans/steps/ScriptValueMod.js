@@ -144,7 +144,7 @@ ScriptValuesModDialog = Ext.extend(KettleDialog, {
 				},{
 					header: BaseMessages.getString(PKG, "ScriptValuesDialogMod.ColumnInfo.Precision"), dataIndex: 'precision', width: 100, editor: new Ext.form.TextField()
 				},{
-					header: BaseMessages.getString(PKG, "ScriptValuesDialogMod.ColumnInfo.Replace"), dataIndex: 'replace', width: 180, renderer: function(v)
+					header:  '替换\'FieldName\'或\'Rename to\'值', dataIndex: 'replace', width: 180, renderer: function(v)
 					{
 						if(v == 'N') 
 							return '否'; 

@@ -7,28 +7,12 @@ BaseGraph = Ext.extend(Ext.Panel, {
 	showResult: false,
 
 	initComponent: function() {
-		var me = this;
-		
-		var resultPanel = this.resultPanel;
-		delete this.resultItem;
-		resultPanel.getOwnerGraph = function() {
-			return me;
-		};
-		this.showResultPanel = function() {
-			resultPanel.setVisible( !resultPanel.isVisible() );
-			me.doLayout();
-		};
-		
 		var graphPanel = new Ext.Panel({
 			region: 'center',
 			bodyStyle:'overflow: auto'
 		});
 		
-		this.items = [graphPanel, resultPanel];
-		this.installToolbar();		
-		this.loadLocal = function(result) {
-			resultPanel.loadLocal(result);
-		};
+		this.items.push(graphPanel);
 		
 		graphPanel.on('afterrender', function(comp) {
 			var container = comp.body.dom;
@@ -42,14 +26,7 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		}, this);
 		
 		BaseGraph.superclass.initComponent.call(this);
-		this.addEvents('doRun', 'load');
-		
-		this.on('doRun', function(executionId) {
-			if(resultPanel.isVisible() === false)
-				me.showResultPanel();
-			
-			resultPanel.loadResult(executionId);
-		}, this);
+		this.addEvents('load', 'initgraph');
 		
 		this.on('load', function() {
 			var graph = this.getGraph();
@@ -58,127 +35,8 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		}, this);
 		
 		graphPanel.on('resize', function() {
-			me.getGraph().sizeDidChange();
-		});
-	},
-	
-	installToolbar: function() {
-		if(this.readOnly === false) {
-			var barArr = [];
-			
-			if(!Ext.isEmpty(this.saveUrl)) {
-				barArr.push({
-					iconCls: 'save', scope: this, handler: function() {
-						Ext.Ajax.request({
-							url: this.saveUrl,
-							params: {graphXml: encodeURIComponent(this.toXml())},
-							method: 'POST',
-							success: function(response) {
-								decodeResponse(response, function(resObj) {
-									Ext.Msg.show({
-									   title: '系统提示',
-									   msg: resObj.message,
-									   buttons: Ext.Msg.OK,
-									   icon: Ext.MessageBox.INFO
-									});
-								});
-							},
-							failure: failureResponse
-						});
-					}
-				});
-				
-				barArr.push('-');
-			}
-				
-			if(!Ext.isEmpty(this.runDialog)) {
-				barArr.push({
-					iconCls: 'run', scope: this, handler: function() {
-						var dialog = Ext.create({}, this.runDialog);
-						dialog.show(null, function() {
-							dialog.initData(getActiveGraph().toXml());
-						});
-					}
-				});
-				
-				barArr.push({
-					iconCls: 'schedule', scope: this, handler: function() {
-						var executionDialog = Ext.create({title: '添加调度', btnText: '下一步'}, this.runDialog);
-						executionDialog.on('beforestart', function(executionConfiguration) {
-							executionDialog.close();
-							
-							var dialog = new SchedulerDialog();
-							dialog.on('ok', function(data) {
-								data.setAttribute('executionConfiguration', Ext.encode(executionConfiguration));
-								Ext.Ajax.request({
-									url: GetUrl('schedule/scheduleJob.do'),
-									method: 'POST',
-									params: {schedulerXml: mxUtils.getXml(data)},
-									success: function(response) {
-										decodeResponse(response, function(resObj) {
-											Ext.Msg.show({
-											   title: resObj.title,
-											   msg: resObj.message,
-											   buttons: Ext.Msg.OK,
-											   icon: Ext.MessageBox.INFO
-											});
-										});
-									},
-									failure: failureResponse
-							   });
-							});
-							dialog.show(null, function() {
-								dialog.initData(this.repositoryId);
-							}, this);
-							
-							return false;
-						}, this);
-						
-						executionDialog.show(null, function() {
-							executionDialog.initData(getActiveGraph().toXml());
-						});
-					}
-				});
-				
-				barArr.push('-');
-			}
-			
-			barArr.push({
-				iconCls: 'SQLbutton', scope: this, handler: this.getSQL
-			});
-			
-			if(Ext.isFunction(this.check)) {
-				barArr.push({
-					iconCls: 'check', scope: this, handler: this.check
-				});
-			}
-			
-			barArr.push('-');
-			
-			barArr.push({
-				iconCls: 'SlaveServer', scope: this, handler: this.showSlaves
-			});
-			
-			if(Ext.isFunction(this.clusterSchema)) {
-				barArr.push({
-					iconCls: 'ClusterSchema', scope: this, handler: this.clusterSchema
-				});
-			}
-			
-			if(Ext.isFunction(this.partitionSchema)) {
-				barArr.push({
-					iconCls: 'PartitionSchema', scope: this, handler: this.partitionSchema
-				});
-			}
-			
-			barArr.push('-');
-			
-			barArr.push({
-				iconCls: 'show-results', scope: this, handler: this.showResultPanel
-			});
-			
-			this.tbar = barArr;
-		}
+			this.getGraph().sizeDidChange();
+		}, this);
 	},
 	
 	initGraph: function(container) {
@@ -274,6 +132,8 @@ BaseGraph = Ext.extend(Ext.Panel, {
 				me.editCell(cell);
 			}
 		});
+		
+		this.fireEvent('initgraph', graph);
 		
 		this.getGraph = function() {
 			return graph;
@@ -670,11 +530,6 @@ BaseGraph = Ext.extend(Ext.Panel, {
 	
 	showSlaves: function() {
 		var dialog = new SlaveServersDialog();
-		dialog.show();
-	},
-	
-	getSQL: function() {
-		var dialog = new SQLStatementsDialog({sqlUrl: this.sqlUrl});
 		dialog.show();
 	},
 	

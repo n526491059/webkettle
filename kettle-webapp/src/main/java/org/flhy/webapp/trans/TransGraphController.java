@@ -7,6 +7,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -15,8 +16,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.flhy.ext.App;
 import org.flhy.ext.PluginFactory;
+import org.flhy.ext.TransDebugExecutor;
 import org.flhy.ext.TransExecutor;
 import org.flhy.ext.base.GraphCodec;
+import org.flhy.ext.core.ConditionCodec;
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.core.database.DatabaseCodec;
 import org.flhy.ext.trans.TransExecutionConfigurationCodec;
 import org.flhy.ext.trans.step.StepEncoder;
@@ -24,12 +28,14 @@ import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.flhy.ext.utils.JsonUtils;
 import org.flhy.ext.utils.StringEscapeHelper;
+import org.flhy.ext.utils.SvgImageUrl;
 import org.flhy.webapp.utils.GetSQLProgress;
 import org.flhy.webapp.utils.SearchFieldsProgress;
 import org.flhy.webapp.utils.TransPreviewProgress;
 import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.CheckResultInterface;
 import org.pentaho.di.core.CheckResultSourceInterface;
+import org.pentaho.di.core.Condition;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.RowMetaAndData;
 import org.pentaho.di.core.SQLStatement;
@@ -52,6 +58,8 @@ import org.pentaho.di.repository.RepositorySecurityProvider;
 import org.pentaho.di.trans.TransExecutionConfiguration;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.TransPreviewFactory;
+import org.pentaho.di.trans.debug.StepDebugMeta;
+import org.pentaho.di.trans.debug.TransDebugMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.springframework.stereotype.Controller;
@@ -167,6 +175,207 @@ public class TransGraphController {
 	}
 	
 	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/initPreview")
+	protected void initPreview(@RequestParam String graphXml, @RequestParam String selectedCells) throws Exception {
+		JSONArray cells = JSONArray.fromObject(URLDecoder.decode(selectedCells, "utf-8"));
+		HashSet hs = new HashSet();
+		hs.addAll(cells);
+		
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
+		transMeta.setRepository(App.getInstance().getRepository());
+		transMeta.setMetaStore(App.getInstance().getMetaStore());
+		
+		TransExecutionConfiguration executionConfiguration = App.getInstance().getTransPreviewExecutionConfiguration();
+		executionConfiguration.setRepository(App.getInstance().getRepository());
+		executionConfiguration.setSafeModeEnabled(true);
+		
+		TransDebugMeta transDebugMeta = transPreviewMetaMap.get(transMeta);
+		if (transDebugMeta == null) {
+			transDebugMeta = new TransDebugMeta(transMeta);
+			transPreviewMetaMap.put(transMeta, transDebugMeta);
+		}
+		
+		transDebugMeta.getTransMeta().setRepository( App.getInstance().getRepository() );
+		
+		JSONArray jsonArray = new JSONArray();
+		for (int i = 0; i < transDebugMeta.getTransMeta().getSteps().size(); i++) {
+			StepMeta stepMeta = transDebugMeta.getTransMeta().getStep(i);
+			transDebugMeta.getStepDebugMetaMap().get(stepMeta);
+
+			PluginInterface plugin = PluginRegistry.getInstance().getPlugin(StepPluginType.class, stepMeta.getStepID());
+			
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("index", transMeta.indexOfStep(stepMeta));
+			jsonObject.put("name", stepMeta.getName());
+			jsonObject.put("image", SvgImageUrl.getUrl(plugin));
+			
+			if(hs.contains(stepMeta.getName())) {
+				jsonObject.put("rowCount", PropsUI.getInstance().getDefaultPreviewSize());
+				jsonObject.put("pauseBreakPoint", "N");
+				jsonObject.put("firstRows", "Y");
+			}
+			
+			jsonArray.add(jsonObject);
+		}
+		
+		JsonUtils.response(jsonArray);
+	}
+	
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/preview")
+	protected void preview(@RequestParam String graphXml, @RequestParam String selectedCells) throws Exception {
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
+		transMeta.setRepository(App.getInstance().getRepository());
+		transMeta.setMetaStore(App.getInstance().getMetaStore());
+		
+		TransExecutionConfiguration executionConfiguration = App.getInstance().getTransPreviewExecutionConfiguration();
+		executionConfiguration.setRepository(App.getInstance().getRepository());
+		executionConfiguration.setSafeModeEnabled(true);
+		
+		TransDebugMeta transDebugMeta = transPreviewMetaMap.get(transMeta);
+		if (transDebugMeta == null) {
+			transDebugMeta = new TransDebugMeta(transMeta);
+			transPreviewMetaMap.put(transMeta, transDebugMeta);
+		}
+		
+		transDebugMeta.getTransMeta().setRepository( App.getInstance().getRepository() );
+		
+		
+		JSONArray cells = JSONArray.fromObject(URLDecoder.decode(selectedCells, "utf-8"));
+		for(int i=0; i<cells.size(); i++) {
+			JSONObject jsonObject = cells.getJSONObject(i);
+			
+			StepMeta stepMeta = transMeta.getStep(jsonObject.optInt("index"));
+			StepDebugMeta stepDebugMeta = new StepDebugMeta(stepMeta);
+
+			stepDebugMeta.setPausingOnBreakPoint("Y".equalsIgnoreCase(jsonObject.optString("pauseBreakPoint")));
+			stepDebugMeta.setReadingFirstRows("Y".equalsIgnoreCase(jsonObject.optString("firstRows")));
+			stepDebugMeta.setRowCount(Const.toInt( jsonObject.optString("rowCount"), -1));
+			
+			if(jsonObject.optJSONObject("condition") != null) {
+				Condition condition = ConditionCodec.decode(jsonObject.optJSONObject("condition"));
+				stepDebugMeta.setCondition(condition);
+			}
+			
+			transDebugMeta.getStepDebugMetaMap().put(stepMeta, stepDebugMeta);
+		}
+		
+		executionConfiguration.setExecutingLocally( true );
+        executionConfiguration.setExecutingRemotely( false );
+        executionConfiguration.setExecutingClustered( false );
+        
+        Object[] data = App.getInstance().getVariables().getData();
+        String[] fields = App.getInstance().getVariables().getRowMeta().getFieldNames();
+        Map<String, String> variableMap = new HashMap<String, String>();
+        variableMap.putAll( executionConfiguration.getVariables() ); // the default
+        for ( int idx = 0; idx < fields.length; idx++ ) {
+          String value = executionConfiguration.getVariables().get( fields[idx] );
+          if ( Const.isEmpty( value ) ) {
+            value = data[idx].toString();
+          }
+          variableMap.put( fields[idx], value );
+        }
+
+        executionConfiguration.setVariables( variableMap );
+        executionConfiguration.getUsedVariables( transMeta );
+        executionConfiguration.getUsedArguments( transMeta, App.getInstance().getArguments() );
+
+        TransDebugExecutor transExecutor = TransDebugExecutor.initExecutor(executionConfiguration, transMeta, transDebugMeta);
+	    Thread tr = new Thread(transExecutor, "TransDebugExecutor_" + transExecutor.getExecutionId());
+	    tr.start();
+		
+        JsonUtils.success(transExecutor.getExecutionId());
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/stop")
+	protected JSONObject stop(@RequestParam String executionId) throws Exception {
+		TransExecutor transExecutor = TransExecutor.getExecutor(executionId);
+		if(transExecutor != null) {
+			transExecutor.stop();
+			while(!transExecutor.isFinished())
+				Thread.sleep(500);
+			
+			
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("finished", transExecutor.isFinished());
+			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
+			jsonObject.put("log", transExecutor.getExecutionLog());
+			jsonObject.put("stepStatus", transExecutor.getStepStatus());
+			
+			TransExecutor.remove(executionId);
+			return jsonObject;
+		}
+		
+		TransDebugExecutor transDebugExecutor = TransDebugExecutor.getExecutor(executionId);
+		if(transDebugExecutor != null) {
+			transDebugExecutor.stop();
+			while(!transDebugExecutor.isFinished())
+				Thread.sleep(500);
+			
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("finished", transDebugExecutor.isFinished());
+			jsonObject.put("stepMeasure", transDebugExecutor.getStepMeasure());
+			jsonObject.put("log", transDebugExecutor.getExecutionLog());
+			jsonObject.put("stepStatus", transDebugExecutor.getStepStatus());
+			jsonObject.put("previewData", transDebugExecutor.getPreviewData());
+			
+			TransDebugExecutor.remove(executionId);
+			return jsonObject;
+		}
+		
+		return null;
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/previewResult")
+	protected void previewResult(@RequestParam String executionId, @RequestParam(required=false) String action) throws Exception {
+		TransDebugExecutor transExecutor = TransDebugExecutor.getExecutor(executionId);
+		if(transExecutor == null)
+			return;
+		
+		if("stop".equalsIgnoreCase(action)) {
+//			transExecutor.stop();
+//			while(!transExecutor.isFinished())
+//				Thread.sleep(500);
+			
+//			JSONObject jsonObject = new JSONObject();
+//			jsonObject.put("finished", transExecutor.isFinished());
+//			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
+//			jsonObject.put("log", transExecutor.getExecutionLog());
+//			jsonObject.put("stepStatus", transExecutor.getStepStatus());
+//			jsonObject.put("previewData", transExecutor.getPreviewData());
+//			TransDebugExecutor.remove(executionId);
+			JsonUtils.response(stop(executionId));
+			return;
+		} else if("askformore".equalsIgnoreCase(action)) {
+			while(!transExecutor.isPreviewed() && !transExecutor.isFinished())
+				Thread.sleep(200);
+			
+			JSONObject jsonObject = new JSONObject();
+			
+			jsonObject.put("finished", transExecutor.isFinished());
+			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
+			jsonObject.put("log", transExecutor.getExecutionLog());
+			jsonObject.put("stepStatus", transExecutor.getStepStatus());
+			jsonObject.put("previewData", transExecutor.getPreviewData());
+			
+			if(transExecutor.isFinished()) 
+				TransDebugExecutor.remove(executionId);
+			
+			JsonUtils.response(jsonObject);
+			transExecutor.clearPreview();
+			transExecutor.resume();
+			return;
+		}
+	}
+	
+	private Map<TransMeta, TransDebugMeta> transPreviewMetaMap = new HashMap<TransMeta, TransDebugMeta>();
+	
+	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/initRun")
 	protected void initRun(@RequestParam String graphXml) throws Exception {
 		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
@@ -205,7 +414,7 @@ public class TransGraphController {
 
 	    executionConfiguration.setLogLevel( DefaultLogLevel.getLogLevel() );
 		
-	    // Fill the parameters, maybe do this in another place?
+		// Fill the parameters, maybe do this in another place?
 		Map<String, String> params = executionConfiguration.getParams();
 		params.clear();
 		String[] paramNames = transMeta.listParameters();
@@ -235,13 +444,12 @@ public class TransGraphController {
 	    TransExecutor transExecutor = TransExecutor.initExecutor(transExecutionConfiguration, transMeta);
 	    Thread tr = new Thread(transExecutor, "TransExecutor_" + transExecutor.getExecutionId());
 	    tr.start();
-
-        executions.put(transExecutor.getExecutionId(), transExecutor);
+//        executions.put(transExecutor.getExecutionId(), transExecutor);
 		
         JsonUtils.success(transExecutor.getExecutionId());
 	}
 	
-	private static HashMap<String, TransExecutor> executions = new HashMap<String, TransExecutor>();
+//	private static HashMap<String, TransExecutor> executions = new HashMap<String, TransExecutor>();
 	
 	/**
 	 * 获取执行结果
@@ -254,11 +462,11 @@ public class TransGraphController {
 	protected void result(@RequestParam String executionId) throws Exception {
 		JSONObject jsonObject = new JSONObject();
 		
-		TransExecutor transExecutor = executions.get(executionId);
+		TransExecutor transExecutor = TransExecutor.getExecutor(executionId);
 		
 		jsonObject.put("finished", transExecutor.isFinished());
 		if(transExecutor.isFinished()) {
-			executions.remove(executionId);
+			TransExecutor.remove(executionId);
 			
 			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
 			jsonObject.put("log", transExecutor.getExecutionLog());

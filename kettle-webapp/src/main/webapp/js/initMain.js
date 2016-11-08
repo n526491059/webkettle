@@ -1,44 +1,72 @@
 var activeGraph = null;
 Ext.onReady(function() {
+	
+	Ext.QuickTips.init();
 	Ext.MessageBox.buttonText.yes = '确定';
 	Ext.MessageBox.buttonText.ok = '好的';
 	Ext.MessageBox.buttonText.no = '否';
 	Ext.MessageBox.buttonText.cancel = '取消';
 	
-	var tabPanel = new Ext.TabPanel({
-		id: 'TabPanel',
-		region: 'center',
-		margins: '5 5 5 0',
-		plain: true
-	});
+	var init = function() {
+		var tabPanel = new Ext.TabPanel({
+			id: 'TabPanel',
+			region: 'center',
+			margins: '5 5 5 0',
+			plain: true
+		});
+		
+		var guidePanel = new GuidePanel({
+			id: 'GuidePanel',
+			split: true,
+			region: 'west',
+			width: 300,
+			margins: '5 0 5 5'
+		});
+		
+		tabPanel.on('tabchange', function(me, item) {
+			if(item) {
+				activeGraph = item;
+				guidePanel.activeCom(item);
+			} else {
+				activeGraph = null;
+				guidePanel.activeCom(null);
+			}
+		});
+		
+	    new Ext.Viewport({
+			layout: 'border',
+			items: [guidePanel, tabPanel]
+		});
+	};
 	
-	var guidePanel = new GuidePanel({
-		id: 'GuidePanel',
-		split: true,
-		region: 'west',
-		width: 300,
-		margins: '5 0 5 5'
-	});
-	
-	tabPanel.on('tabchange', function(me, item) {
-		if(item) {
-			activeGraph = item;
-			guidePanel.activeCom(item);
-		} else {
-			activeGraph = null;
-			guidePanel.activeCom(null);
-		}
-	});
-	
-    new Ext.Viewport({
-		layout: 'border',
-		items: [guidePanel, tabPanel]
-	});
+//	Ext.Ajax.request({
+//		url: GetUrl('system/getSystem.do'),
+//		success: function(response) {
+//			if(response.responseText == 'access forbidden') {
+//				var dialog = new RepositoriesDialog();
+//				dialog.on('loginSuccess', function() {
+//					dialog.close();
+//					init();
+//				});
+//				dialog.show();
+//			} else {
+//				init();
+//			}
+//			
+//		    setTimeout(function(){
+//		    	Ext.get('loading').hide();
+//		        Ext.get('loading-mask').fadeOut();
+//		    }, 250);
+//		}
+//	});
     
-    setTimeout(function(){
-    	Ext.get('loading').hide();
-        Ext.get('loading-mask').fadeOut();
-    }, 250);
+	init();
+	
+	 setTimeout(function(){
+		 Ext.get('loading').hide();
+		 Ext.get('loading-mask').fadeOut();
+	 }, 250);
+
     
 });
 

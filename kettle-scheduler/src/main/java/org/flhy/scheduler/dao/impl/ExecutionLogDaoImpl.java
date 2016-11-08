@@ -17,7 +17,7 @@ public class ExecutionLogDaoImpl extends JdbcDaoSupport implements ExecutionLogD
 
 	@Override
 	public String lastestStatus(String jobName) {
-		return getJdbcTemplate().query("select * from kettle_execution_log where jobname=? and endTime is not null order by starttime desc", new String[]{jobName},
+		return getJdbcTemplate().query("select * from kettle_execution_log where jobname=? and endTime is not null order by starttime desc", new String[]{jobName}, 
 				new ResultSetExtractor<String>() {
 					@Override
 					public String extractData(ResultSet rs) throws SQLException, DataAccessException {

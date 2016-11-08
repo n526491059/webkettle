@@ -39,6 +39,12 @@ public class SvgImageUrl {
 	}
 	
 	public static String url(String imageFile, int scale) {
+		if(imageFile == null)
+			return null;
+		
+		if(!imageFile.startsWith("ui/images/"))
+			imageFile = "ui/images/" + imageFile;
+		
 		return imageFile + "?scale=" + scale; 
 	}
 	

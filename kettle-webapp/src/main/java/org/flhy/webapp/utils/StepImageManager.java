@@ -11,6 +11,7 @@ import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -220,6 +221,14 @@ public class StepImageManager {
 		return null;
 	}
 	
+	public static void main(String[] args) throws IOException {
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		InputStream is = cl.getResource("ui/images/eq_add.png").openStream();
+		
+		BufferedImage bi = loadImage(is, "ui/images/eq_add.png", 16);
+		ImageIO.write(bi, "PNG", new FileOutputStream("1.png")); 
+	}
+	
 	private static BufferedImage loadImage(InputStream in, String filename, int scale) throws IOException {
 		if (SvgSupport.isSvgName(filename)) {
 			SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory( XMLResourceDescriptor.getXMLParserClassName() );
@@ -238,14 +247,11 @@ public class StepImageManager {
 		} else {
 			BufferedImage png = ImageIO.read(in);
 			
-			BufferedImage result = new BufferedImage(scale, scale, BufferedImage.TYPE_INT_ARGB);  
-			Graphics2D gc = (Graphics2D) result.getGraphics();
+//          新生成结果图片
+            BufferedImage result = new BufferedImage(scale, scale,  BufferedImage.TYPE_INT_RGB);  
+            result.getGraphics().drawImage( png.getScaledInstance(scale, scale, java.awt.Image.SCALE_SMOOTH), 0, 0, null);  
 			
-			AffineTransform affineTransform = new AffineTransform( gc.getTransform() );
-			affineTransform.scale(scale * 1.0f / png.getWidth(), scale * 1.0f / png.getHeight());
-			gc.drawImage(png, 0, 0, null);
-			gc.dispose();
-			return png;
+			return result;
 		}
 	}
 	

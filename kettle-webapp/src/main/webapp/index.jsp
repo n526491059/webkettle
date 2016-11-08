@@ -66,6 +66,7 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/trans/ClusterSchemaDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/trans/PartitionSchemaDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/trans/StepErrorMetaDialog.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/trans/TransDebugDialog.js"></script>
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/job/JobExecutionConfigurationDialog.js"></script>
 	    

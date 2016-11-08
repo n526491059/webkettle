@@ -66,34 +66,34 @@ TransResult = Ext.extend(Ext.TabPanel, {
 			disabled: true
 		}];
 		
-		this.loadResult = function(executionId) {
-			if(!executionId) return;
-			
-			Ext.Ajax.request({
-				url: GetUrl('trans/result.do'),
-				params: {executionId: executionId},
-				method: 'POST',
-				success: function(response) {
-					var result = Ext.decode(response.responseText);
-					measureStore.removeAll();
-					log.setValue('');
-					
-					measureStore.loadData(result.stepMeasure);
-					log.setValue(result.log);
-					
-					getActiveGraph().updateStatus(result.stepStatus);
-					
-					if(!result.finished) {
-						setTimeout(function() { me.loadResult(executionId); }, 500);
-					}
-				}
-			});
-		};
+//		this.loadResult = function(executionId) {
+//			if(!executionId) return;
+//			
+//			Ext.Ajax.request({
+//				url: GetUrl('trans/result.do'),
+//				params: {executionId: executionId},
+//				method: 'POST',
+//				success: function(response) {
+//					var result = Ext.decode(response.responseText);
+//					measureStore.removeAll();
+//					log.setValue('');
+//					
+//					measureStore.loadData(result.stepMeasure);
+//					log.setValue(result.log);
+//					
+//					getActiveGraph().updateStatus(result.stepStatus);
+//					
+//					if(!result.finished) {
+//						setTimeout(function() { me.loadResult(executionId); }, 500);
+//					}
+//				}
+//			});
+//		};
 		
 		this.loadLocal = function(result) {
 			measureStore.loadData(result.stepMeasure);
 			log.setValue(result.log);
-			me.getOwnerGraph().updateStatus(result.stepStatus);
+//			ownerGraph.updateStatus(result.stepStatus);
 		};
 		
 		TransResult.superclass.initComponent.call(this);

@@ -83,7 +83,14 @@ public class JSONObject extends LinkedHashMap<String, Object> {
 	}
 
 	public JSONObject optJSONObject(String key) {
-		Map<String, Object> m = (Map<String, Object>) get(key);
+		Object value = get(key);
+		if(value instanceof String) {
+			String v = (String) value;
+			if(!StringUtils.hasText(v))
+				return null;
+		}
+		
+		Map<String, Object> m = (Map<String, Object>) value;
 		if(m == null) return null;
 		return new JSONObject(m);
 	}

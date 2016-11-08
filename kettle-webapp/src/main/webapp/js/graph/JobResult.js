@@ -43,28 +43,28 @@ JobResult = Ext.extend(Ext.TabPanel, {
 			disabled: true
 		}];
 
-		this.loadResult = function(executionId) {
-			if(!executionId) return;
-			
-			Ext.Ajax.request({
-				url: GetUrl('job/result.do'),
-				params: {executionId: executionId},
-				method: 'POST',
-				success: function(response) {
-					var result = Ext.decode(response.responseText);
-					
-					if(result.jobMeasure.length > 0) {
-						jobMeasure.getRootNode().removeAll(true);
-						jobMeasure.getRootNode().appendChild(result.jobMeasure);
-					}
-					log.setValue(decodeURIComponent(result.log));
-					
-					if(!result.finished) {
-						setTimeout(function() { me.loadResult(executionId); }, 500);
-					}
-				}
-			});
-		}
+//		this.loadResult = function(executionId) {
+//			if(!executionId) return;
+//			
+//			Ext.Ajax.request({
+//				url: GetUrl('job/result.do'),
+//				params: {executionId: executionId},
+//				method: 'POST',
+//				success: function(response) {
+//					var result = Ext.decode(response.responseText);
+//					
+//					if(result.jobMeasure.length > 0) {
+//						jobMeasure.getRootNode().removeAll(true);
+//						jobMeasure.getRootNode().appendChild(result.jobMeasure);
+//					}
+//					log.setValue(decodeURIComponent(result.log));
+//					
+//					if(!result.finished) {
+//						setTimeout(function() { me.loadResult(executionId); }, 500);
+//					}
+//				}
+//			});
+//		}
 		
 		this.loadLocal = function(result) {
 			if(result.jobMeasure.length > 0) {

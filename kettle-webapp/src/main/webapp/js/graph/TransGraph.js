@@ -1,11 +1,286 @@
+TransExecutor = Ext.extend(Ext.util.Observable, {
+	
+	executionId: null,
+	debuging: false,
+	
+	constructor: function() {
+		this.addEvents('beforerun', 'run', 'debug', 'result', 'stop', 'finish');
+		
+		this.on('run', function(executionId) {
+			this.executionId = executionId;
+			this.loadResult();
+		}, this);
+		
+		this.on('debug', function(executionId) {
+			this.executionId = executionId;
+			this.debuging = true;
+			this.loadDebugResult('askformore');
+		}, this);
+		
+		this.on('stop', function(result) {
+			this.executionId = null;
+			this.fireEvent('result', result);
+			this.fireEvent('finish');
+		}, this);
+		
+		this.on('finish', function(executionId) {
+			this.debuging = false;
+		}, this);
+		
+	},
+	
+	loadResult: function() {
+		var me = this;
+		Ext.Ajax.request({
+			url: GetUrl('trans/result.do'),
+			params: {executionId: this.executionId},
+			method: 'POST',
+			success: function(response) {
+				var result = Ext.decode(response.responseText);
+				
+				me.fireEvent('result', result);
+				if(!result.finished) {
+					setTimeout(function() { me.loadResult(); }, 100);
+				} else {
+					me.fireEvent('finish');
+					me.executionId = null;
+				}
+			},
+			failure: failureResponse
+		});
+	},
+	
+	loadDebugResult: function(action) {
+		var me = this;
+		Ext.Ajax.request({
+			url: GetUrl('trans/previewResult.do'),
+			params: {executionId: this.executionId, action: action},
+			method: 'POST',
+			success: function(response) {
+				var result = Ext.decode(response.responseText);
+				if(action == 'stop') {
+					me.fireEvent('stop', result);
+					return;
+				}
+				
+				me.fireEvent('result', result);
+				if(!result.finished) {
+					var previewGrid = new DynamicEditorGrid({
+						rowNumberer: true
+					});
+					
+					var win = new Ext.Window({
+						title: '预览数据',
+						width: 850,
+						height: 500,
+						layout: 'fit',
+						bbar: ['->', {
+							text: '关闭', handler: function() {
+								win.close();
+							}
+						}, {
+							text: '停止', handler: function() {
+								win.close();
+								me.loadDebugResult('stop');
+							}
+						}, {
+							text: '获取更多行', handler: function() {
+								win.close();
+								me.loadDebugResult('askformore');
+							}
+						}],
+						items: previewGrid
+					});
+					win.show();
+					
+					previewGrid.loadMetaAndValue(result.previewData);
+					
+				} else {
+					me.executionId = null;
+					me.fireEvent('finish');
+				}
+				
+			},
+			failure: failureResponse
+		});
+	},
+
+	isRunning: function() {
+		return this.executionId != null;
+	},
+	
+	isDebuging: function() {
+		return this.isRunning() && this.debuging;
+	},
+	
+	stop: function() {
+		var me = this;
+		if(this.executionId == null)
+			return;
+		
+		Ext.Ajax.request({
+			url: GetUrl('trans/stop.do'),
+			method: 'POST',
+			params: {executionId: this.executionId},
+			success: function(response) {
+				var resObj = Ext.decode(response.responseText);
+				me.fireEvent('stop', resObj);
+			},
+			failure: failureResponse
+		});
+	}
+
+});
+
+StatusPanel = Ext.extend(Ext.BoxComponent, {
+	
+	tpl: new Ext.Template([
+		'<table class="pd_body" cellspacing="0" cellpadding="0">',
+			'<tr class="sep">',
+				'<td>复制的记录行数</td>',
+				'<td align="right">{num}</td>',
+			'</tr>',
+			'<tr>',
+				'<td>读</td>',
+				'<td align="right">{r}</td>',
+			'</tr>',
+			'<tr class="sep">',
+				'<td>写</td>',
+				'<td align="right">{x}</td>',
+			'</tr>',
+			'<tr>',
+				'<td>输入</td>',
+				'<td align="right">{i}</td>',
+			'</tr>',
+			'<tr class="sep">',
+				'<td>输出</td>',
+				'<td align="right">{o}</td>',
+			'</tr>',
+			'<tr>',
+				'<td>更新</td>',
+				'<td align="right">{u}</td>',
+			'</tr>',
+			'<tr class="sep">',
+				'<td>拒绝</td>',
+				'<td align="right">{f}</td>',
+			'</tr>',
+			'<tr>',
+				'<td>错误</td>',
+				'<td align="right">{e}</td>',
+			'</tr>',
+			'<tr class="sep">',
+				'<td>激活</td>',
+				'<td align="right">{a}</td>',
+			'</tr>',
+			'<tr>',
+				'<td>时间</td>',
+				'<td align="right">{t}</td>',
+			'</tr>',
+			'<tr class="sep">',
+				'<td>速度(条记录/秒)</td>',
+				'<td align="right">{s}</td>',
+			'</tr>',
+			'<tr>',
+				'<td>Pri/in/out</td>',
+				'<td align="right">{pio}</td>',
+			'</tr>',
+		'</table>']),
+
+	onRender: function(ct, pos) {
+		StatusPanel.superclass.onRender.call(this, ct, pos);
+		this.tpl.append(this.el, this.value || {});
+	},
+	
+	setValue: function(val) {
+		this.value = val;
+		this.tpl.overwrite(this.el, val);
+	}
+});
+
 TransGraph = Ext.extend(BaseGraph, {
 	iconCls: 'trans',
-	saveUrl: GetUrl('trans/save.do'),
-	sqlUrl: GetUrl('trans/getSQL.do'),
-	runDialog: 'TransExecutionConfigurationDialog',
-	
 	initComponent: function() {
-		this.resultPanel = new TransResult({hidden: !this.showResult});
+		var resultPanel = new TransResult({hidden: !this.showResult});
+		this.items = [resultPanel];
+		
+		if(this.readOnly === false) {
+			var transExecutor = this.transExecutor = new TransExecutor();
+			transExecutor.on('beforerun', function(executor, defaultExecutionConfig) {
+				var dialog = new TransExecutionConfigurationDialog();
+				dialog.show(null, function() {
+					dialog.initData(defaultExecutionConfig);
+				});
+			});
+			transExecutor.on('result', this.doResult, this);
+			
+//			this.on('initgraph', function(graph) {
+//				graph.getSelectionModel().addListener(mxEvent.CHANGE, function(sender, evt){
+//					if(transExecutor.isDebuging()) {
+//						Ext.each(evt.getProperty('added'), function(cell) {
+//							
+//							var doc = mxUtils.createXmlDocument();
+//							var di = doc.createElement('DebugInfo');
+//							di.setAttribute('label', '<div id="DebugInfo' + cell.getId() + '"></div>');
+//							
+//							var nc = graph.insertVertex(graph.getDefaultParent(), null, di, 1, 1, 200, 230);
+//							
+//							new StatusPanel({
+//								renderTo: Ext.get('DebugInfo' + cell.getId()),
+//								width: 180
+//							});
+//							
+//							
+//						});
+//						
+//						Ext.each(evt.getProperty('removed'), function(cell) {
+//							
+//						});
+//					}
+//				});
+//			});
+			
+			var startrun = function() {
+				var tb = this.getTopToolbar();
+				tb.find('iconCls', 'pause')[0].enable();
+				tb.find('iconCls', 'stop')[0].enable();
+			};
+			transExecutor.on('run', startrun, this);
+			transExecutor.on('debug', startrun, this);
+			
+			var finish = function() {
+				var tb = this.getTopToolbar();
+				tb.find('iconCls', 'pause')[0].disable();
+				tb.find('iconCls', 'stop')[0].disable();
+			};
+			transExecutor.on('finish', finish, this);
+			
+			this.tbar = [{
+				iconCls: 'save', scope: this, tooltip: '保存这个转换', handler: this.save
+			}, '-', {
+				iconCls: 'run', scope: this, tooltip: '运行这个转换', handler: this.run
+			}, {
+				iconCls: 'pause', scope: this, disabled: true, tooltip: '恢复/暂停这个转换', handler: this.pause
+			}, {
+				iconCls: 'stop', scope: this, disabled: true, tooltip: '停止这个转换', handler: this.stop
+			}, {
+				iconCls: 'preview', scope: this, tooltip: '预览这个转换', handler: this.preview
+			}, {
+				iconCls: 'debug', scope: this, tooltip: '调试这个转换', handler: this.debug
+			}, '-', {
+				iconCls: 'check', scope: this, tooltip: '校验这个转换', handler: this.check
+			}, {
+				iconCls: 'SQLbutton', scope: this, tooltip: '产生需要运行这个转换的SQL', handler: this.getSQL
+			}, '-', {
+				iconCls: 'SlaveServer', scope: this, handler: this.showSlaves
+			}, {
+				iconCls: 'ClusterSchema', scope: this, handler: this.clusterSchema
+			}, {
+				iconCls: 'PartitionSchema', scope: this, handler: this.partitionSchema
+			}, '-', {
+				iconCls: 'show-results', scope: this, handler: this.showResultPanel
+			}];
+		}
+		
 		TransGraph.superclass.initComponent.call(this);
 		
 		this.on('load', function() {
@@ -61,10 +336,129 @@ TransGraph = Ext.extend(BaseGraph, {
 		}, this);
 	},
 	
+	doResult: function(result) {
+		var resultPanel = this.layout.south.panel;
+		resultPanel.loadLocal(result);
+		this.updateStatus(result.stepStatus);
+	},
+	
+	toRun: function(executionId) {
+		var resultPanel = this.layout.south.panel;
+		if(!resultPanel.isVisible())
+			this.showResultPanel();
+		
+		this.transExecutor.fireEvent('run', executionId);
+	},
+	
+	toDebug: function(executionId) {
+		var resultPanel = this.layout.south.panel;
+		if(!resultPanel.isVisible())
+			this.showResultPanel();
+		
+		this.transExecutor.fireEvent('debug', executionId);
+	},
+	
+	/***
+	 * toolbar func
+	 * 
+	 */
+	save: function() {
+		Ext.Ajax.request({
+			url: GetUrl('trans/save.do'),
+			params: {graphXml: encodeURIComponent(this.toXml())},
+			method: 'POST',
+			success: function(response) {
+				decodeResponse(response, function(resObj) {
+					Ext.Msg.show({
+					   title: '系统提示',
+					   msg: resObj.message,
+					   buttons: Ext.Msg.OK,
+					   icon: Ext.MessageBox.INFO
+					});
+				});
+			},
+			failure: failureResponse
+		});
+	},
+	
+	run: function() {
+		var transExecutor = this.transExecutor;
+		if(transExecutor.isRunning()) {
+			Ext.Msg.alert('系统提示', '转换正在执行，请稍后...');
+			return;
+		}
+		
+		// 获取执行参数
+		Ext.Ajax.request({
+			url: GetUrl('trans/initRun.do'),
+			method: 'POST',
+			params: {graphXml: this.toXml()},
+			success: function(response) {
+				var resObj = Ext.decode(response.responseText);
+				transExecutor.fireEvent('beforerun', transExecutor, resObj);
+			},
+			failure: failureResponse
+		});
+		
+	},
+	
+	pause: function() {
+		
+	},
+	
+	stop: function() {
+		this.transExecutor.stop();
+	},
+	
+	preview: function() {
+		var selectedCells = [], graph = this.getGraph();
+		Ext.each(graph.getSelectionCells(), function(c) {
+			if(c.isVertex() && c.value)
+				selectedCells.push(c.getAttribute('label'));
+		});
+		
+		Ext.Ajax.request({
+			url: GetUrl('trans/initPreview.do'),
+			params: {graphXml: this.toXml(), selectedCells: encodeURIComponent(Ext.encode(selectedCells))},
+			method: 'POST',
+			success: function(response) {
+				var jsonArray = Ext.decode(response.responseText);
+				var win = new TransDebugDialog();
+				win.show(null, function() {
+					win.initData(jsonArray);
+				});
+			},
+			failure: failureResponse
+		});
+	},
+	
+	debug: function() {
+		
+	},
+	
 	check: function() {
 		var checkResultDialog = new CheckResultDialog();
 		checkResultDialog.show();
 	},
+	
+	getSQL: function() {
+		var dialog = new SQLStatementsDialog({sqlUrl: this.sqlUrl});
+		dialog.show();
+	},
+	
+	showResultPanel: function() {
+		var resultPanel = this.layout.south.panel;
+		
+		resultPanel.setVisible( !resultPanel.isVisible() );
+		this.doLayout();
+	},
+	
+	/*
+	 * 
+	 * end toolbar func
+	 * 
+	 * */
+	
 	
 	clusterSchema: function() {
 		var dialog = new ClusterSchemaDialog();
@@ -188,6 +582,31 @@ TransGraph = Ext.extend(BaseGraph, {
 				});
 				dialog.show();
 			}, null, null, cell.getAttribute('supports_error_handing') == 'Y');
+			
+			menu.addItem('预览', null, function(){
+				
+				var selectedCells = [];
+				Ext.each(graph.getSelectionCells(), function(c) {
+					if(c.isVertex() && c.value)
+						selectedCells.push(c.getAttribute('label'));
+				});
+				
+				Ext.Ajax.request({
+					url: GetUrl('trans/initPreview.do'),
+					params: {graphXml: me.toXml(), selectedCells: encodeURIComponent(Ext.encode(selectedCells))},
+					method: 'POST',
+					success: function(response) {
+						var jsonArray = Ext.decode(response.responseText);
+						var win = new TransDebugDialog();
+						win.show(null, function() {
+							win.initData(jsonArray);
+						});
+					},
+					failure: failureResponse
+				});
+				
+				
+			}, null, null, true);
 			
 			menu.addSeparator(null);
 			menu.addItem('分区', null, function(){

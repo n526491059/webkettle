@@ -6,7 +6,6 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +26,6 @@ import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.core.util.EnvUtil;
 import org.pentaho.di.i18n.BaseMessages;
-import org.pentaho.di.i18n.GlobalMessages;
 import org.pentaho.di.i18n.LanguageChoice;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.laf.BasePropertyHandler;
@@ -255,6 +253,8 @@ public class KettleUIController {
 		images.put("activeStartScript", SvgImageUrl.getSmallUrl( "ui/images/SQLbutton.svg"));
 		images.put("activeEndScript", SvgImageUrl.getSmallUrl( "ui/images/edfScript.svg"));
 		images.put("scriptType", SvgImageUrl.getSmallUrl( "ui/images/hide-inactive.svg"));
+		
+		images.put("condition_add", SvgImageUrl.getSmallUrl( "ui/images/eq_add.svg" ));
 		
 		//线上小图标
 		jsimages.put("imageUnconditionalHop", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "UnconditionalHop_image" )));

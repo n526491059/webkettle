@@ -44,8 +44,22 @@ function showDetails(fireId)
 		method: 'POST',
 		params: {fireId: fireId},
 		success: function(response) {
-			var dialog = new LogDetailDialog({data: Ext.decode(response.responseText)});
-			dialog.show();
+			var resObj = Ext.decode(response.responseText);
+			var graphPanel = Ext.create({border: false, readOnly: true, showResult: true}, resObj.GraphType);
+			var dialog = new LogDetailDialog({
+				items: graphPanel
+			});
+			dialog.show(null, function() {
+				var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
+				var decoder = new mxCodec(xmlDocument);
+				var node = xmlDocument.documentElement;
+				
+				var graph = graphPanel.getGraph();
+				decoder.decode(node, graph.getModel());
+				graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
+				
+				graphPanel.doResult(Ext.decode(resObj.executionLog));
+			});
 		}
 	});
 }
@@ -55,24 +69,5 @@ LogDetailDialog = Ext.extend(Ext.Window, {
 	width: 900,
 	height: 600,
 	layout: 'fit',
-	modal: true,
-	initComponent: function() {
-		var graphPanel = Ext.create({border: false, readOnly: true, showResult: true}, this.data.GraphType);
-		
-		var xmlDocument = mxUtils.parseXml(decodeURIComponent(this.data.graphXml));
-		var decoder = new mxCodec(xmlDocument);
-		var node = xmlDocument.documentElement;
-		
-		this.items = graphPanel;
-		this.on('afterrender', function() {
-			var graph = graphPanel.getGraph();
-			decoder.decode(node, graph.getModel());
-			
-			graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
-			
-			graphPanel.loadLocal(Ext.decode(this.data.executionLog));
-		}, this);
-		
-		LogDetailDialog.superclass.initComponent.call(this);
-	}
+	modal: true
 });

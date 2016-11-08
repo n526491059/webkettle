@@ -26,8 +26,8 @@ JsonInputDialog = Ext.extend(KettleTabDialog, {
 		});
 		//-------------for content-----------
 		var wIgnoreEmptyFile = new Ext.form.Checkbox({fieldLabel: BaseMessages.getString(PKG, "JsonInputDialog.IgnoreEmptyFile.Label")});
-		var wdoNotFailIfNoFile = new Ext.form.Checkbox({fieldLabel: BaseMessages.getString(PKG, "JsonInputDialog.doNotFailIfNoFile.Label"});
-		var wIgnoreMissingPath = new Ext.form.Checkbox({fieldLabel: BaseMessages.getString(PKG, "JsonInputDialog.IgnoreMissingPath.Label"});
+		var wdoNotFailIfNoFile = new Ext.form.Checkbox({fieldLabel: BaseMessages.getString(PKG, "JsonInputDialog.doNotFailIfNoFile.Label")});
+		var wIgnoreMissingPath = new Ext.form.Checkbox({fieldLabel: BaseMessages.getString(PKG, "JsonInputDialog.IgnoreMissingPath.Label")});
 		var wLimit = new Ext.form.TextField({fieldLabel: BaseMessages.getString(PKG, "JsonInputDialog.Limit.Label"), anchor: '-10'});
 		
 		var wInclFilename = new Ext.form.Checkbox({fieldLabel: BaseMessages.getString(PKG, "JsonInputDialog.InclFilename.Label")});
@@ -280,8 +280,8 @@ JsonInputDialog = Ext.extend(KettleTabDialog, {
 			        store: new Ext.data.JsonStore({
 			        	fields: ['value', 'text'],
 			        	data: [{value: 'none', text: BaseMessages.getString(PKG, "JsonInputField.TrimType.None")},
-			        	       {value: 'left', text: BaseMessages.getString(PKG, "JsonInputField.TrimType.Left"),
-							   {value: 'right', text: BaseMessages.getString(PKG, "JsonInputField.TrimType.Right")},
+			        	       {value: 'left', text: BaseMessages.getString(PKG, "JsonInputField.TrimType.Left")},
+			        	       {value: 'right', text: BaseMessages.getString(PKG, "JsonInputField.TrimType.Right")},
 			        	       {value: 'both', text: BaseMessages.getString(PKG, "JsonInputField.TrimType.None")}]
 			        }),
 			        displayField: 'text',

@@ -5,7 +5,7 @@ EnterValueDialog = Ext.extend(Ext.Window, {
 	modal: true,
 	title: 'E输入一个值',
 	initComponent: function() {
-		var me = this, value = this.initialConfig.value;
+		var me = this, value = this.initialConfig.value || {};
 		
 		var wValueType = new Ext.form.ComboBox({
 			fieldLabel: '类型',

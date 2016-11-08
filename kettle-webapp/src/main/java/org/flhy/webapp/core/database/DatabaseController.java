@@ -440,6 +440,7 @@ public class DatabaseController {
 				}
 			}
 		}
+		
 		JsonUtils.success(StringEscapeHelper.encode(sql.toString()));
 	}
 	

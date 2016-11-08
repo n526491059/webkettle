@@ -2,6 +2,7 @@ package org.flhy.ext.trans;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -297,6 +298,7 @@ public class TransMetaCodec extends BaseGraphCodec {
 				if(PropsUI.TRANS_STEP_NAME.equals(e.getTagName())) {
 					StepDecoder stepDecoder = (StepDecoder) PluginFactory.getBean(cell.getAttribute("ctype"));
 					StepMeta stepMeta = stepDecoder.decodeStep(cell, transMeta.getDatabases(), transMeta.getMetaStore());
+					
 					stepMeta.setParentTransMeta( transMeta );
 					if (stepMeta.isMissing()) {
 						transMeta.addMissingTrans((MissingTrans) stepMeta.getStepMetaInterface());
