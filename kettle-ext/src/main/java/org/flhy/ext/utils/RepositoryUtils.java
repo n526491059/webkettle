@@ -36,4 +36,16 @@ public class RepositoryUtils {
 		}
 	}
 	
+	public static RepositoryDirectoryInterface loadDirectory(String path) throws KettleException {
+		String dir = path.substring(0, path.lastIndexOf("/"));
+		String name = path.substring(path.lastIndexOf("/") + 1);
+		
+		Repository repository = App.getInstance().getRepository();
+		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
+		if(directory == null)
+			directory = repository.getUserHomeDirectory();
+		
+		return directory;
+	}
+	
 }

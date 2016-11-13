@@ -342,46 +342,6 @@ public class SchedulerController {
 	}
 	
 	@ResponseBody
-	@RequestMapping(method=RequestMethod.POST, value="/logDetail")
-	protected void logDetail(@RequestParam String fireId) throws Exception {
-		ExecutionTrace executionTrace = executionTraceDao.findById(fireId);
-		String jobName = executionTrace.getJobName();
-		
-		String dir = jobName.substring(0, jobName.lastIndexOf("/"));
-		String name = jobName.substring(jobName.lastIndexOf("/") + 1);
-		
-		Repository repository = App.getInstance().getRepository();
-		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
-		if(directory == null)
-			directory = repository.getUserHomeDirectory();
-		
-		JobDetail jobDetail = getJobDetail(jobName);
-		
-		
-		JSONObject jsonObject = new JSONObject();
-		if(jobDetail.getJobClass().equals(TransRunner.class)) {
-			jsonObject.put("GraphType", "TransGraph");
-			TransMeta transMeta = repository.loadTransformation(name, directory, null, true, null);
-			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
-			String graphXml = codec.encode(transMeta);
-			
-			jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
-		} else if(jobDetail.getJobClass().equals(JobRunner.class)) {
-			jsonObject.put("GraphType", "JobGraph");
-			
-			JobMeta jobMeta = repository.loadJob(name, directory, null, null);
-			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
-			String graphXml = codec.encode(jobMeta);
-			
-			jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
-		}
-		
-		jsonObject.put("executionLog", executionTrace.getExecutionLog());
-		
-		JsonUtils.response(jsonObject);
-	}
-	
-	@ResponseBody
 	@RequestMapping(method={RequestMethod.POST, RequestMethod.GET}, value="/jobs")
 	protected void jobs() throws Exception {
 		
@@ -396,14 +356,19 @@ public class SchedulerController {
 				
 				jsonObject.put("lastestStatus", executionTraceDao.findLastestStatus(jobKey.getName()));
 				
-				Trigger trigger = scheduler.getTriggersOfJob(jobKey).get(0);
-				jsonObject.put("previousFireTime", XMLHandler.date2string(trigger.getPreviousFireTime()));
-				jsonObject.put("nextFireTime", XMLHandler.date2string(trigger.getNextFireTime()));
+				List<? extends Trigger> triggersOfJob = scheduler.getTriggersOfJob(jobKey);
 				
-				TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
-				jsonObject.put("triggerState", triggerState.name());
+				if(triggersOfJob != null && triggersOfJob.size() > 0) {
+					Trigger trigger = triggersOfJob.get(0);
+					jsonObject.put("previousFireTime", XMLHandler.date2string(trigger.getPreviousFireTime()));
+					jsonObject.put("nextFireTime", XMLHandler.date2string(trigger.getNextFireTime()));
+					
+					TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
+					jsonObject.put("triggerState", triggerState.name());
+					
+					jsonArray.add(jsonObject);
+				}
 				
-				jsonArray.add(jsonObject);
 			}
 		}
 		
@@ -413,9 +378,4 @@ public class SchedulerController {
 	@Resource
 	private ExecutionTraceDao executionTraceDao;
 	
-	@ResponseBody
-	@RequestMapping(method={RequestMethod.POST, RequestMethod.GET}, value="/list")
-	protected List list(@RequestParam String jobName) throws Exception {
-		return executionTraceDao.executionsByName(jobName);
-	}
 }

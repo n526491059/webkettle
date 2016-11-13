@@ -53,7 +53,9 @@ RepositoryManageTree = Ext.extend(RepositoryTree, {
 	            iconCls: 'job', text: '新建任务', scope: this, handler: this.newJob
 	        }, '-', {
 	        	text: '添加到调度', scope: this, handler: this.schedule
-	        }, '-', {
+	        },{
+				text: '查看历史日志', scope: this, handler: this.jobLog
+			}, '-', {
 	        	text: '重命名'
 	        }, {
 	            iconCls: 'delete', text: '删除', scope: this, handler: this.remove
@@ -446,6 +448,16 @@ RepositoryManageTree = Ext.extend(RepositoryTree, {
 	jobManage: function() {
 		var dialog = new SchedulerManageDialog();
 		dialog.show();
+	},
+	
+	jobLog: function() {
+		var sm = this.getSelectionModel(), node = sm.getSelectedNode();
+		if(node) {
+			var dialog = new SchedulerLogDialog();
+			dialog.show(null, function() {
+				dialog.initData(node.attributes.path);
+			});
+		}
 	},
 	
 	exp: function() {

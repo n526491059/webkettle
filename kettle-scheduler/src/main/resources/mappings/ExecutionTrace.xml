@@ -10,6 +10,12 @@
 		select status from kettle_execution_log where jobName=#{jobName} and endTime is not null order by startTime desc
 	</select>
 	
+	<select id="findExecutionTrancesPage" resultType="org.flhy.scheduler.beans.ExecutionTrace">
+		select * from kettle_execution_log where jobName=#{jobName} order by startTime desc limit #{start},#{limit}
+	</select>
+	<select id="findExecutionTrancesPageTotal" parameterType="string" resultType="int">
+		select count(*) from kettle_execution_log where jobName=#{0}
+	</select>
 	
 	<insert id="finishExecutionTrace" parameterType="org.flhy.scheduler.beans.ExecutionTrace" >
 		update kettle_execution_log set jobName=#{jobName}, startTime=#{startTime}, endTime=#{endTime}, execMethod=#{execMethod}, status=#{status}, 
