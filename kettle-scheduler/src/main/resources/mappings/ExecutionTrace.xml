@@ -1,0 +1,22 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="scheduler">
+	<select id="loadExecutionTrace" parameterType="string" resultType="org.flhy.scheduler.beans.ExecutionTrace">
+		select * from kettle_execution_log where fireId=#{fireId}
+	</select>
+	<select id="findExecutionTrances" parameterType="string" resultType="org.flhy.scheduler.beans.ExecutionTrace">
+		select * from kettle_execution_log where jobName=#{jobName} order by startTime desc
+	</select>
+	<select id="findLastestStatus" parameterType="string" resultType="string">
+		select status from kettle_execution_log where jobName=#{jobName} and endTime is not null order by startTime desc
+	</select>
+	
+	
+	<insert id="finishExecutionTrace" parameterType="org.flhy.scheduler.beans.ExecutionTrace" >
+		update kettle_execution_log set jobName=#{jobName}, startTime=#{startTime}, endTime=#{endTime}, execMethod=#{execMethod}, status=#{status}, 
+			executionConfiguration=#{executionConfiguration}, executionLog=#{executionLog} where fireId=#{fireId}
+	</insert>
+	<insert id="createExecutionTrace" parameterType="org.flhy.scheduler.beans.ExecutionTrace" >
+		insert into kettle_execution_log(fireId, jobName, startTime, endTime, execMethod, status, executionConfiguration,executionLog) 
+			values(#{fireId},#{jobName},#{startTime},#{endTime},#{execMethod},#{status},#{executionConfiguration},#{executionLog})
+	</insert>
+</mapper>
