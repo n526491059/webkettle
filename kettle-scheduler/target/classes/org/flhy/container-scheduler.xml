@@ -11,20 +11,29 @@
 	   http://www.springframework.org/schema/mvc
 	   http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-		<property name="driverClassName" value="org.h2.Driver" />
-		<property name="url" value="jdbc:h2:file:samples/db/schedulerdb;IFEXISTS=TRUE" />
-		<property name="username" value="PENTAHO_USER" />
-		<property name="password" value="PASSWORD" />
-	</bean> 
+<!-- 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"> -->
+<!-- 		<property name="driverClassName" value="org.h2.Driver" /> -->
+<!-- 		<property name="url" value="jdbc:h2:file:samples/db/schedulerdb;IFEXISTS=TRUE" /> -->
+<!-- 		<property name="username" value="PENTAHO_USER" /> -->
+<!-- 		<property name="password" value="PASSWORD" /> -->
+<!-- 	</bean>  -->
 	
-	<bean id="quartzJobListener" class="org.flhy.scheduler.listener.QuartzJobListener">
-		<property name="dataSource" ref="dataSource" />
-	</bean> 
+<!-- 	<bean id="quartzJobListener" class="org.flhy.scheduler.listener.QuartzJobListener"> -->
+<!-- 		<property name="dataSource" ref="dataSource" /> -->
+<!-- 	</bean>  -->
+
+<!-- 	<bean id="executionLogDao" class="org.flhy.scheduler.dao.impl.ExecutionLogDaoImpl"> -->
+<!-- 		<property name="dataSource" ref="dataSource" /> -->
+<!-- 	</bean>  -->
+
+
+	<bean id="quartzJobListener" class="org.flhy.scheduler.listener.GlobalJobListener">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
 	
-	<bean id="executionLogDao" class="org.flhy.scheduler.dao.impl.ExecutionLogDaoImpl">
-		<property name="dataSource" ref="dataSource" />
-	</bean> 
+	<bean id="executionTraceDao" class="org.flhy.scheduler.dao.impl.ExecutionTraceDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
 
 	<bean name="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="dataSource" ref="dataSource" />

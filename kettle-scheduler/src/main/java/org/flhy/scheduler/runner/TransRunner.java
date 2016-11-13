@@ -1,33 +1,27 @@
 package org.flhy.scheduler.runner;
 
-import org.flhy.ext.App;
 import org.flhy.ext.TransExecutor;
 import org.flhy.ext.trans.TransExecutionConfigurationCodec;
 import org.flhy.ext.utils.JSONObject;
-import org.pentaho.di.repository.Repository;
-import org.pentaho.di.repository.RepositoryDirectoryInterface;
-import org.pentaho.di.repository.StringObjectId;
+import org.flhy.ext.utils.RepositoryUtils;
 import org.pentaho.di.trans.TransExecutionConfiguration;
 import org.pentaho.di.trans.TransMeta;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.StatefulJob;
+import org.quartz.PersistJobDataAfterExecution;
 
-public class TransRunner implements StatefulJob {
+@PersistJobDataAfterExecution
+@DisallowConcurrentExecution
+public class TransRunner implements Job {
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
 			String path = context.getJobDetail().getKey().getName();
-			String dir = path.substring(0, path.lastIndexOf("/"));
-			String name = path.substring(path.lastIndexOf("/") + 1);
-			
-			Repository repository = App.getInstance().getRepository();
-			RepositoryDirectoryInterface directory = repository.findDirectory(dir);
-			if(directory == null)
-				directory = repository.getUserHomeDirectory();
-			
-			TransMeta transMeta = App.getInstance().getRepository().loadTransformation(name, directory, null, true, null);
+			TransMeta transMeta = RepositoryUtils.loadTransByPath(path);
 			
 			JSONObject jsonObject = JSONObject.fromObject(context.getMergedJobDataMap().getString("executionConfiguration"));
 			TransExecutionConfiguration transExecutionConfiguration = TransExecutionConfigurationCodec.decode(jsonObject, transMeta);
@@ -56,11 +50,16 @@ public class TransRunner implements StatefulJob {
 				execMethod = "远程:" + transExecutionConfiguration.getRemoteServer().getName();
 			else if(transExecutionConfiguration.isExecutingClustered())
 				execMethod = "集群";
-			context.getMergedJobDataMap().put("execMethod",  execMethod );
-			context.getMergedJobDataMap().put("error", transExecutor.getErrCount());
-			context.getMergedJobDataMap().put("executionLog", result.toString());
+			
+			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
+			
+			dataMap.put("execMethod",  execMethod );
+			dataMap.put("error", Long.valueOf(transExecutor.getErrCount()));
+//			dataMap.put("executionConfiguration", jsonObject.toString());
+			dataMap.put("executionLog", result.toString());
 		    
 		} catch(Exception e) {
+			e.printStackTrace();
 			throw new JobExecutionException(e);
 		}
 		

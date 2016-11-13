@@ -6,25 +6,36 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Resource;
+
 import org.flhy.ext.App;
 import org.flhy.ext.PluginFactory;
 import org.flhy.ext.base.GraphCodec;
+import org.flhy.ext.job.JobExecutionConfigurationCodec;
+import org.flhy.ext.trans.TransExecutionConfigurationCodec;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.flhy.ext.utils.JsonUtils;
+import org.flhy.ext.utils.RepositoryUtils;
 import org.flhy.ext.utils.StringEscapeHelper;
-import org.flhy.scheduler.dao.ExecutionLogDao;
+import org.flhy.scheduler.beans.ExecutionTrace;
+import org.flhy.scheduler.dao.ExecutionTraceDao;
 import org.flhy.scheduler.runner.JobRunner;
 import org.flhy.scheduler.runner.TransRunner;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.RowMetaAndData;
+import org.pentaho.di.core.logging.DefaultLogLevel;
 import org.pentaho.di.core.xml.XMLHandler;
+import org.pentaho.di.job.JobExecutionConfiguration;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
+import org.pentaho.di.trans.TransExecutionConfiguration;
 import org.pentaho.di.trans.TransMeta;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
@@ -38,6 +49,7 @@ import org.quartz.Trigger.TriggerState;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -61,7 +73,16 @@ public class SchedulerController {
 		Document doc = mxUtils.parseXml(schedulerXml);
 		Element root = doc.getDocumentElement();
 		
-		JSONObject jsonObject = JSONObject.fromObject(root.getAttribute("executionConfiguration"));
+		JSONObject jsonObject = null;
+		String executionConfiguration = root.getAttribute("executionConfiguration");
+		if(StringUtils.hasText(executionConfiguration)) {
+			jsonObject = JSONObject.fromObject(executionConfiguration);
+		} else {
+			jsonObject = transExecutionConfig(root.getAttribute("name"));
+			if(jsonObject == null)
+				jsonObject = jobExecutionConfig(root.getAttribute("name"));
+		}
+		
 		
 		JobDetail jobDetail = null;
 		if(jsonObject.containsKey("start_copy_nr")) {
@@ -94,7 +115,7 @@ public class SchedulerController {
 					.build();
 		}
 		
-		jobDetail.getJobDataMap().put("executionConfiguration", root.getAttribute("executionConfiguration"));
+		jobDetail.getJobDataMap().put("executionConfiguration", jsonObject.toString());
 		scheduler.scheduleJob(jobDetail, trigger);
 		
 		JsonUtils.success("系统提示", "成功加入调度计划！");
@@ -230,10 +251,101 @@ public class SchedulerController {
 	}
 	
 	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/transExecutionConfig")
+	protected JSONObject transExecutionConfig(@RequestParam String path) throws Exception {
+		TransMeta transMeta = RepositoryUtils.loadTransByPath(path);
+		if(transMeta == null)
+			return null;
+		
+		transMeta.setRepository(App.getInstance().getRepository());
+		transMeta.setMetaStore(App.getInstance().getMetaStore());
+		
+		TransExecutionConfiguration executionConfiguration = App.getInstance().getTransExecutionConfiguration();
+		
+		if (transMeta.findFirstUsedClusterSchema() != null) {
+			executionConfiguration.setExecutingLocally(false);
+			executionConfiguration.setExecutingRemotely(false);
+			executionConfiguration.setExecutingClustered(true);
+		} else {
+			executionConfiguration.setExecutingLocally(true);
+			executionConfiguration.setExecutingRemotely(false);
+			executionConfiguration.setExecutingClustered(false);
+		}
+		
+		 // Remember the variables set previously
+	    //
+		RowMetaAndData variables = App.getInstance().getVariables();
+	    Object[] data = variables.getData();
+	    String[] fields = variables.getRowMeta().getFieldNames();
+	    Map<String, String> variableMap = new HashMap<String, String>();
+	    for ( int idx = 0; idx < fields.length; idx++ ) {
+	    	variableMap.put( fields[idx], data[idx].toString() );
+	    }
+
+	    executionConfiguration.setVariables( variableMap );
+	    executionConfiguration.getUsedVariables( transMeta );
+	    executionConfiguration.getUsedArguments(transMeta, App.getInstance().getArguments());
+	    executionConfiguration.setReplayDate( null );
+	    executionConfiguration.setRepository( App.getInstance().getRepository() );
+	    executionConfiguration.setSafeModeEnabled( false );
+
+	    executionConfiguration.setLogLevel( DefaultLogLevel.getLogLevel() );
+		
+		// Fill the parameters, maybe do this in another place?
+		Map<String, String> params = executionConfiguration.getParams();
+		params.clear();
+		String[] paramNames = transMeta.listParameters();
+		for (String name : paramNames) {
+			params.put(name, "");
+		}
+		
+		return TransExecutionConfigurationCodec.encode(executionConfiguration);
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/jobExecutionConfig")
+	protected JSONObject jobExecutionConfig(@RequestParam String path) throws Exception {
+		JobMeta jobMeta = RepositoryUtils.loadJobbyPath(path);
+		if(jobMeta == null)
+			return null;
+		
+		 // Remember the variables set previously
+	    //
+		RowMetaAndData variables = App.getInstance().getVariables();
+	    Object[] data = variables.getData();
+	    String[] fields = variables.getRowMeta().getFieldNames();
+	    Map<String, String> variableMap = new HashMap<String, String>();
+	    for ( int idx = 0; idx < fields.length; idx++ ) {
+	    	variableMap.put( fields[idx], data[idx].toString() );
+	    }
+
+	    JobExecutionConfiguration executionConfiguration = App.getInstance().getJobExecutionConfiguration();
+	    executionConfiguration.setVariables( variableMap );
+	    executionConfiguration.getUsedVariables( jobMeta );
+	    executionConfiguration.setReplayDate( null );
+	    executionConfiguration.setRepository( App.getInstance().getRepository() );
+	    executionConfiguration.setSafeModeEnabled( false );
+	    executionConfiguration.setStartCopyName( null );
+	    executionConfiguration.setStartCopyNr( 0 );
+
+	    executionConfiguration.setLogLevel( DefaultLogLevel.getLogLevel() );
+		
+	    // Fill the parameters, maybe do this in another place?
+		Map<String, String> params = executionConfiguration.getParams();
+		params.clear();
+		String[] paramNames = jobMeta.listParameters();
+		for (String name : paramNames) {
+			params.put(name, "");
+		}
+		
+		return JobExecutionConfigurationCodec.encode(executionConfiguration);
+	}
+	
+	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/logDetail")
 	protected void logDetail(@RequestParam String fireId) throws Exception {
-		Map record = executionLogDao.findById(fireId);
-		String jobName = (String) record.get("jobName");
+		ExecutionTrace executionTrace = executionTraceDao.findById(fireId);
+		String jobName = executionTrace.getJobName();
 		
 		String dir = jobName.substring(0, jobName.lastIndexOf("/"));
 		String name = jobName.substring(jobName.lastIndexOf("/") + 1);
@@ -264,13 +376,10 @@ public class SchedulerController {
 			jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
 		}
 		
-		jsonObject.put("executionLog", record.get("executionLog"));
+		jsonObject.put("executionLog", executionTrace.getExecutionLog());
 		
 		JsonUtils.response(jsonObject);
 	}
-	
-	@Autowired
-	private ExecutionLogDao executionLogDao;
 	
 	@ResponseBody
 	@RequestMapping(method={RequestMethod.POST, RequestMethod.GET}, value="/jobs")
@@ -285,8 +394,7 @@ public class SchedulerController {
 				jsonObject.put("name", jobKey.getName());
 				jsonObject.put("group", jobKey.getGroup());
 				
-				String lastestStatus = executionLogDao.lastestStatus(jobKey.getName());
-				jsonObject.put("lastestStatus", lastestStatus);
+				jsonObject.put("lastestStatus", executionTraceDao.findLastestStatus(jobKey.getName()));
 				
 				Trigger trigger = scheduler.getTriggersOfJob(jobKey).get(0);
 				jsonObject.put("previousFireTime", XMLHandler.date2string(trigger.getPreviousFireTime()));
@@ -302,12 +410,12 @@ public class SchedulerController {
 		JsonUtils.response(jsonArray);
 	}
 	
+	@Resource
+	private ExecutionTraceDao executionTraceDao;
+	
 	@ResponseBody
 	@RequestMapping(method={RequestMethod.POST, RequestMethod.GET}, value="/list")
-	protected void list(@RequestParam String jobName) throws Exception {
-		List list = executionLogDao.list(jobName);
-		JSONArray jsonArray = JSONArray.fromObject(list);
-		
-		JsonUtils.response(jsonArray);
+	protected List list(@RequestParam String jobName) throws Exception {
+		return executionTraceDao.executionsByName(jobName);
 	}
 }

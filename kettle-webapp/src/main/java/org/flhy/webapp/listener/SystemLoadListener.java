@@ -40,10 +40,10 @@ public class SystemLoadListener implements ServletContextListener {
 			meta.setReadOnly(false);
 			meta.setHidingHiddenFiles(true);
 			
-			KettleFileRepository rep = new KettleFileRepository();
-			rep.init(meta);
-			
-			App.getInstance().initDefault(rep);
+//			KettleFileRepository rep = new KettleFileRepository();
+//			rep.init(meta);
+//			
+//			App.getInstance().initDefault(rep);
 		} catch (KettleException e) {
 			e.printStackTrace();
 		}

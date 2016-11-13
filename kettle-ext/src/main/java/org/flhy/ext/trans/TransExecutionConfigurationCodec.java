@@ -116,43 +116,49 @@ public class TransExecutionConfigurationCodec {
 		
 		Map<String, String> map = new HashMap<String, String>();
 		JSONArray jsonArray = jsonObject.optJSONArray("parameters");
-		for (int i = 0; i < jsonArray.size(); i++) {
-			JSONObject jsonObject2 = jsonArray.getJSONObject(i);
-			String paramName = jsonObject2.optString("name");
-			String paramValue = jsonObject2.optString("value");
-			String defaultValue = jsonObject2.optString("default_value");
+		if(jsonArray != null) {
+			for (int i = 0; i < jsonArray.size(); i++) {
+				JSONObject jsonObject2 = jsonArray.getJSONObject(i);
+				String paramName = jsonObject2.optString("name");
+				String paramValue = jsonObject2.optString("value");
+				String defaultValue = jsonObject2.optString("default_value");
 
-			if (Const.isEmpty(paramValue)) {
-				paramValue = Const.NVL(defaultValue, "");
+				if (Const.isEmpty(paramValue)) {
+					paramValue = Const.NVL(defaultValue, "");
+				}
+				map.put(paramName, paramValue);
 			}
-			map.put(paramName, paramValue);
+			executionConfiguration.setParams( map );
 		}
-		executionConfiguration.setParams( map );
 		
 		jsonArray = jsonObject.optJSONArray("variables");
-		map = new HashMap<String, String>();
-		for (int i = 0; i < jsonArray.size(); i++) {
-			JSONObject jsonObject2 = jsonArray.getJSONObject(i);
-			String varName = jsonObject2.optString("name");
-			String varValue = jsonObject2.optString("value");
-			
-			if (!Const.isEmpty(varName)) {
-				map.put(varName, varValue);
+		if(jsonArray != null) {
+			map = new HashMap<String, String>();
+			for (int i = 0; i < jsonArray.size(); i++) {
+				JSONObject jsonObject2 = jsonArray.getJSONObject(i);
+				String varName = jsonObject2.optString("name");
+				String varValue = jsonObject2.optString("value");
+				
+				if (!Const.isEmpty(varName)) {
+					map.put(varName, varValue);
+				}
 			}
+			executionConfiguration.setVariables(map);
 		}
-		executionConfiguration.setVariables(map);
 	    
 		jsonArray = jsonObject.optJSONArray("arguments");
-		map = new HashMap<String, String>();
-		for (int i = 0; i < jsonArray.size(); i++) {
-			JSONObject jsonObject2 = jsonArray.getJSONObject(i);
-			String varName = jsonObject2.optString("name");
-			String varValue = jsonObject2.optString("value");
-			if (!Const.isEmpty(varName)) {
-				map.put(varName, varValue);
+		if(jsonArray != null) {
+			map = new HashMap<String, String>();
+			for (int i = 0; i < jsonArray.size(); i++) {
+				JSONObject jsonObject2 = jsonArray.getJSONObject(i);
+				String varName = jsonObject2.optString("name");
+				String varValue = jsonObject2.optString("value");
+				if (!Const.isEmpty(varName)) {
+					map.put(varName, varValue);
+				}
 			}
+			executionConfiguration.setArguments(map);
 		}
-		executionConfiguration.setArguments(map);
 		
 		executionConfiguration.setReplayDate(XMLHandler.stringToDate(jsonObject.optString("replay_date")));
 		executionConfiguration.setSafeModeEnabled("Y".equalsIgnoreCase(jsonObject.optString("safe_mode")));

@@ -1,5 +1,5 @@
 <%@page import="org.flhy.ext.utils.StringEscapeHelper"%>
-<%@page import="org.flhy.webapp.utils.ExceptionUtils"%>
+<%@page import="org.flhy.ext.utils.ExceptionUtils" %>
 <%@page pageEncoding="utf-8" %>
 <%
 	Exception e = (Exception) request.getAttribute("exception");

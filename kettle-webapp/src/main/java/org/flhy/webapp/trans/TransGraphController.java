@@ -258,6 +258,8 @@ public class TransGraphController {
 			if(jsonObject.optJSONObject("condition") != null) {
 				Condition condition = ConditionCodec.decode(jsonObject.optJSONObject("condition"));
 				stepDebugMeta.setCondition(condition);
+			} else {
+				stepDebugMeta.setCondition(new Condition());
 			}
 			
 			transDebugMeta.getStepDebugMetaMap().put(stepMeta, stepDebugMeta);
@@ -363,8 +365,10 @@ public class TransGraphController {
 			jsonObject.put("stepStatus", transExecutor.getStepStatus());
 			jsonObject.put("previewData", transExecutor.getPreviewData());
 			
-			if(transExecutor.isFinished()) 
+			if(transExecutor.isFinished()) {
+				jsonObject.put("lastPreviewResults", transExecutor.getLastPreviewResults());
 				TransDebugExecutor.remove(executionId);
+			}
 			
 			JsonUtils.response(jsonObject);
 			transExecutor.clearPreview();

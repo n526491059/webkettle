@@ -52,9 +52,7 @@ JobGraph = Ext.extend(BaseGraph, {
 					dialog.initData(defaultExecutionConfig);
 				});
 			});
-			jobExecutor.on('result', function(result) {
-				resultPanel.loadLocal(result);
-			}, this);
+			jobExecutor.on('result', this.doResult, this);
 			
 			this.tbar = [{
 				iconCls: 'save', scope: this, tooltip: '保存这个任务', handler: this.save
@@ -110,6 +108,11 @@ JobGraph = Ext.extend(BaseGraph, {
 			});
 			
 		}, this);
+	},
+	
+	doResult: function(result) {
+		var resultPanel = this.layout.south.panel;
+		resultPanel.loadLocal(result);
 	},
 	
 	toRun: function(executionId) {

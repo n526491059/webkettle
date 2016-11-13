@@ -397,4 +397,71 @@ public class TransDebugExecutor implements Runnable {
 	public JSONObject getPreviewData() {
 		return jsonObject;
 	}
+	
+	public JSONArray getLastPreviewResults() {
+		JSONArray previewSteps = new JSONArray();
+		
+		for (StepMeta stepMeta : transDebugMeta.getStepDebugMetaMap().keySet()) {
+			StepDebugMeta stepDebugMeta = transDebugMeta.getStepDebugMetaMap().get(stepMeta);
+			RowMetaInterface rowMeta = stepDebugMeta.getRowBufferMeta();
+			List<Object[]> rowsData = stepDebugMeta.getRowBuffer();
+			if(rowMeta == null || rowsData == null)
+				continue;
+
+			JSONArray columns = new JSONArray();
+			JSONObject metaData = new JSONObject();
+			JSONArray fields = new JSONArray();
+			List<ValueMetaInterface> valueMetas = rowMeta.getValueMetaList();
+			for (int i = 0; i < valueMetas.size(); i++) {
+				ValueMetaInterface valueMeta = rowMeta.getValueMeta(i);
+				fields.add(valueMeta.getName());
+				String header = valueMeta.getComments() == null ? valueMeta.getName() : valueMeta.getComments();
+				
+				JSONObject column = new JSONObject();
+				column.put("dataIndex", valueMeta.getName());
+				column.put("header", header);
+				column.put("width", 800 / valueMetas.size());
+				columns.add(column);
+			}
+			metaData.put("fields", fields);
+			metaData.put("root", "firstRecords");
+			
+			JSONArray firstRecords = new JSONArray();
+			for (int rowNr = 0; rowNr < rowsData.size(); rowNr++) {
+				Object[] rowData = rowsData.get(rowNr);
+				JSONObject row = new JSONObject();
+				for (int colNr = 0; colNr < rowMeta.size(); colNr++) {
+					String string = null;
+					ValueMetaInterface valueMetaInterface;
+					try {
+						valueMetaInterface = rowMeta.getValueMeta(colNr);
+						if (valueMetaInterface.isStorageBinaryString()) {
+							Object nativeType = valueMetaInterface.convertBinaryStringToNativeType((byte[]) rowData[colNr]);
+							string = valueMetaInterface.getStorageMetadata().getString(nativeType);
+						} else {
+							string = rowMeta.getString(rowData, colNr);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					if(!StringUtils.hasText(string))
+						string = "&lt;null&gt;";
+					
+					ValueMetaInterface valueMeta = rowMeta.getValueMeta( colNr );
+					row.put(valueMeta.getName(), string);
+				}
+				firstRecords.add(row);
+			}
+			
+			JSONObject stepPreviewInfo = new JSONObject();
+			stepPreviewInfo.put("name", stepMeta.getName());
+			stepPreviewInfo.put("metaData", metaData);
+			stepPreviewInfo.put("columns", columns);
+			stepPreviewInfo.put("firstRecords", firstRecords);
+			
+			previewSteps.add(stepPreviewInfo);
+		}
+		
+		return previewSteps;
+	}
 }

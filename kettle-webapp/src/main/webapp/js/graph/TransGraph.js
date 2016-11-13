@@ -1,3 +1,105 @@
+EnterPreviewRowsDialog = Ext.extend(Ext.Window, {
+	title: '请选择需要预览的步骤',
+	width: 400,
+	height: 300,
+	layout: 'fit',
+	modal: true,
+	initComponent: function() {
+		var store = new Ext.data.JsonStore({
+			fields: ['name', 'metaData', 'columns', 'firstRecords']
+		});
+		
+		var stepsList = new ListView({
+			valueField: 'name',
+			store: store,
+			columns: [{
+				dataIndex: 'name', value: 200
+			}]
+		});
+		
+		this.items = {
+			border: false,
+			layout: 'fit',
+			bodyStyle: 'padding: 10px',
+			items: {
+				border: false,
+				layout: 'border',
+				items: [{
+					xtype: 'label',
+					text: '预览步骤：',
+					height: 30,
+					region: 'north'
+				}, {
+					region: 'center',
+					layout: 'fit',
+					items: stepsList
+				}]
+			}
+		};
+			
+		this.bbar = ['->', {
+			text: '显示', scope: this, handler: function() {
+				var records = stepsList.getSelectedRecords();
+				if(records.length > 0) {
+					var previewGrid = new DynamicEditorGrid({
+						rowNumberer: true
+					});
+					
+					var win = new Ext.Window({
+						title: '预览数据',
+						width: 850,
+						height: 500,
+						layout: 'fit',
+						bbar: ['->', {
+							text: '关闭', handler: function() {
+								win.close();
+							}
+						}],
+						items: previewGrid
+					});
+					win.show();
+					
+					previewGrid.loadMetaAndValue(records[0].json);
+				} else {
+					alert('请选择您要预览的步骤！');
+				}
+			}
+		}, {
+			text: '关闭', scope: this, handler: function() {
+				this.close();
+			}
+		}];
+		
+		this.initData = function(steps) {
+			store.loadData(steps);
+			
+			if(steps.length == 1) {
+				var previewGrid = new DynamicEditorGrid({
+					rowNumberer: true
+				});
+				
+				var win = new Ext.Window({
+					title: '预览数据',
+					width: 850,
+					height: 500,
+					layout: 'fit',
+					bbar: ['->', {
+						text: '关闭', handler: function() {
+							win.close();
+						}
+					}],
+					items: previewGrid
+				});
+				win.show();
+				
+				previewGrid.loadMetaAndValue(steps[0]);
+			}
+		};
+			
+		EnterPreviewRowsDialog.superclass.initComponent.call(this);
+	}
+});
+
 TransExecutor = Ext.extend(Ext.util.Observable, {
 	
 	executionId: null,
@@ -23,7 +125,14 @@ TransExecutor = Ext.extend(Ext.util.Observable, {
 			this.fireEvent('finish');
 		}, this);
 		
-		this.on('finish', function(executionId) {
+		this.on('finish', function(result, debug) {
+			if(debug === true && result.lastPreviewResults.length > 0) {
+				var dialog = new EnterPreviewRowsDialog();
+				dialog.show(null, function() {
+					dialog.initData(result.lastPreviewResults);
+				});
+			}
+			
 			this.debuging = false;
 		}, this);
 		
@@ -42,7 +151,7 @@ TransExecutor = Ext.extend(Ext.util.Observable, {
 				if(!result.finished) {
 					setTimeout(function() { me.loadResult(); }, 100);
 				} else {
-					me.fireEvent('finish');
+					me.fireEvent('finish', result, false);
 					me.executionId = null;
 				}
 			},
@@ -97,7 +206,7 @@ TransExecutor = Ext.extend(Ext.util.Observable, {
 					
 				} else {
 					me.executionId = null;
-					me.fireEvent('finish');
+					me.fireEvent('finish', result, true);
 				}
 				
 			},

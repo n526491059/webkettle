@@ -52,6 +52,8 @@ RepositoryManageTree = Ext.extend(RepositoryTree, {
 	        }, {
 	            iconCls: 'job', text: '新建任务', scope: this, handler: this.newJob
 	        }, '-', {
+	        	text: '添加到调度', scope: this, handler: this.schedule
+	        }, '-', {
 	        	text: '重命名'
 	        }, {
 	            iconCls: 'delete', text: '删除', scope: this, handler: this.remove
@@ -78,7 +80,7 @@ RepositoryManageTree = Ext.extend(RepositoryTree, {
 				}]
 			}
 		}, {
-			text: '资源库管理',
+			text: '资源库管理', disabled: true,
 			menu: {
 				items: [{
 					text: '连接资源库', scope: this, handler: this.connect
@@ -344,6 +346,39 @@ RepositoryManageTree = Ext.extend(RepositoryTree, {
 					   }
 				   }
 			});
+		}
+    },
+    
+    schedule: function() {
+    	var sm = this.getSelectionModel(), node = sm.getSelectedNode();
+		if(node) {
+			if(this.isTrans(node) || this.isJob(node)) {
+				var dialog = new Scheduler2Dialog();
+				dialog.on('ok', function(data) {
+					data.setAttribute('name', node.attributes.path);
+					data.setAttribute('group', 'DEFAULT');
+					
+					Ext.Ajax.request({
+						url: GetUrl('schedule/scheduleJob.do'),
+						method: 'POST',
+						params: {schedulerXml: mxUtils.getXml(data)},
+						success: function(response) {
+							decodeResponse(response, function(resObj) {
+								Ext.Msg.show({
+								   title: resObj.title,
+								   msg: resObj.message,
+								   buttons: Ext.Msg.OK,
+								   icon: Ext.MessageBox.INFO
+								});
+							});
+						},
+						failure: failureResponse
+				   });
+				});
+				dialog.show(null, function() {
+					dialog.initData(node.attributes.path);
+				});
+			}
 		}
     },
 	
