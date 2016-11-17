@@ -615,169 +615,174 @@ TransGraph = Ext.extend(BaseGraph, {
 				transDialog.show();
 			}, null, null, true);
 		} else if(cell.isVertex()) {
-			menu.addItem('编辑步骤', null, function() {me.editCell(cell);}, null, null, true);
-			menu.addItem('编辑步骤描述', null, function(){alert(1);}, null, null, true);
-			menu.addSeparator(null);
-			var sendMethod = menu.addItem('数据发送......', null, null, null, null, true);
-			
-			var text = 'Round-Robin', text1 = '复制发送模式';
-			if(cell.getAttribute('distribute') == 'Y')
-				text = '[√]Round-Robin';
-			else
-				text1 = '[√]复制发送模式';
-			
-			menu.addItem(text, null, function() {
-				graph.getModel().beginUpdate();
-		        try
-		        {
-					var edit = new mxCellAttributeChange(cell, 'distribute', 'Y');
-	            	graph.getModel().execute(edit);
-		        } finally
-		        {
-		            graph.getModel().endUpdate();
-		        }
-		        me.setDistribute(cell);
-			}, sendMethod, null, true);
-			menu.addItem(text1, null, function() {
-				graph.getModel().beginUpdate();
-		        try
-		        {
-					var edit = new mxCellAttributeChange(cell, 'distribute', 'N');
-	            	graph.getModel().execute(edit);
-		        } finally
-		        {
-		            graph.getModel().endUpdate();
-		        }
-		        me.setDistribute(cell);
-			}, sendMethod, null, true);
-			
-			menu.addItem('改变开始复制的数量...', null, this.changeCopies.createDelegate(this, [cell]), null, null, true);
-			menu.addSeparator(null);
-			menu.addItem('复制到剪贴板', null, function(){
-				mxClipboard.copy(graph);
-			}, null, null, true);
-			menu.addItem('复制步骤', null, function(){
-				mxClipboard.copy(graph);
-				mxClipboard.paste(graph);
-			}, null, null, true);
-			menu.addItem('删除步骤', null, function(){
-				graph.removeCells();
-			}, null, null, true);
-			menu.addItem('隐藏步骤', null, function(){alert(1);}, null, null, false);
-			menu.addItem('分离步骤', null, function(){alert(1);}, null, null, true);
-			menu.addSeparator(null);
-			menu.addItem('显示输入字段', null, function(){
-				var stepFieldsDialog = new StepFieldsDialog({before: true});
-				stepFieldsDialog.show();
-			}, null, null, true);
-			menu.addItem('显示输出字段', null, function(){
-				var stepFieldsDialog = new StepFieldsDialog({before: false});
-				stepFieldsDialog.show();
-			}, null, null, true);
-			menu.addSeparator(null);
-			
-			menu.addItem('定义错误处理', null, function(){
-				var dialog = new StepErrorMetaDialog();
-				dialog.on('ok', function(data) {
+			if(cell.value.nodeName == 'NotePad') {
+				menu.addItem('编辑注释', null, function() {alert(1);}, null, null, true);
+				menu.addItem('删除注释', null, function(){alert(1);}, null, null, true);
+			} else {
+				menu.addItem('编辑步骤', null, function() {me.editCell(cell);}, null, null, true);
+				menu.addItem('编辑步骤描述', null, function(){alert(1);}, null, null, true);
+				menu.addSeparator(null);
+				var sendMethod = menu.addItem('数据发送......', null, null, null, null, true);
+				
+				var text = 'Round-Robin', text1 = '复制发送模式';
+				if(cell.getAttribute('distribute') == 'Y')
+					text = '[√]Round-Robin';
+				else
+					text1 = '[√]复制发送模式';
+				
+				menu.addItem(text, null, function() {
 					graph.getModel().beginUpdate();
 			        try
 			        {
-						var edit = new mxCellAttributeChange(cell, 'error', Ext.encode(data));
+						var edit = new mxCellAttributeChange(cell, 'distribute', 'Y');
 		            	graph.getModel().execute(edit);
 			        } finally
 			        {
 			            graph.getModel().endUpdate();
 			        }
-			        me.showError(cell);
-			        dialog.close();
-				});
-				dialog.show();
-			}, null, null, cell.getAttribute('supports_error_handing') == 'Y');
-			
-			menu.addItem('预览', null, function(){
-				
-				var selectedCells = [];
-				Ext.each(graph.getSelectionCells(), function(c) {
-					if(c.isVertex() && c.value)
-						selectedCells.push(c.getAttribute('label'));
-				});
-				
-				Ext.Ajax.request({
-					url: GetUrl('trans/initPreview.do'),
-					params: {graphXml: me.toXml(), selectedCells: encodeURIComponent(Ext.encode(selectedCells))},
-					method: 'POST',
-					success: function(response) {
-						var jsonArray = Ext.decode(response.responseText);
-						var win = new TransDebugDialog();
-						win.show(null, function() {
-							win.initData(jsonArray);
-						});
-					},
-					failure: failureResponse
-				});
-				
-				
-			}, null, null, true);
-			
-			menu.addSeparator(null);
-			menu.addItem('分区', null, function(){
-				var dialog = new SelectPartitionDialog();
-				dialog.on('ok', function(data) {
+			        me.setDistribute(cell);
+				}, sendMethod, null, true);
+				menu.addItem(text1, null, function() {
 					graph.getModel().beginUpdate();
 			        try
 			        {
-						var edit = new mxCellAttributeChange(cell, 'partitioning', Ext.encode(data));
+						var edit = new mxCellAttributeChange(cell, 'distribute', 'N');
 		            	graph.getModel().execute(edit);
 			        } finally
 			        {
 			            graph.getModel().endUpdate();
 			        }
-			        
-			        me.showPartitioning(cell);
-				});
-				dialog.show(null, function() {
-					dialog.initData(Ext.decode(cell.getAttribute('partitioning')));
-				});
-			}, null, null, this.getPartitionSchemaStore().getCount() > 0);
-			
-			menu.addItem('集群', null, function(){
-				var availableClusters =  new ListView({
-					valueField: 'name',
-					store: me.getClusterSchemaStore(),
-					columns: [{
-						width: 1, dataIndex: 'name'
-					}]
-				});
+			        me.setDistribute(cell);
+				}, sendMethod, null, true);
 				
-				var win = new Ext.Window({
-					width: 200,
-					height: 300,
-					title: '集群选择',
-					layout: 'fit',
-					modal: true,
-					items: availableClusters,
-					bbar: ['->', {
-						text: '确定', handler: function() {
-							if(!Ext.isEmpty(availableClusters.getValue())) {
-								graph.getModel().beginUpdate();
-						        try
-						        {
-									var edit = new mxCellAttributeChange(cell, 'cluster_schema', availableClusters.getValue());
-					            	graph.getModel().execute(edit);
-						        } finally
-						        {
-						            graph.getModel().endUpdate();
-						        }
-								
-								me.showCluster(cell);
-								win.close();
+				menu.addItem('改变开始复制的数量...', null, this.changeCopies.createDelegate(this, [cell]), null, null, true);
+				menu.addSeparator(null);
+				menu.addItem('复制到剪贴板', null, function(){
+					mxClipboard.copy(graph);
+				}, null, null, true);
+				menu.addItem('复制步骤', null, function(){
+					mxClipboard.copy(graph);
+					mxClipboard.paste(graph);
+				}, null, null, true);
+				menu.addItem('删除步骤', null, function(){
+					graph.removeCells();
+				}, null, null, true);
+				menu.addItem('隐藏步骤', null, function(){alert(1);}, null, null, false);
+				menu.addItem('分离步骤', null, function(){alert(1);}, null, null, true);
+				menu.addSeparator(null);
+				menu.addItem('显示输入字段', null, function(){
+					var stepFieldsDialog = new StepFieldsDialog({before: true});
+					stepFieldsDialog.show();
+				}, null, null, true);
+				menu.addItem('显示输出字段', null, function(){
+					var stepFieldsDialog = new StepFieldsDialog({before: false});
+					stepFieldsDialog.show();
+				}, null, null, true);
+				menu.addSeparator(null);
+				
+				menu.addItem('定义错误处理', null, function(){
+					var dialog = new StepErrorMetaDialog();
+					dialog.on('ok', function(data) {
+						graph.getModel().beginUpdate();
+				        try
+				        {
+							var edit = new mxCellAttributeChange(cell, 'error', Ext.encode(data));
+			            	graph.getModel().execute(edit);
+				        } finally
+				        {
+				            graph.getModel().endUpdate();
+				        }
+				        me.showError(cell);
+				        dialog.close();
+					});
+					dialog.show();
+				}, null, null, cell.getAttribute('supports_error_handing') == 'Y');
+				
+				menu.addItem('预览', null, function(){
+					
+					var selectedCells = [];
+					Ext.each(graph.getSelectionCells(), function(c) {
+						if(c.isVertex() && c.value)
+							selectedCells.push(c.getAttribute('label'));
+					});
+					
+					Ext.Ajax.request({
+						url: GetUrl('trans/initPreview.do'),
+						params: {graphXml: me.toXml(), selectedCells: encodeURIComponent(Ext.encode(selectedCells))},
+						method: 'POST',
+						success: function(response) {
+							var jsonArray = Ext.decode(response.responseText);
+							var win = new TransDebugDialog();
+							win.show(null, function() {
+								win.initData(jsonArray);
+							});
+						},
+						failure: failureResponse
+					});
+					
+					
+				}, null, null, true);
+				
+				menu.addSeparator(null);
+				menu.addItem('分区', null, function(){
+					var dialog = new SelectPartitionDialog();
+					dialog.on('ok', function(data) {
+						graph.getModel().beginUpdate();
+				        try
+				        {
+							var edit = new mxCellAttributeChange(cell, 'partitioning', Ext.encode(data));
+			            	graph.getModel().execute(edit);
+				        } finally
+				        {
+				            graph.getModel().endUpdate();
+				        }
+				        
+				        me.showPartitioning(cell);
+					});
+					dialog.show(null, function() {
+						dialog.initData(Ext.decode(cell.getAttribute('partitioning')));
+					});
+				}, null, null, this.getPartitionSchemaStore().getCount() > 0);
+				
+				menu.addItem('集群', null, function(){
+					var availableClusters =  new ListView({
+						valueField: 'name',
+						store: me.getClusterSchemaStore(),
+						columns: [{
+							width: 1, dataIndex: 'name'
+						}]
+					});
+					
+					var win = new Ext.Window({
+						width: 200,
+						height: 300,
+						title: '集群选择',
+						layout: 'fit',
+						modal: true,
+						items: availableClusters,
+						bbar: ['->', {
+							text: '确定', handler: function() {
+								if(!Ext.isEmpty(availableClusters.getValue())) {
+									graph.getModel().beginUpdate();
+							        try
+							        {
+										var edit = new mxCellAttributeChange(cell, 'cluster_schema', availableClusters.getValue());
+						            	graph.getModel().execute(edit);
+							        } finally
+							        {
+							            graph.getModel().endUpdate();
+							        }
+									
+									me.showCluster(cell);
+									win.close();
+								}
 							}
-						}
-					}]
-				});
-				
-				win.show();
-			}, null, null, true);
+						}]
+					});
+					
+					win.show();
+				}, null, null, true);
+			}
 		} else if(cell.isEdge()) {
 			menu.addItem('编辑连接', null, function(){alert(1);}, null, null, true);
 			menu.addItem('使节点连接失效', null, function(){ }, null, null, true);

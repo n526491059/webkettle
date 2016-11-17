@@ -545,9 +545,9 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		
 		var doc = mxUtils.createXmlDocument();
 		var note = doc.createElement('NotePad');
-		note.setAttribute('label', '123');
+		note.setAttribute('label', '注释');
 		
-		var style = 'shape=note;fillColor=#FFA500;fontColor=#000000;strokeColor=#646464';
+		var style = 'shape=note;fillColor=#FFCD70;fontColor=#000000;strokeColor=#646464';
 		
 //		note.setAttribute('from', edge.source.getAttribute('label'));
 //		note.setAttribute('to', edge.target.getAttribute('label'));
