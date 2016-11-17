@@ -11,12 +11,9 @@ DatabaseExplorerDialog = Ext.extend(Ext.Window, {
 	initComponent: function() {
 		var me = this;
 		
-		var tree = new Ext.tree.TreePanel({
-			useArrows: true,
+		var tree = new KettleTree({
 			border: false,
 			root: new Ext.tree.TreeNode({text: 'root'}),
-			autoScroll: true,
-			animate: false,
 			rootVisible: false
 		});
 		

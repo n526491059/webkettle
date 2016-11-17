@@ -3,8 +3,6 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 	plain: true,
 	
 	initComponent: function() {
-		var me = this;
-		
 		var transTree = new Ext.tree.TreePanel({
 			title: '核心对象',
 			useArrows: true,

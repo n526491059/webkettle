@@ -582,7 +582,9 @@ TransGraph = Ext.extend(BaseGraph, {
 	initContextMenu: function(menu, cell, evt) {
 		var graph = this.getGraph(), me = this;
 		if(cell == null) {
-			menu.addItem('新建注释', null, function(){alert(1);}, null, null, true);
+			menu.addItem('新建注释', null, function(evt) {
+				me.createNote(evt);
+			}, null, null, true);
 			menu.addItem('从剪贴板粘贴步骤', null, function(){alert(1);}, null, null, true);
 			menu.addSeparator(null);
 			menu.addItem('全选', null, function(){me.getGraph().selectVertices();}, null, null, true);

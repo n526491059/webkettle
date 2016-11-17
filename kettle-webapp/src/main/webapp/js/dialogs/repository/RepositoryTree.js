@@ -1,8 +1,4 @@
-RepositoryTree = Ext.extend(Ext.tree.TreePanel, {
-	
-	useArrows: true,
-	autoScroll: true,
-	animate: false,
+RepositoryTree = Ext.extend(KettleTree, {
 	
 	loadElement: 3,
 	
@@ -82,7 +78,7 @@ RepositoryManageTree = Ext.extend(RepositoryTree, {
 				}]
 			}
 		}, {
-			text: '资源库管理', disabled: true,
+			text: '资源库管理', /*disabled: true,*/
 			menu: {
 				items: [{
 					text: '连接资源库', scope: this, handler: this.connect

@@ -1,8 +1,4 @@
-RepositoryCheckTree = Ext.extend(Ext.tree.TreePanel, {
-	
-	useArrows: true,
-	autoScroll: true,
-	animate: false,
+RepositoryCheckTree = Ext.extend(KettleTree, {
 	
 	loadElement: 3,
 	loadUrl: GetUrl('repository/exptree.do'),

@@ -31,9 +31,9 @@
 		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
 	</bean>
 	
-	<bean id="executionTraceDao" class="org.flhy.scheduler.dao.impl.ExecutionTraceDaoImpl">
-		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
-	</bean>
+<!-- 	<bean id="executionTraceDao" class="org.flhy.scheduler.dao.impl.ExecutionTraceDaoImpl"> -->
+<!-- 		<property name="sqlSessionFactory" ref="sqlSessionFactory"/> -->
+<!-- 	</bean> -->
 
 	<bean name="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="dataSource" ref="dataSource" />

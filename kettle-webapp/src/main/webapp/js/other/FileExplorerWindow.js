@@ -11,13 +11,10 @@ FileExplorerWindow = Ext.extend(Ext.Window, {
 		var loader = new Ext.tree.TreeLoader({
 			dataUrl: GetUrl('system/fileexplorer.do'),
 		});
-		var tree = new Ext.tree.TreePanel({
+		var tree = new KettleTree({
 			region: 'center',
-			useArrows: true,
 			root: new Ext.tree.AsyncTreeNode({text: 'root'}),
 			loader: loader,
-			autoScroll: true,
-			animate: false,
 			rootVisible: false
 		});
 		

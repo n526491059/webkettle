@@ -158,8 +158,33 @@ div.control_ct td {
 }
 
 
+/**.ext-gecko ***/
+/**the tree node el, contains blank tab, arrow image, folder image,text */
+.kettletree .x-tree-node-el {
+	height: 22px;
+	padding-top: 2px;
+}
 
-.ext-gecko .x-tree-icon, .x-tree-ec-icon, .x-tree-elbow-line, .x-tree-elbow, .x-tree-elbow-end, .x-tree-elbow-plus, .x-tree-elbow-minus, .x-tree-elbow-end-plus, .x-tree-elbow-end-minus {
+.ext-ie .kettletree .x-tree-node-el {
+	line-height: normal;
+}
+
+.kettletree .x-tree-node-icon {
+	margin-right: 3px;	
+	margin-left: 3px;
+}
+
+.kettletree .x-tree-node-anchor {
+	height: 20px;
+}
+
+/***
+.x-tree-node-el {
+  cursor: pointer;
+  line-height: 24px;
+}
+
+.x-tree-icon, .x-tree-ec-icon, .x-tree-elbow-line, .x-tree-elbow, .x-tree-elbow-end, .x-tree-elbow-plus, .x-tree-elbow-minus, .x-tree-elbow-end-plus, .x-tree-elbow-end-minus {
   background-repeat: no-repeat;
   border: 0 none;
   height: 22px;
@@ -169,7 +194,7 @@ div.control_ct td {
   width: 16px;
 }
 
-.ext-gecko .x-tree-node-collapsed .x-tree-node-icon, .x-tree-node-expanded .x-tree-node-icon, .x-tree-node-leaf .x-tree-node-icon {
+.x-tree-node-collapsed .x-tree-node-icon, .x-tree-node-expanded .x-tree-node-icon, .x-tree-node-leaf .x-tree-node-icon {
   background-position: center center;
   background-repeat: no-repeat;
   border: 0 none;
@@ -178,9 +203,4 @@ div.control_ct td {
   padding: 0;
   vertical-align: top;
   width: 24px;
-}
-
-.ext-gecko .x-tree-node-el {
-  cursor: pointer;
-  line-height: 24px;
-}
+}**/

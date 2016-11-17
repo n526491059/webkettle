@@ -3,15 +3,16 @@ package org.flhy.scheduler.dao.impl;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.ibatis.annotations.Param;
 import org.flhy.scheduler.beans.ExecutionTrace;
 import org.flhy.scheduler.dao.ExecutionTraceDao;
-import org.mybatis.spring.support.SqlSessionDaoSupport;
+import org.flhy.scheduler.dao.MybatisDaoSupport;
+import org.springframework.stereotype.Repository;
 
-public class ExecutionTraceDaoImpl extends SqlSessionDaoSupport implements ExecutionTraceDao {
+@Repository
+public class ExecutionTraceDaoImpl extends MybatisDaoSupport implements ExecutionTraceDao {
 
 	@Override
-	public List<ExecutionTrace> executionsByName(String jobName) {
+	public List<ExecutionTrace> listByName(String jobName) {
 		return getSqlSession().selectList("scheduler.findExecutionTrances", jobName);
 	}
 

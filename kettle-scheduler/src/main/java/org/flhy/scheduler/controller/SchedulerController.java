@@ -14,8 +14,6 @@ import java.util.Set;
 import javax.annotation.Resource;
 
 import org.flhy.ext.App;
-import org.flhy.ext.PluginFactory;
-import org.flhy.ext.base.GraphCodec;
 import org.flhy.ext.job.JobExecutionConfigurationCodec;
 import org.flhy.ext.trans.TransExecutionConfigurationCodec;
 import org.flhy.ext.utils.JSONArray;
@@ -23,7 +21,6 @@ import org.flhy.ext.utils.JSONObject;
 import org.flhy.ext.utils.JsonUtils;
 import org.flhy.ext.utils.RepositoryUtils;
 import org.flhy.ext.utils.StringEscapeHelper;
-import org.flhy.scheduler.beans.ExecutionTrace;
 import org.flhy.scheduler.dao.ExecutionTraceDao;
 import org.flhy.scheduler.runner.JobRunner;
 import org.flhy.scheduler.runner.TransRunner;
@@ -33,8 +30,6 @@ import org.pentaho.di.core.logging.DefaultLogLevel;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.job.JobExecutionConfiguration;
 import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.repository.Repository;
-import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.pentaho.di.trans.TransExecutionConfiguration;
 import org.pentaho.di.trans.TransMeta;
 import org.quartz.CronTrigger;
@@ -47,7 +42,6 @@ import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.Trigger.TriggerState;
 import org.quartz.impl.matchers.GroupMatcher;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,11 +53,17 @@ import org.w3c.dom.Element;
 
 import com.mxgraph.util.mxUtils;
 
+/**
+ * 
+ * 
+ * @author Liuhy
+ *
+ */
 @Controller
 @RequestMapping(value="/schedule")
 public class SchedulerController {
 
-	@Autowired
+	@Resource
 	private Scheduler scheduler;
 	
 	@ResponseBody
@@ -77,12 +77,11 @@ public class SchedulerController {
 		String executionConfiguration = root.getAttribute("executionConfiguration");
 		if(StringUtils.hasText(executionConfiguration)) {
 			jsonObject = JSONObject.fromObject(executionConfiguration);
-		} else {
+		} else {	//快速添加执行计划
 			jsonObject = transExecutionConfig(root.getAttribute("name"));
 			if(jsonObject == null)
 				jsonObject = jobExecutionConfig(root.getAttribute("name"));
 		}
-		
 		
 		JobDetail jobDetail = null;
 		if(jsonObject.containsKey("start_copy_nr")) {
@@ -116,6 +115,9 @@ public class SchedulerController {
 		}
 		
 		jobDetail.getJobDataMap().put("executionConfiguration", jsonObject.toString());
+		if(scheduler.getJobDetail(jobDetail.getKey()) != null) {
+			scheduler.deleteJob(jobDetail.getKey());
+		}
 		scheduler.scheduleJob(jobDetail, trigger);
 		
 		JsonUtils.success("系统提示", "成功加入调度计划！");

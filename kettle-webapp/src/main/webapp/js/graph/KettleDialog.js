@@ -191,6 +191,16 @@ KettleTabDialog = Ext.extend(KettleDialog, {
 	}
 });
 
+KettleTree = Ext.extend(Ext.tree.TreePanel, {
+	
+	useArrows: true,
+	autoScroll: true,
+	animate: false,
+	cls: 'kettletree'
+	
+	
+});
+
 KettleEditor = Ext.extend(Ext.Panel, {
 	
 	theme: 'javascript',

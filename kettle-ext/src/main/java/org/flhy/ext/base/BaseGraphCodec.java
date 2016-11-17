@@ -261,17 +261,17 @@ public abstract class BaseGraphCodec implements GraphCodec {
 					boolean fontBold = "Y".equalsIgnoreCase(cell.getAttribute("fontBold"));
 					boolean fontItalic = "Y".equalsIgnoreCase(cell.getAttribute("fontItalic"));
 					
-					int fR = Integer.parseInt(cell.getAttribute("fR"));
-					int fG = Integer.parseInt(cell.getAttribute("fG"));
-					int fB = Integer.parseInt(cell.getAttribute("fB"));
+					int fR = Const.toInt(cell.getAttribute("fR"), NotePadMeta.COLOR_RGB_BLACK_RED);
+					int fG = Const.toInt(cell.getAttribute("fG"), NotePadMeta.COLOR_RGB_BLACK_GREEN);
+					int fB = Const.toInt(cell.getAttribute("fB"), NotePadMeta.COLOR_RGB_BLACK_BLUE);
 					
-					int bgR = Integer.parseInt(cell.getAttribute("bgR"));
-					int bgG = Integer.parseInt(cell.getAttribute("bgG"));
-					int bgB = Integer.parseInt(cell.getAttribute("bgB"));
+					int bgR = Const.toInt(cell.getAttribute("bgR"), NotePadMeta.COLOR_RGB_DEFAULT_BG_RED);
+					int bgG = Const.toInt(cell.getAttribute("bgG"), NotePadMeta.COLOR_RGB_DEFAULT_BG_GREEN);
+					int bgB = Const.toInt(cell.getAttribute("bgB"), NotePadMeta.COLOR_RGB_DEFAULT_BG_BLUE);
 					
-					int bR = Integer.parseInt(cell.getAttribute("bR"));
-					int bG = Integer.parseInt(cell.getAttribute("bG"));
-					int bB = Integer.parseInt(cell.getAttribute("bB"));
+					int bR = Const.toInt(cell.getAttribute("bR"), NotePadMeta.COLOR_RGB_DEFAULT_BORDER_RED);
+					int bG = Const.toInt(cell.getAttribute("bG"), NotePadMeta.COLOR_RGB_DEFAULT_BORDER_GREEN);
+					int bB = Const.toInt(cell.getAttribute("bB"), NotePadMeta.COLOR_RGB_DEFAULT_BORDER_BLUE);
 					
 					boolean drawShadow = "Y".equalsIgnoreCase(cell.getAttribute("drawShadow"));
 					

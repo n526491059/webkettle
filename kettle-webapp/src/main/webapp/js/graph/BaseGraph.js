@@ -96,10 +96,11 @@ BaseGraph = Ext.extend(Ext.Panel, {
 			return label;
 		};
 		var cellLabelChanged = graph.cellLabelChanged;
-		graph.cellLabelChanged = function(cell, newValue, autoSize){ 
+		graph.cellLabelChanged = function(cell, newValue, autoSize) 
+		{
 			var tmp = cell.value.cloneNode(true);
-			tmp.setAttribute('label', value);
-			value = tmp;
+			tmp.setAttribute('label', newValue);
+			newValue = tmp;
 			
 			cellLabelChanged.apply(this, arguments);
 		};
@@ -129,7 +130,12 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		graph.addListener(mxEvent.DOUBLE_CLICK, function(sender, evt){  
 			var cell = evt.getProperty('cell');
 			if(cell && cell.isVertex()) {
-				me.editCell(cell);
+				if(cell.value.nodeName != 'NotePad') {
+					me.editCell(cell);
+				} else {
+					graph.startEditingAtCell(cell);
+				}
+				
 			}
 		});
 		
@@ -531,6 +537,25 @@ BaseGraph = Ext.extend(Ext.Panel, {
 	showSlaves: function() {
 		var dialog = new SlaveServersDialog();
 		dialog.show();
+	},
+	
+	createNote: function(evt) {
+		var graph = this.getGraph();
+		var pt = graph.getPointForEvent(evt);
+		
+		var doc = mxUtils.createXmlDocument();
+		var note = doc.createElement('NotePad');
+		note.setAttribute('label', '123');
+		
+		var style = 'shape=note;fillColor=#FFA500;fontColor=#000000;strokeColor=#646464';
+		
+//		note.setAttribute('from', edge.source.getAttribute('label'));
+//		note.setAttribute('to', edge.target.getAttribute('label'));
+//		note.setAttribute('enable', 'Y');
+		
+		
+		var cell = graph.insertVertex(graph.getDefaultParent(), null, note, pt.x, pt.y, 100, 100, style);
+		graph.startEditingAtCell(cell);
 	},
 	
 	listParameters: function() {
