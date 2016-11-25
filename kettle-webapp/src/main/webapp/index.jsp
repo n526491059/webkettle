@@ -17,10 +17,13 @@
 				系统加载中，请稍后...
 		    </div>
 		</div>
+		
+		<!-- javascript脚本编辑器框架加载 -->
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/CodeMirror/codemirror.css" />
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/CodeMirror/codemirror.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/CodeMirror/javascript.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/CodeMirror/sql.js"></script>
+	    
 	    
 	    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ext3/ux/ext-patch.css" />
 	    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ext3/ux/treegrid/treegrid.css" />
@@ -49,6 +52,7 @@
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/ui/global.js2"></script>
 	    
+	    <!-- Kettle核心面板组件 -->
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/KettleDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/BaseGraph.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/TransGraph.js"></script>
@@ -57,6 +61,7 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/JobResult.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/SlaveServerDialog.js"></script>
 	    
+	    <!-- 与转换相关的对话框 -->
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/trans/TransLogTransPanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/trans/TransLogStepPanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/trans/TransLogRunningPanel.js"></script>
@@ -76,8 +81,10 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/trans/StepErrorMetaDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/trans/TransDebugDialog.js"></script>
 	    
+	    <!-- 与任务相关的对话框 -->
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/job/JobExecutionConfigurationDialog.js"></script>
 	    
+	    <!-- 与数据库相关的对话框 -->
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/NormalPanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/AdvancePanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/OptionsPanel.js"></script>
@@ -86,6 +93,7 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/DatabaseDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/DatabaseExplorerDialog.js"></script>
 	    
+	    <!-- 与资源库相关的对话框 -->
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/repository/KettleDatabaseRepositoryDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/repository/KettleFileRepositoryDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/repository/RepositoriesDialog.js"></script>
@@ -93,10 +101,12 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/repository/RepositoryTree.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/repository/RepositoryManageDialog.js"></script>
 	    
+	    <!-- 与调度相关的对话框 -->
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/scheduler/SchedulerDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/scheduler/SchedulerLogDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/scheduler/SchedulerManageDialog.js"></script>
 	    
+	    <!-- 系统对话框 -->
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/StepFieldsDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/SQLStatementsDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/CheckResultDialog.js"></script>
@@ -108,6 +118,7 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/AnswerDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/FileExplorerWindow.js"></script>
 	    
+	    <!-- 系统入口对话框 -->
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/GuidePanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initMain.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initStore.js"></script>
