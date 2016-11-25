@@ -162,7 +162,7 @@ public class App implements ApplicationContextAware {
 			dbMeta.setDBPort(port);
 			dbMeta.setUsername(dataSource.getUsername());
 			dbMeta.setPassword(dataSource.getPassword());
-			
+
 			dbMeta.addExtraOption(dbMeta.getPluginId(), "characterEncoding", "gbk");
 			dbMeta.addExtraOption(dbMeta.getPluginId(), "useUnicode", "true");
 			

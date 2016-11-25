@@ -9,13 +9,16 @@
 		<module>kettle-webapp</module>
 		<module>kettle-ext</module>
 		<module>kettle-scheduler</module>
+		<module>untitled</module>
+		<module>kettle-repo-monitor</module>
+		<module>jingwei-task-monitor</module>
 	</modules>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
-			<version>1.7.3</version>
+			<version>1.7.4</version>
 		</dependency>
 		<dependency>
 			<groupId>xerces</groupId>
