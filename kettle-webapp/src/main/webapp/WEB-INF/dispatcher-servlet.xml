@@ -54,6 +54,7 @@
      </bean>
 
 	<import resource="classpath*:org/flhy/container-*.xml"/>
+	<import resource="classpath*:org/sxdata/jingwei/container-*.xml"/>
 	   
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />

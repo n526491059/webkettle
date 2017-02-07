@@ -3,7 +3,7 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 	plain: true,
 	
 	initComponent: function() {
-		var transTree = new Ext.tree.TreePanel({
+		var transComponentTree = new Ext.tree.TreePanel({
 			title: '核心对象',
 			useArrows: true,
 			root: new Ext.tree.AsyncTreeNode({text: 'root'}),
@@ -17,7 +17,7 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 			rootVisible: false
 		});
 		
-		var jobTree = new Ext.tree.TreePanel({
+		var jobComponentTree = new Ext.tree.TreePanel({
 			title: '核心对象',
 			useArrows: true,
 			root: new Ext.tree.AsyncTreeNode({text: 'root'}),
@@ -30,37 +30,62 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 			animate: false,
 			rootVisible: false
 		});
-		
+		var jobTree = new Ext.tree.TreePanel({
+			title: '作业管理',
+			useArrows: true,
+			root: new Ext.tree.AsyncTreeNode({text: 'root'}),
+			loader: new Ext.tree.TreeLoader({
+				dataUrl: GetUrl('task/getJobs.do')
+			}),
+			enableDD:true,
+			ddGroup:'TreePanelDDGroup',
+			autoScroll: true,
+			animate: false,
+			rootVisible: false
+		});
+		var transTree = new Ext.tree.TreePanel({
+			title: '转换管理',
+			useArrows: true,
+			root: new Ext.tree.AsyncTreeNode({text: 'root'}),
+			loader: new Ext.tree.TreeLoader({
+				dataUrl: GetUrl('task/getTrans.do')
+			}),
+			enableDD:true,
+			ddGroup:'TreePanelDDGroup',
+			autoScroll: true,
+			animate: false,
+			rootVisible: false
+		});
 		this.activeCom = function(item) {
-			this.remove(transTree, false);
-			this.remove(jobTree, false);
-			jobTree.hide();
-			transTree.hide();
+			this.remove(transComponentTree, false);
+			this.remove(jobComponentTree, false);
+			jobComponentTree.hide();
+			transComponentTree.hide();
 			
 			if(item && item.getXType() == 'JobGraph') {
-				jobTree.show();
-				this.add(jobTree);
-				this.setActiveTab(jobTree.getId());
+				jobComponentTree.show();
+				this.add(jobComponentTree);
+				this.setActiveTab(jobComponentTree.getId());
 			} else if(item && item.getXType() == 'TransGraph') {
-				transTree.show();
-				this.add(transTree);
-				this.setActiveTab(transTree.getId());
+				transComponentTree.show();
+				this.add(transComponentTree);
+				this.setActiveTab(transComponentTree.getId());
 			}
 		};
 		
-	    jobTree.on("nodedragover", function(e){
+	    jobComponentTree.on("nodedragover", function(e){
 	    	return false;
 	    }); 
 	    
-	    transTree.on("nodedragover", function(e){
+	    transComponentTree.on("nodedragover", function(e){
 	    	return false;
 	    });
-	    
+
 	    var repositoryTree = new RepositoryManageTree({title: '资源库'});
-		
-	    this.items = [repositoryTree];
+
+	    this.items = [repositoryTree,jobTree,transTree];
 		
 	    GuidePanel.superclass.initComponent.call(this);
-	    
+
 	}
 });

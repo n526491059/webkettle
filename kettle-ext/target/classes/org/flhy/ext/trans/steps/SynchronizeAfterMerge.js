@@ -52,7 +52,7 @@ SynchronizeAfterMergeDialog = Ext.extend(KettleTabDialog, {
 		
 		var searchStore = new Ext.data.JsonStore({
 			idProperty: 'field',
-			fields: ['field', 'condition', 'name', 'name2'],
+			fields: ['field', 'name', 'condition', 'name2'],
 			data: Ext.decode(cell.getAttribute('searchFields')) || []
 		});
 		var updateStore = new Ext.data.JsonStore({

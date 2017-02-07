@@ -288,7 +288,7 @@ public class RepositoryController {
 	    	
 			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
 			String graphXml = codec.encode(transMeta);
-			
+			System.out.println(graphXml);
 			JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
 		} else if(RepositoryObjectType.JOB.getTypeDescription().equals(type)) {
 			JobMeta jobMeta = repository.loadJob(name, directory, null, null);
@@ -296,7 +296,6 @@ public class RepositoryController {
 	    	
 	    	GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
 			String graphXml = codec.encode(jobMeta);
-			
 			JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
 		}
 	}

@@ -524,7 +524,6 @@ public class JobGraphController {
 		JSONObject jsonObject = new JSONObject();
 		
 		JobExecutor jobExecutor = executions.get(executionId);
-		System.out.println("jobExecutor_" + executionId + ": " + jobExecutor.isFinished());
 		jsonObject.put("finished", jobExecutor.isFinished());
 		if(jobExecutor.isFinished()) {
 			executions.remove(executionId);

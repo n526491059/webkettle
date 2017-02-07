@@ -200,10 +200,11 @@ public class SystemMainController {
 			jsonObject.put("children", children);
 			jsonArray.add(jsonObject);
 		}
-		
 		JsonUtils.response(jsonArray);
 	}
-	
+
+
+
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/systemDataTypes")
 	protected void systemDataTypes() throws IOException {

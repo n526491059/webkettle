@@ -9,8 +9,6 @@
 		<module>kettle-webapp</module>
 		<module>kettle-ext</module>
 		<module>kettle-scheduler</module>
-		<module>untitled</module>
-		<module>kettle-repo-monitor</module>
 		<module>jingwei-task-monitor</module>
 	</modules>
 
