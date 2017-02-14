@@ -116,7 +116,7 @@ public class SystemMainController {
 			jsonObject.put("children", children);
 			jsonArray.add(jsonObject);
 		}
-		
+		System.out.println(jsonArray);
 		JsonUtils.response(jsonArray);
 	}
 	

@@ -1,4 +1,5 @@
 var activeGraph = null;
+
 Ext.onReady(function() {
 	
 	Ext.QuickTips.init();
@@ -6,36 +7,64 @@ Ext.onReady(function() {
 	Ext.MessageBox.buttonText.ok = '好的';
 	Ext.MessageBox.buttonText.no = '否';
 	Ext.MessageBox.buttonText.cancel = '取消';
-	
+
 	var init = function() {
 		var tabPanel = new Ext.TabPanel({
 			id: 'TabPanel',
 			region: 'center',
-			margins: '5 5 5 0',
-			plain: true
+			border: true,
+			collapsible: true,
+
 		});
-		
+		var navigationPanel = new Ext.Panel({
+			id: 'navigationPanel',
+			region: 'north',
+			height: 50,
+			border: false,
+			margin: '0,0,0,0',
+			bodyStyle: {
+				background: '#3992D4'
+			},
+		});
+		var footPanel = new Ext.Panel({
+			id: 'footPanel',
+			region: 'south',
+			height: 30,
+			border: false,
+			margin: '0,0,0,0',
+			bodyStyle: {
+				background: '#3992D4'
+			},
+		});
+		secondGuidePanel.hide();
+
 		var guidePanel = new GuidePanel({
 			id: 'GuidePanel',
 			split: true,
 			region: 'west',
-			width: 300,
-			margins: '5 0 5 5'
+			width: 400,
+			layout: "border",
+			items:[
+				fristGuidePanel,
+				secondGuidePanel,
+			],
 		});
-		
+		guidePanel.setWidth(300);
 		tabPanel.on('tabchange', function(me, item) {
 			if(item) {
 				activeGraph = item;
 				guidePanel.activeCom(item);
+				//secondGuidePanel.activeCom(item);
 			} else {
 				activeGraph = null;
 				guidePanel.activeCom(null);
+				//secondGuidePanel.activeCom(null);
 			}
 		});
-		
+
 	    new Ext.Viewport({
 			layout: 'border',
-			items: [guidePanel, tabPanel]
+			items: [navigationPanel,guidePanel,tabPanel,footPanel]
 		});
 	};
 	
@@ -59,7 +88,7 @@ Ext.onReady(function() {
 //		    }, 250);
 //		}
 //	});
-    
+
 	init();
 	
 	 setTimeout(function(){
