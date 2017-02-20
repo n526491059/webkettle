@@ -4,7 +4,6 @@ fristGuidePanel =
 
 		useArrows: true,
 		region: 'center',
-
 		loader : new Ext.tree.TreeLoader(),
 		root : new Ext.tree.AsyncTreeNode({
 			id:'fristGuidePanel',
@@ -16,7 +15,7 @@ fristGuidePanel =
 					text : "<font size = '3px'>模型设计</font>",
 					children:[
 						{id:"newTrans",text:"<font size = '2px'>新建转换</font>",cls:"nav",leaf:true},
-						{id:"newJob",text:"<font size = '2px'>新建转换</font>",cls:"nav",leaf:true}
+						{id:"newJob",text:"<font size = '2px'>新建作业</font>",cls:"nav",leaf:true}
 					]
 				},
 				{
@@ -35,14 +34,13 @@ fristGuidePanel =
 		animate: false,
 		rootVisible: false,
 	});
-
-secondGuidePanel =
+transGuidePanel =
 	new Ext.tree.TreePanel({
-
+		id:'transGuidePanel',
 		title: '核心对象',
 		useArrows: true,
-		region: 'east',
-		width:200,
+		//region: 'east',
+		//width:200,
 		enableDD:true,
 		ddGroup:'TreePanelDDGroup',
 		autoScroll: true,
@@ -55,12 +53,38 @@ secondGuidePanel =
 
 	});
 
+jobGuidePanel =
+	new Ext.tree.TreePanel({
+		id:'jobGuidePanel',
+		title: '核心对象',
+		useArrows: true,
+		//region: 'east',
+		//width:200,
+		enableDD:true,
+		ddGroup:'TreePanelDDGroup',
+		autoScroll: true,
+		animate: false,
+		rootVisible: false,
+		root: new Ext.tree.AsyncTreeNode({text: 'root'}),
+		loader: new Ext.tree.TreeLoader({
+			dataUrl: GetUrl('system/jobentrys.do')
+		}),
+
+	});
+secondGuidePanel =  new Ext.Panel({
+	region:'east',
+	layout:'fit',
+	id: 'secondGuidePanel',
+	width: 200,
+	items: [transGuidePanel]
+})
 GuidePanel = Ext.extend(Ext.Panel, {
 
 	initComponent: function() {
 		GuidePanel.superclass.initComponent.call(this);
 	}
 });
+
 // GuidePanel = Ext.extend(Ext.TabPanel, {
 //     activeTab: 0,
 //     plain: true,

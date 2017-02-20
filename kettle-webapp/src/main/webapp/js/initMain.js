@@ -36,20 +36,21 @@ Ext.onReady(function() {
 				background: '#3992D4'
 			},
 		});
-		secondGuidePanel.hide();
 
+
+		//secondGuidePanel.hide();
 		var guidePanel = new GuidePanel({
 			id: 'GuidePanel',
 			split: true,
 			region: 'west',
 			width: 400,
-			layout: "border",
+			layout: 'border',
 			items:[
 				fristGuidePanel,
-				secondGuidePanel,
+				secondGuidePanel
 			],
 		});
-		guidePanel.setWidth(300);
+
 		tabPanel.on('tabchange', function(me, item) {
 			if(item) {
 				activeGraph = item;
@@ -89,8 +90,8 @@ Ext.onReady(function() {
 //		}
 //	});
 
-	init();
-	
+	 init();
+
 	 setTimeout(function(){
 		 Ext.get('loading').hide();
 		 Ext.get('loading-mask').fadeOut();
@@ -98,6 +99,24 @@ Ext.onReady(function() {
 
     
 });
+
+function treeClick(node, e) {
+	if (node.isLeaf()) {
+
+		if(node.id=='newTrans'){
+
+			//var guide =  Ext.getCmp('secondGuidePanel');
+			//secondGuidePanel.show();
+
+		}else if(node.id=='newJob'){
+
+
+		}
+	}
+}
+
+fristGuidePanel.on('click', treeClick);
+
 
 function syncCall(cfg) {
 	var conn = null;
