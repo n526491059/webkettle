@@ -34,6 +34,7 @@ fristGuidePanel =
 		animate: false,
 		rootVisible: false,
 	});
+
 transGuidePanel =
 	new Ext.tree.TreePanel({
 		id:'transGuidePanel',
@@ -76,8 +77,10 @@ secondGuidePanel =  new Ext.Panel({
 	layout:'fit',
 	id: 'secondGuidePanel',
 	width: 200,
-	items: [transGuidePanel]
+	bodyStyle : 'background:#CCC'
+
 })
+
 GuidePanel = Ext.extend(Ext.Panel, {
 
 	initComponent: function() {

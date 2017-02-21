@@ -38,7 +38,6 @@ Ext.onReady(function() {
 		});
 
 
-		//secondGuidePanel.hide();
 		var guidePanel = new GuidePanel({
 			id: 'GuidePanel',
 			split: true,
@@ -50,6 +49,7 @@ Ext.onReady(function() {
 				secondGuidePanel
 			],
 		});
+
 
 		tabPanel.on('tabchange', function(me, item) {
 			if(item) {
@@ -105,12 +105,18 @@ function treeClick(node, e) {
 
 		if(node.id=='newTrans'){
 
-			//var guide =  Ext.getCmp('secondGuidePanel');
+			var guide =  Ext.getCmp('secondGuidePanel');
+			guide.removeAll();
+			guide.add('transGuidePanel');
+			guide.doLayout();
 			//secondGuidePanel.show();
 
 		}else if(node.id=='newJob'){
-
-
+			var guide =  Ext.getCmp('secondGuidePanel');
+			guide.removeAll();
+			guide.add('jobGuidePanel');
+			guide.doLayout();
+			//secondGuidePanel.show();
 		}
 	}
 }
