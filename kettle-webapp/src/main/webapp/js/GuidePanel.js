@@ -7,7 +7,7 @@ fristGuidePanel =
 
 		loader : new Ext.tree.TreeLoader(),
 		root : new Ext.tree.AsyncTreeNode({
-			id:'fristGuidePanel',
+			id:'rootGuidePanel',
 			children:[
 				{
 					id:'task',
@@ -22,8 +22,8 @@ fristGuidePanel =
 				{
 					text : "<font size = '3px'>任务管理</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
 					children:[
-						{id:"newTrans",text:"<font size = '2px'>作业管理</font>",cls:"nav",leaf:true},
-						{id:"newJob",text:"<font size = '2px'>转换管理</font>",cls:"nav",leaf:true}
+						{id:"jobMonitor",text:"<font size = '2px'>作业管理</font>",cls:"nav",leaf:true},
+						{id:"transMonitor",text:"<font size = '2px'>转换管理</font>",cls:"nav",leaf:true}
 					]
 				}
 			]
@@ -33,8 +33,21 @@ fristGuidePanel =
 		ddGroup:'TreePanelDDGroup',
 		autoScroll: true,
 		animate: false,
-		rootVisible: false,
+		rootVisible: false
 	});
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 secondGuidePanel =
 	new Ext.tree.TreePanel({
@@ -51,7 +64,7 @@ secondGuidePanel =
 		root: new Ext.tree.AsyncTreeNode({text: 'root'}),
 		loader: new Ext.tree.TreeLoader({
 			dataUrl: GetUrl('system/steps.do')
-		}),
+		})
 
 	});
 
@@ -61,6 +74,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 		GuidePanel.superclass.initComponent.call(this);
 	}
 });
+
 // GuidePanel = Ext.extend(Ext.TabPanel, {
 //     activeTab: 0,
 //     plain: true,
@@ -153,3 +167,4 @@ GuidePanel = Ext.extend(Ext.Panel, {
 //
 //     }
 // });
+

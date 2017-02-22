@@ -1,15 +1,24 @@
 package org.sxdata.jingwei.controller;
 
+import org.apache.commons.collections.bag.SynchronizedSortedBag;
 import org.flhy.ext.utils.JSONArray;
-import org.flhy.ext.utils.JSONObject;
 import org.flhy.ext.utils.JsonUtils;
-import org.pentaho.di.trans.steps.systemdata.SystemDataTypes;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
+import org.sxdata.jingwei.dao.JobDao;
+import org.sxdata.jingwei.dao.TransDao;
+import org.sxdata.jingwei.entity.Job;
+import org.sxdata.jingwei.entity.PageforBean;
+import org.sxdata.jingwei.entity.Transformation;
+import org.sxdata.jingwei.entity.User;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Created by pengpai on 2017/1/18 0018.
@@ -17,29 +26,53 @@ import java.io.IOException;
 @Controller
 @RequestMapping(value="/task")
 public class TaskController {
-    @ResponseBody
-    @RequestMapping(method= RequestMethod.POST, value="/getJobs")
-    protected void getJobs() throws IOException {
-        JSONArray jsonArray = new JSONArray();
 
-//        SystemDataTypes[] values = SystemDataTypes.values();
-//        for (SystemDataTypes value : values) {
-//            JSONObject jsonObject = new JSONObject();
-//            jsonObject.put("code", value.getCode());
-//            jsonObject.put("descrp", value.getDescription());
-//            jsonArray.add(jsonObject);
-//        }
-        System.out.println("xxxx");
-        JsonUtils.response(jsonArray);
+    @Autowired
+    protected JobDao jobdao;
+    @Autowired
+    protected TransDao transDao;
+
+    @RequestMapping(value="/getJobs.do")
+    @ResponseBody
+    protected void getJobs(HttpServletResponse response,HttpServletRequest request) throws IOException {
+        //获取前台传递的分页参数
+        int start=Integer.parseInt(request.getParameter("start"));
+        int limit=Integer.parseInt(request.getParameter("limit"));
+        List<Job> jobs=jobdao.getThisPageJob(start,limit);
+        PageforBean pages=new PageforBean();
+        pages.setRoot(jobs);
+        pages.setTotalProperty(1);
+        //把分页对象(包含该页的数据以及所有页的总条数)转换成json对象
+        net.sf.json.JSONObject result=net.sf.json.JSONObject.fromObject(pages);
+        System.out.print(result.toString());
+        response.setContentType("text/html;charset=utf-8");
+        PrintWriter out=response.getWriter();
+        out.write(result.toString());
+        out.flush();
+        out.close();
+
+        //JsonUtils.response();
     }
 
+    //转换
     @ResponseBody
     @RequestMapping(method=RequestMethod.POST, value="/getTrans")
-    protected void getTrans() throws IOException {
-        JSONArray jsonArray = new JSONArray();
-
-
-
-        JsonUtils.response(jsonArray);
+    protected void getTrans(HttpServletResponse response,HttpServletRequest request) throws IOException {
+        //获取前台传递的分页参数
+        int start=Integer.parseInt(request.getParameter("start"));
+        int limit=Integer.parseInt(request.getParameter("limit"));
+        List<Transformation> trans=transDao.getThisPageTrans(start,limit);
+        Integer totalCount=transDao.getTotalSize();
+        PageforBean pages=new PageforBean();
+        pages.setRoot(trans);
+        pages.setTotalProperty(totalCount);
+        //把分页对象(包含该页的数据以及所有页的总条数)转换成json对象
+        net.sf.json.JSONObject result=net.sf.json.JSONObject.fromObject(pages);
+        System.out.print(result.toString());
+        response.setContentType("text/html;charset=utf-8");
+        PrintWriter out=response.getWriter();
+        out.write(result.toString());
+        out.flush();
+        out.close();
     }
 }

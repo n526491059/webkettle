@@ -410,7 +410,7 @@ public class TransExecutor implements Runnable {
 	public JSONArray getStepStatus() throws Exception {
 		JSONArray jsonArray = new JSONArray();
 		
-		HashMap<String, Integer> stepIndex = new HashMap<String, Integer>();
+		HashMap<String, Integer> stepIndex = new HashMap<String,Integer>();
 		if(executionConfiguration.isExecutingLocally()) {
 			for (StepMetaDataCombi combi : trans.getSteps()) {
 				Integer index = stepIndex.get(combi.stepMeta.getName());

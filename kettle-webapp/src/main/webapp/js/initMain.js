@@ -1,21 +1,22 @@
 var activeGraph = null;
 
 Ext.onReady(function() {
-	
+
 	Ext.QuickTips.init();
 	Ext.MessageBox.buttonText.yes = '确定';
 	Ext.MessageBox.buttonText.ok = '好的';
 	Ext.MessageBox.buttonText.no = '否';
 	Ext.MessageBox.buttonText.cancel = '取消';
 
-	var init = function() {
+	var init= function() {
 		var tabPanel = new Ext.TabPanel({
 			id: 'TabPanel',
 			region: 'center',
 			border: true,
-			collapsible: true,
-
+			collapsible:true
 		});
+
+
 		var navigationPanel = new Ext.Panel({
 			id: 'navigationPanel',
 			region: 'north',
@@ -24,7 +25,7 @@ Ext.onReady(function() {
 			margin: '0,0,0,0',
 			bodyStyle: {
 				background: '#3992D4'
-			},
+			}
 		});
 		var footPanel = new Ext.Panel({
 			id: 'footPanel',
@@ -34,7 +35,7 @@ Ext.onReady(function() {
 			margin: '0,0,0,0',
 			bodyStyle: {
 				background: '#3992D4'
-			},
+			}
 		});
 		secondGuidePanel.hide();
 
@@ -47,17 +48,17 @@ Ext.onReady(function() {
 			items:[
 				fristGuidePanel,
 				secondGuidePanel,
-			],
+			]
 		});
 		guidePanel.setWidth(300);
 		tabPanel.on('tabchange', function(me, item) {
 			if(item) {
 				activeGraph = item;
-				guidePanel.activeCom(item);
+				//guidePanel.activeCom(item);
 				//secondGuidePanel.activeCom(item);
 			} else {
 				activeGraph = null;
-				guidePanel.activeCom(null);
+				//guidePanel.activeCom(null);
 				//secondGuidePanel.activeCom(null);
 			}
 		});
@@ -334,4 +335,22 @@ Ext.override(Ext.data.Store, {
 		}
 	}
 });
+
+
+
+function treeClick(node,e) {
+	//判断是否是叶子节点
+	if(node.leaf){
+		var nodeId=node.id;
+		//如果点击的是作业管理节点 并且作业板块未曾打开过则生成一个作业的panel
+		if(nodeId=='jobMonitor' && !Ext.getCmp("JobPanel")){
+			generateJobPanel();
+		};
+		if(nodeId=='transMonitor' && !Ext.getCmp("transPanel")){
+			generateTrans();
+		}
+	}
+}
+
+fristGuidePanel.addListener('click', treeClick);
 
