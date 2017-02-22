@@ -257,6 +257,11 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				    }
 				});
 				
+			} 
+			else if(node.text == "<font size = '2px'>作业管理</font>")
+			{
+				secondGuidePanel.add(generateJobPanel());
+				secondGuidePanel.doLayout();
 			}
 		});
 		
