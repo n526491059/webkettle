@@ -1,24 +1,22 @@
 var activeGraph = null;
 
 Ext.onReady(function() {
-	
+
 	Ext.QuickTips.init();
 	Ext.MessageBox.buttonText.yes = '确定';
 	Ext.MessageBox.buttonText.ok = '好的';
 	Ext.MessageBox.buttonText.no = '否';
 	Ext.MessageBox.buttonText.cancel = '取消';
-	/**
-	 *初始化面板
-	 */
 
-	var init = function() {
-		var tabPanel = new Ext.TabPanel({
-			id: 'TabPanel',
-			region: 'center',
-			border: true,
-			collapsible: true,
+	var init= function() {
+//		var tabPanel = new Ext.TabPanel({
+//			id: 'TabPanel',
+//			region: 'center',
+//			border: true,
+//			collapsible:true
+//		});
 
-		});
+
 		var navigationPanel = new Ext.Panel({
 			id: 'navigationPanel',
 			region: 'north',
@@ -27,7 +25,7 @@ Ext.onReady(function() {
 			margin: '0,0,0,0',
 			bodyStyle: {
 				background: '#3992D4'
-			},
+			}
 		});
 		var footPanel = new Ext.Panel({
 			id: 'footPanel',
@@ -37,38 +35,39 @@ Ext.onReady(function() {
 			margin: '0,0,0,0',
 			bodyStyle: {
 				background: '#3992D4'
-			},
+			}
 		});
 
 
 		var guidePanel = new GuidePanel({
 			id: 'GuidePanel',
-			split: true,
-			region: 'west',
-			width: 400,
-			layout: 'border',
-			items:[
-				fristGuidePanel,
-				secondGuidePanel
-			],
+//			split: true,
+			region: 'center',
+//			width: 400,
+			layout: 'border'//,
+//			items:[
+//				fristGuidePanel,
+//				secondGuidePanel,
+//			]
+			
 		});
 
 
-		tabPanel.on('tabchange', function(me, item) {
+		/*tabPanel.on('tabchange', function(me, item) {
 			if(item) {
 				activeGraph = item;
-				guidePanel.activeCom(item);
+				//guidePanel.activeCom(item);
 				//secondGuidePanel.activeCom(item);
 			} else {
 				activeGraph = null;
-				guidePanel.activeCom(null);
+				//guidePanel.activeCom(null);
 				//secondGuidePanel.activeCom(null);
 			}
-		});
+		});*/
 
 	    new Ext.Viewport({
 			layout: 'border',
-			items: [navigationPanel,guidePanel,tabPanel,footPanel]
+			items: [navigationPanel,guidePanel,footPanel]
 		});
 	};
 	
@@ -106,35 +105,16 @@ Ext.onReady(function() {
 function treeClick(node, e) {
 	if (node.isLeaf()) {
 
-		var guide =  Ext.getCmp('secondGuidePanel');
 		if(node.id=='newTrans'){
 
+			var guide =  Ext.getCmp('secondGuidePanel');
 			guide.removeAll();
 			guide.add('transGuidePanel');
 			guide.doLayout();
-			Ext.getBody().mask('正在创建转换，请稍后...');
-
-			Ext.Ajax.request({
-				url: GetUrl('task/getRepositoryDir.do'),
-				method: 'POST',
-				//params: {dir: node.attributes.path, transName: text},
-				success: function(response) {
-					// try {
-					// 	var path = Ext.decode(response.responseText).message;
-					// 	node.reload(function() {
-					// 		var child = node.findChild('path', path);
-					// 		child && child.select();
-					// 		me.openGraph();
-					// 	});
-					// } finally {
-					// 	Ext.getBody().unmask();
-					// }
-				},
-				failure: failureResponse
-			});
 			//secondGuidePanel.show();
 
 		}else if(node.id=='newJob'){
+			var guide =  Ext.getCmp('secondGuidePanel');
 			guide.removeAll();
 			guide.add('jobGuidePanel');
 			guide.doLayout();
@@ -142,7 +122,9 @@ function treeClick(node, e) {
 		}
 	}
 }
-fristGuidePanel.on('click', treeClick);
+
+//fristGuidePanel.on('click', treeClick);
+
 
 function syncCall(cfg) {
 	var conn = null;
@@ -379,4 +361,22 @@ Ext.override(Ext.data.Store, {
 		}
 	}
 });
+
+
+
+function treeClick(node,e) {
+	//判断是否是叶子节点
+	if(node.leaf){
+		var nodeId=node.id;
+		//如果点击的是作业管理节点 并且作业板块未曾打开过则生成一个作业的panel
+		if(nodeId=='jobMonitor' && !Ext.getCmp("JobPanel")){
+			generateJobPanel();
+		};
+		if(nodeId=='transMonitor' && !Ext.getCmp("transPanel")){
+			generateTrans();
+		}
+	}
+}
+
+//fristGuidePanel.addListener('click', treeClick);
 

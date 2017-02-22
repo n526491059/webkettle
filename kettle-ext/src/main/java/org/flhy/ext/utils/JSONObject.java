@@ -33,6 +33,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
 		ObjectMapper mapper = new ObjectMapper();
 		return mapper.readValue(json, JSONObject.class);
 	}
+
 	
 	public String optString(String key) {
 		Object v = get(key);

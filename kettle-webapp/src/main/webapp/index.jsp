@@ -51,7 +51,7 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/ext3/ux/datetime/datetime.js"></script>
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/ui/global.js2"></script>
-	    
+
 	    <!-- Kettle核心面板组件 -->
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/KettleDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/BaseGraph.js"></script>
@@ -117,10 +117,12 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/TextAreaDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/AnswerDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/FileExplorerWindow.js"></script>
-	    
+
 	    <!-- 系统入口对话框 -->
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/GuidePanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initMain.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initStore.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/jobMonitor.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/transMonitor.js"></script>
 	</body>
 </html>

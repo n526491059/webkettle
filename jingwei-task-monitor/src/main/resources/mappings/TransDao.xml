@@ -1,0 +1,16 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sxdata.jingwei.dao.TransDao">
+    <select id="getThisPageTrans" resultType="org.sxdata.jingwei.entity.Transformation">
+        select
+        j.name as name,
+        j.CREATED_USER as createUser,
+        j.CREATED_DATE as createDate,
+        j.MODIFIED_USER as modifiedUser,
+        j.MODIFIED_DATE as modifiedDate
+        from  r_transformation j limit #{0},#{1}
+    </select>
+
+    <select id="getTotalSize" resultType="java.lang.Integer">
+        select count(1) from r_transformation
+    </select>
+</mapper>

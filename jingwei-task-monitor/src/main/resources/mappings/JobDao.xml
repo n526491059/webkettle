@@ -1,0 +1,29 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sxdata.jingwei.dao.JobDao">
+    <!--<resultMap id="forUser" type="org.sxdata.jingwei.entity.User">
+        <id property="userId" column="ID_USER"></id>
+        <result property="login" column="LOGIN"></result>
+        <result property="password" column="PASSWORD"></result>
+        <result property="name" column="NAME"></result>
+        <result property="description" column="DESCRIPTION"></result>
+        <result property="enabled" column="ENABLED"></result>
+    </resultMap>
+
+    <select id="getAllUser" resultMap="forUser">
+        select * FROM r_user
+    </select>
+
+    <select id="getThisPageUser" resultMap="forUser">
+        select * from r_user limit #{0},#{1}
+    </select>-->
+
+    <select id="getThisPageJob" resultType="org.sxdata.jingwei.entity.Job">
+        select
+            j.name as name,
+            j.CREATED_USER as createUser,
+            j.CREATED_DATE as createDate,
+            j.MODIFIED_USER as modifiedUser,
+            j.MODIFIED_DATE as modifiedDate
+        from  r_job j limit #{0},#{1}
+    </select>
+</mapper>
