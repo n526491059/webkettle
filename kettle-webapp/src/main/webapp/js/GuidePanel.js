@@ -79,7 +79,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				animate: false,
 				rootVisible: false
 			});
-		
+
 		var secondGuidePanel = new Ext.Panel({
 			region:'center',
 			layout:'fit',
@@ -87,9 +87,9 @@ GuidePanel = Ext.extend(Ext.Panel, {
 			border: false,
 			bodyStyle : 'background:#CCC'
 		});
-		
+
 		fristGuidePanel.on('click', function(node, e) {
-			
+
 			if(node.text == "<font size = '2px'>新建转换</font>")
 			{
 				secondGuidePanel.removeAll(true);
@@ -190,11 +190,11 @@ GuidePanel = Ext.extend(Ext.Panel, {
 							success: function(response) {
 								try {
 									var path = Ext.decode(response.responseText).message;
-									
-									
-									
+
+
+
 									Ext.getBody().mask('正在加载，请稍后...', 'x-mask-loading');
-									
+
 									Ext.Ajax.request({
 										url: GetUrl('repository/open.do'),
 										timeout: 120000,
@@ -228,17 +228,17 @@ GuidePanel = Ext.extend(Ext.Panel, {
 													items: [transComponentTree, graphPanel]
 												});
 												secondGuidePanel.doLayout();
-												
+
 												activeGraph = graphPanel;
-												
-												
+
+
 												var xmlDocument = mxUtils.parseXml(decodeURIComponent(response.responseText));
 												var decoder = new mxCodec(xmlDocument);
 												var node = xmlDocument.documentElement;
-												
+
 												var graph = graphPanel.getGraph();
 												decoder.decode(node, graph.getModel());
-												
+
 												graphPanel.fireEvent('load');
 											} finally {
 												Ext.getBody().unmask();
@@ -267,77 +267,77 @@ GuidePanel = Ext.extend(Ext.Panel, {
 	}
 });
 
- TransGuide = Ext.extend(Ext.Panel, {
-//     activeTab: 0,
-//     plain: true,
-	 layout: 'border',
-
-     initComponent: function() {
-
-     	var transComponentTree = new Ext.tree.TreePanel({
-     		region: 'west',
-     		split: true,
-     		width: 200,
-     		
-     		title: '核心对象',
-     		useArrows: true,
-     		root: new Ext.tree.AsyncTreeNode({text: 'root'}),
-     		loader: new Ext.tree.TreeLoader({
-     			dataUrl: GetUrl('system/steps.do')
-     		}),
-     		enableDD:true,
-     		ddGroup:'TreePanelDDGroup',
-     		autoScroll: true,
-     		animate: false,
-     		rootVisible: false
-     	});
-
-//     	var jobComponentTree = new Ext.tree.TreePanel({
-//     		title: '核心对象',
-//     		useArrows: true,
-//     		root: new Ext.tree.AsyncTreeNode({text: 'root'}),
-//     		loader: new Ext.tree.TreeLoader({
-//     			dataUrl: GetUrl('system/jobentrys.do')
-//     		}),
-//     		enableDD:true,
-//     		ddGroup:'TreePanelDDGroup',
-//     		autoScroll: true,
-//     		animate: false,
-//     		rootVisible: false
-//     	});
-//     	this.activeCom = function(item) {
-//     		this.remove(transComponentTree, false);
-//     		this.remove(jobComponentTree, false);
-//     		jobComponentTree.hide();
-//     		transComponentTree.hide();
+//  TransGuide = Ext.extend(Ext.Panel, {
+// //     activeTab: 0,
+// //     plain: true,
+// 	 layout: 'border',
 //
-//     		if(item && item.getXType() == 'JobGraph') {
-//     			jobComponentTree.show();
-//     			this.add(jobComponentTree);
-//     			this.setActiveTab(jobComponentTree.getId());
-//     		} else if(item && item.getXType() == 'TransGraph') {
-//     			transComponentTree.show();
-//     			this.add(transComponentTree);
-//     			this.setActiveTab(transComponentTree.getId());
-//     		}
-//     	};
-
-//         jobComponentTree.on("nodedragover", function(e){
-//         	return false;
-//         });
-
-//         transComponentTree.on("nodedragover", function(e){
-//         	return false;
-//         });
-
-//         var repositoryTree = new RepositoryManageTree({title: '资源库'});
-
-         this.items = [transComponentTree, {
-        	 
-         }];
-
-         TransGuide.superclass.initComponent.call(this);
-
-     }
- });
+//      initComponent: function() {
+//
+//      	var transComponentTree = new Ext.tree.TreePanel({
+//      		region: 'west',
+//      		split: true,
+//      		width: 200,
+//
+//      		title: '核心对象',
+//      		useArrows: true,
+//      		root: new Ext.tree.AsyncTreeNode({text: 'root'}),
+//      		loader: new Ext.tree.TreeLoader({
+//      			dataUrl: GetUrl('system/steps.do')
+//      		}),
+//      		enableDD:true,
+//      		ddGroup:'TreePanelDDGroup',
+//      		autoScroll: true,
+//      		animate: false,
+//      		rootVisible: false
+//      	});
+//
+// //     	var jobComponentTree = new Ext.tree.TreePanel({
+// //     		title: '核心对象',
+// //     		useArrows: true,
+// //     		root: new Ext.tree.AsyncTreeNode({text: 'root'}),
+// //     		loader: new Ext.tree.TreeLoader({
+// //     			dataUrl: GetUrl('system/jobentrys.do')
+// //     		}),
+// //     		enableDD:true,
+// //     		ddGroup:'TreePanelDDGroup',
+// //     		autoScroll: true,
+// //     		animate: false,
+// //     		rootVisible: false
+// //     	});
+// //     	this.activeCom = function(item) {
+// //     		this.remove(transComponentTree, false);
+// //     		this.remove(jobComponentTree, false);
+// //     		jobComponentTree.hide();
+// //     		transComponentTree.hide();
+// //
+// //     		if(item && item.getXType() == 'JobGraph') {
+// //     			jobComponentTree.show();
+// //     			this.add(jobComponentTree);
+// //     			this.setActiveTab(jobComponentTree.getId());
+// //     		} else if(item && item.getXType() == 'TransGraph') {
+// //     			transComponentTree.show();
+// //     			this.add(transComponentTree);
+// //     			this.setActiveTab(transComponentTree.getId());
+// //     		}
+// //     	};
+//
+// //         jobComponentTree.on("nodedragover", function(e){
+// //         	return false;
+// //         });
+//
+// //         transComponentTree.on("nodedragover", function(e){
+// //         	return false;
+// //         });
+//
+// //         var repositoryTree = new RepositoryManageTree({title: '资源库'});
+//
+//          this.items = [transComponentTree, {
+//
+//          }];
+//
+//          TransGuide.superclass.initComponent.call(this);
+//
+//      }
+//  });
 

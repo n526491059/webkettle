@@ -28,9 +28,9 @@ import java.util.List;
 public class TaskController {
 
     @Autowired
-    protected JobDao jobdao;
+    private JobDao jobdao;
     @Autowired
-    protected TransDao transDao;
+    private TransDao transDao;
 
     @RequestMapping(value="/getJobs.do")
     @ResponseBody
@@ -53,30 +53,30 @@ public class TaskController {
 
         //JsonUtils.response();
     }
-    /**
-     * 获取资源库路径
-     *
-     * @throws KettleException
-     * @throws IOException
-     */
-    @ResponseBody
-    @RequestMapping(method=RequestMethod.POST, value="/getRepositoryDir")
-    protected  void getRepositoryDir(@RequestParam String path, @RequestParam int loadElement) throws KettleException, IOException {
-        System.out.println("111");
-        ArrayList list = new ArrayList();
-
-        Repository repository = App.getInstance().getRepository();
-        RepositoryDirectoryInterface dir = null;
-        if(StringUtils.hasText(path))
-            dir = repository.findDirectory(path);
-        else
-            dir = repository.getUserHomeDirectory();
-
-        List<RepositoryDirectoryInterface> directorys = dir.getChildren();
-        for(RepositoryDirectoryInterface child : directorys) {
-            list.add(RepositoryNode.initNode(child.getName(), child.getPath()));
-        }
-
+//    /**
+//     * 获取资源库路径
+//     *
+//     * @throws KettleException
+//     * @throws IOException
+//     */
+//    @ResponseBody
+//    @RequestMapping(method=RequestMethod.POST, value="/getRepositoryDir")
+//    protected  void getRepositoryDir(@RequestParam String path, @RequestParam int loadElement) throws KettleException, IOException {
+//        System.out.println("111");
+//        ArrayList list = new ArrayList();
+//
+//        Repository repository = App.getInstance().getRepository();
+//        RepositoryDirectoryInterface dir = null;
+//        if(StringUtils.hasText(path))
+//            dir = repository.findDirectory(path);
+//        else
+//            dir = repository.getUserHomeDirectory();
+//
+//        List<RepositoryDirectoryInterface> directorys = dir.getChildren();
+//        for(RepositoryDirectoryInterface child : directorys) {
+//            list.add(RepositoryNode.initNode(child.getName(), child.getPath()));
+//        }
+//
 //        if(RepositoryNodeType.includeTrans(loadElement)) {
 //            List<RepositoryElementMetaInterface> elements = repository.getTransformationObjects(dir.getObjectId(), false);
 //            if(elements != null) {
@@ -104,10 +104,10 @@ public class TaskController {
 //                }
 //            }
 //        }
-        System.out.println(list);
-
-        JsonUtils.success("导入成功！");
-    }
+//        System.out.println(list);
+//
+//        JsonUtils.success("导入成功！");
+//    }
 
     //转换
     @ResponseBody
