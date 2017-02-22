@@ -7,6 +7,9 @@ Ext.onReady(function() {
 	Ext.MessageBox.buttonText.ok = '好的';
 	Ext.MessageBox.buttonText.no = '否';
 	Ext.MessageBox.buttonText.cancel = '取消';
+	/**
+	 *初始化面板
+	 */
 
 	var init = function() {
 		var tabPanel = new Ext.TabPanel({
@@ -103,16 +106,35 @@ Ext.onReady(function() {
 function treeClick(node, e) {
 	if (node.isLeaf()) {
 
+		var guide =  Ext.getCmp('secondGuidePanel');
 		if(node.id=='newTrans'){
 
-			var guide =  Ext.getCmp('secondGuidePanel');
 			guide.removeAll();
 			guide.add('transGuidePanel');
 			guide.doLayout();
+			Ext.getBody().mask('正在创建转换，请稍后...');
+
+			Ext.Ajax.request({
+				url: GetUrl('task/getRepositoryDir.do'),
+				method: 'POST',
+				//params: {dir: node.attributes.path, transName: text},
+				success: function(response) {
+					// try {
+					// 	var path = Ext.decode(response.responseText).message;
+					// 	node.reload(function() {
+					// 		var child = node.findChild('path', path);
+					// 		child && child.select();
+					// 		me.openGraph();
+					// 	});
+					// } finally {
+					// 	Ext.getBody().unmask();
+					// }
+				},
+				failure: failureResponse
+			});
 			//secondGuidePanel.show();
 
 		}else if(node.id=='newJob'){
-			var guide =  Ext.getCmp('secondGuidePanel');
 			guide.removeAll();
 			guide.add('jobGuidePanel');
 			guide.doLayout();
@@ -120,9 +142,7 @@ function treeClick(node, e) {
 		}
 	}
 }
-
 fristGuidePanel.on('click', treeClick);
-
 
 function syncCall(cfg) {
 	var conn = null;
