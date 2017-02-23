@@ -38,6 +38,7 @@ public class TaskController {
         //获取前台传递的分页参数
         int start=Integer.parseInt(request.getParameter("start"));
         int limit=Integer.parseInt(request.getParameter("limit"));
+
         List<Job> jobs=jobdao.getThisPageJob(start,limit);
         PageforBean pages=new PageforBean();
         pages.setRoot(jobs);

@@ -84,8 +84,8 @@ GuidePanel = Ext.extend(Ext.Panel, {
 			region:'center',
 			layout:'fit',
 			id: 'secondGuidePanel',
-			border: false,
-			bodyStyle : 'background:#CCC'
+			// border: false,
+			// bodyStyle : 'background:#CCC'
 		});
 
 		fristGuidePanel.on('click', function(node, e) {
@@ -257,10 +257,13 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				    }
 				});
 				
-			} 
-			else if(node.text == "<font size = '2px'>作业管理</font>")
-			{
+			} else if(node.text == "<font size = '2px'>作业管理</font>") {
+				secondGuidePanel.removeAll(true);
 				secondGuidePanel.add(generateJobPanel());
+				secondGuidePanel.doLayout();
+			}else if(node.text == "<font size = '2px'>转换管理</font>") {
+				secondGuidePanel.removeAll(true);
+				secondGuidePanel.add(generateTrans());
 				secondGuidePanel.doLayout();
 			}
 		});
