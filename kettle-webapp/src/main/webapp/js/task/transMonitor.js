@@ -1,15 +1,15 @@
 //转换
-function generateTrans(){
+function generateTrans(transName,createDate,inputName){
     var tabPanel=Ext.getCmp("TabPanel");
     //var data=response.responseText;
     //列模型
     var cm=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
-        {header:"名字",width:250,dataIndex:"name"},
+        {header:"转换名",width:250,dataIndex:"name"},
         {header:"创建用户",width:100,dataIndex:"createUser"},
-        {header:"创建时间",width:150,dataIndex:"createDate",tooltip:"这是创建时间"},
+        {header:"创建时间",width:150,dataIndex:"createDate",tooltip:"这是创建时间",format:"y-M-d H:m:s"},
         {header:"最终修改的用户",width:100,dataIndex:"modifiedUser",align:"center"},
-        {header:"修改时间",width:150,dataIndex:"modifiedDate"},
+        {header:"修改时间",width:150,dataIndex:"modifiedDate",format:"y-M-d H:m:s"},
         {
             header:"操作",width:140,dataIndex:"",menuDisabled:true,
             renderer:function(v){
@@ -36,7 +36,39 @@ function generateTrans(){
         proxy:proxy,
         reader:reader
     })
-    store.load({params:{start:0,limit:5}});
+    store.load({params:{start:0,limit:5,name:transName,date:createDate}});
+
+
+    var nameField=new Ext.form.TextField({
+        name: "name",
+        fieldLabel: "转换名",
+        width:100,
+        value:inputName
+    })
+    var dateField=new Ext.form.DateField({
+        name: "createDate",
+        fieldLabel: "创建日期",
+        width: 150,
+        format: "Y-m-d"
+    })
+
+
+    f=new Ext.form.FormPanel({
+        width:600,
+        autoHeight:true,
+        frame:true,
+        labelWidth:100,
+        labelAlign:"right",
+        items:[
+            {
+                layout:"column",    //横向布局(列布局),左到右
+                items:[
+                    {layout:"form", items:[nameField]},     //每一个是单独的表单控件,单个使用纵向布局,上到下
+                    {layout:"form",items:[dateField]}
+                ]
+            }
+        ]
+    })
 
     var grid=new Ext.grid.GridPanel({
         id:"transPanel",
@@ -48,22 +80,14 @@ function generateTrans(){
         closable:true,
         tbar:new Ext.Toolbar({
             buttons:[
+                f ,"-",
                 {
-                    text:"新建",
+                    text:"查询",
                     handler:function(){
-
-                    }
-                },"-",
-                {
-                    text:"保存",
-                    handler:function(){
-
-                    }
-                },
-                {
-                    text:"打开",
-                    handler:function(){
-
+                        var transValue= f.getForm().findField("name").getValue();
+                        var createDate= f.getForm().findField("createDate").getRawValue();
+                        tabPanel.remove(Ext.getCmp("transPanel"));
+                        generateTrans(transValue,createDate,transValue);
                     }
                 }
             ]

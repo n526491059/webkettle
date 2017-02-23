@@ -1,17 +1,23 @@
 package org.sxdata.jingwei.entity;
 
+import java.sql.Timestamp;
+import java.util.Date;
+
 /**
  * Created by cRAZY on 2017/2/22.
  * 转换
  */
 public class Transformation {
-    private String createDate;//创建时间
+    private Date createDate;//创建时间
     private String modifiedUser;//修改用户
-    private String modifiedDate;//修改时间
+    private Date modifiedDate;//修改时间
     private String name;
     private String createUser; //创建用户
+    private Timestamp createDateStamp;
+    private Timestamp modifiedDateStamp;
 
-    public String getCreateDate() {
+
+    public Date getCreateDate() {
         return createDate;
     }
 
@@ -19,7 +25,7 @@ public class Transformation {
         return modifiedUser;
     }
 
-    public String getModifiedDate() {
+    public Date getModifiedDate() {
         return modifiedDate;
     }
 
@@ -31,7 +37,7 @@ public class Transformation {
         return createUser;
     }
 
-    public void setCreateDate(String createDate) {
+    public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 
@@ -39,7 +45,7 @@ public class Transformation {
         this.modifiedUser = modifiedUser;
     }
 
-    public void setModifiedDate(String modifiedDate) {
+    public void setModifiedDate(Date modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
 

@@ -9,13 +9,14 @@ import java.util.Date;
  * 作业
  */
 public class Job {
-    private String createDate;//创建时间
+    private Date createDate;//创建时间
     private String modifiedUser;//修改用户
-    private String modifiedDate;//修改时间
+    private Date modifiedDate;//修改时间
     private String name;
     private String createUser; //创建用户
 
-    public String getCreateDate() {
+
+    public Date getCreateDate() {
         return createDate;
     }
 
@@ -23,7 +24,7 @@ public class Job {
         return modifiedUser;
     }
 
-    public String getModifiedDate() {
+    public Date getModifiedDate() {
         return modifiedDate;
     }
 
@@ -35,7 +36,7 @@ public class Job {
         return createUser;
     }
 
-    public void setCreateDate(String createDate) {
+    public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 
@@ -43,7 +44,7 @@ public class Job {
         this.modifiedUser = modifiedUser;
     }
 
-    public void setModifiedDate(String modifiedDate) {
+    public void setModifiedDate(Date modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
 

@@ -7,7 +7,7 @@ import java.util.List;
  */
 public class PageforBean {
     private int totalProperty;//分页的总记录条数
-    private List root;//json对象集合,表示本次的查询结果
+    private List root;//对象集合,表示本次的查询结果
 
     public int getTotalProperty() {
         return totalProperty;

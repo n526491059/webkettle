@@ -370,10 +370,10 @@ function treeClick(node,e) {
 		var nodeId=node.id;
 		//如果点击的是作业管理节点 并且作业板块未曾打开过则生成一个作业的panel
 		if(nodeId=='jobMonitor' && !Ext.getCmp("JobPanel")){
-			generateJobPanel();
+			generateJobPanel("","",undefined);
 		};
 		if(nodeId=='transMonitor' && !Ext.getCmp("transPanel")){
-			generateTrans();
+			generateTrans("","",undefined);
 		}
 	}
 }

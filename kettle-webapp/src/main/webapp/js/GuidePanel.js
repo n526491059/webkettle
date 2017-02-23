@@ -69,8 +69,7 @@ jobGuidePanel =
 		root: new Ext.tree.AsyncTreeNode({text: 'root'}),
 		loader: new Ext.tree.TreeLoader({
 			dataUrl: GetUrl('system/jobentrys.do')
-		}),
-
+		})
 	});
 secondGuidePanel =  new Ext.Panel({
 	region:'east',
