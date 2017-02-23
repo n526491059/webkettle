@@ -1,6 +1,6 @@
 //转换
-function generateTrans(){
-    //var tabPanel=Ext.getCmp("TabPanel");
+function generateTrans(transName,createDate,inputName){
+    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
     //var data=response.responseText;
     //列模型
     var cm=new Ext.grid.ColumnModel([
@@ -86,8 +86,9 @@ function generateTrans(){
                     handler:function(){
                         var transValue= f.getForm().findField("name").getValue();
                         var createDate= f.getForm().findField("createDate").getRawValue();
-                        tabPanel.remove(Ext.getCmp("transPanel"));
-                        generateTrans(transValue,createDate,transValue);
+                        secondGuidePanel.removeAll(true);
+                        secondGuidePanel.add(generateTrans(transValue,createDate,transValue));
+                        secondGuidePanel.doLayout();
                     }
                 }
             ]
@@ -100,8 +101,6 @@ function generateTrans(){
             emptyMsg:"没有记录"
         })
     });
-    // tabPanel.add(grid);
-    // //把创建好的gridPanel设置为默认的标签
-    // tabPanel.setActiveTab(grid);
+
     return grid;
 }

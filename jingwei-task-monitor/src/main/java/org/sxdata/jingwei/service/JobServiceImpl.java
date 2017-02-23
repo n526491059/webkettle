@@ -18,6 +18,7 @@ import java.util.List;
 public class JobServiceImpl implements JobService{
     @Autowired
     protected JobDao jobDao;
+
     protected SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override

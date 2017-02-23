@@ -260,11 +260,11 @@ GuidePanel = Ext.extend(Ext.Panel, {
 			} else if(node.text == "<font size = '2px'>作业管理</font>")
 			{
 				secondGuidePanel.removeAll(true);
-				secondGuidePanel.add(generateJobPanel());
+				secondGuidePanel.add(generateJobPanel("","",undefined));
 				secondGuidePanel.doLayout();
 			}else if(node.text == "<font size = '2px'>转换管理</font>") {
 				secondGuidePanel.removeAll(true);
-				secondGuidePanel.add(generateTrans());
+				secondGuidePanel.add(generateTrans("","",undefined));
 				secondGuidePanel.doLayout();
 			}
 		});
