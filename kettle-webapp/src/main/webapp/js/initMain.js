@@ -9,12 +9,12 @@ Ext.onReady(function() {
 	Ext.MessageBox.buttonText.cancel = '取消';
 
 	var init= function() {
-		var tabPanel = new Ext.TabPanel({
-			id: 'TabPanel',
-			region: 'center',
-			border: true,
-			collapsible:true
-		});
+//		var tabPanel = new Ext.TabPanel({
+//			id: 'TabPanel',
+//			region: 'center',
+//			border: true,
+//			collapsible:true
+//		});
 
 
 		var navigationPanel = new Ext.Panel({
@@ -41,19 +41,19 @@ Ext.onReady(function() {
 
 		var guidePanel = new GuidePanel({
 			id: 'GuidePanel',
-			split: true,
-			region: 'west',
-			width: 400,
-			layout: 'border',
-			items:[
-				fristGuidePanel,
-				secondGuidePanel,
-			]
+//			split: true,
+			region: 'center',
+//			width: 400,
+			layout: 'border'//,
+//			items:[
+//				fristGuidePanel,
+//				secondGuidePanel,
+//			]
 			
 		});
 
 
-		tabPanel.on('tabchange', function(me, item) {
+		/*tabPanel.on('tabchange', function(me, item) {
 			if(item) {
 				activeGraph = item;
 				//guidePanel.activeCom(item);
@@ -63,11 +63,11 @@ Ext.onReady(function() {
 				//guidePanel.activeCom(null);
 				//secondGuidePanel.activeCom(null);
 			}
-		});
+		});*/
 
 	    new Ext.Viewport({
 			layout: 'border',
-			items: [navigationPanel,guidePanel,tabPanel,footPanel]
+			items: [navigationPanel,guidePanel,footPanel]
 		});
 	};
 	
@@ -123,7 +123,7 @@ function treeClick(node, e) {
 	}
 }
 
-fristGuidePanel.on('click', treeClick);
+//fristGuidePanel.on('click', treeClick);
 
 
 function syncCall(cfg) {
@@ -378,5 +378,5 @@ function treeClick(node,e) {
 	}
 }
 
-fristGuidePanel.addListener('click', treeClick);
+//fristGuidePanel.addListener('click', treeClick);
 

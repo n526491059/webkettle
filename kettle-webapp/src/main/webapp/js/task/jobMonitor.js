@@ -2,7 +2,7 @@
 
 
 function generateJobPanel(jobName,createDate,inputName){
-    var tabPanel=Ext.getCmp("TabPanel");
+ //   var tabPanel=Ext.getCmp("TabPanel");
     //var data=response.responseText;
     //列模型
     var cm=new Ext.grid.ColumnModel([
@@ -112,9 +112,11 @@ function generateJobPanel(jobName,createDate,inputName){
             emptyMsg:"没有记录"
         })
     });
-    tabPanel.add(grid);
+//    tabPanel.add(grid);
     //把创建好的gridPanel设置为默认的标签
-    tabPanel.setActiveTab(grid);
+//    tabPanel.setActiveTab(grid);
+    
+    return grid;
 }
 
 
