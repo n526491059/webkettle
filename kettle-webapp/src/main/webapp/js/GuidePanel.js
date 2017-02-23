@@ -83,7 +83,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 		var secondGuidePanel = new Ext.Panel({
 			region:'center',
 			layout:'fit',
-			id: 'secondGuidePanel',
+			id: 'secondGuidePanel'
 			// border: false,
 			// bodyStyle : 'background:#CCC'
 		});

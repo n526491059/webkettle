@@ -11,6 +11,7 @@ import org.sxdata.jingwei.service.TransService;
 import org.sxdata.jingwei.util.Util;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.PrintWriter;
 
 
@@ -30,7 +31,7 @@ public class TaskController {
     //作业管理
     @RequestMapping(value="/getJobs.do")
     @ResponseBody
-    protected void getJobs(HttpServletResponse response,HttpServletRequest request) throws IOException {
+    protected void getJobs(HttpServletResponse response,HttpServletRequest request) throws Exception {
         //获取前台传递的分页参数
         int start=Integer.parseInt(request.getParameter("start"));
         int limit=Integer.parseInt(request.getParameter("limit"));
@@ -49,7 +50,7 @@ public class TaskController {
     //转换管理
     @ResponseBody
     @RequestMapping(method=RequestMethod.POST, value="/getTrans")
-    protected void getTrans(HttpServletResponse response,HttpServletRequest request) throws IOException {
+    protected void getTrans(HttpServletResponse response,HttpServletRequest request) throws Exception {
         //获取前台传递的分页参数
         String transName=request.getParameter("name");
         int start=Integer.parseInt(request.getParameter("start"));
