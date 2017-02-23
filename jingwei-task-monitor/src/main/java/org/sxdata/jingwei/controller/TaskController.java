@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 @Controller
 @RequestMapping(value="/task")
 public class TaskController {
+
     @Autowired
     protected TransService transService;
     @Autowired
@@ -29,14 +30,14 @@ public class TaskController {
     //作业管理
     @RequestMapping(value="/getJobs.do")
     @ResponseBody
-    protected void getJobs(HttpServletResponse response,HttpServletRequest request) throws Exception {
-
+    protected void getJobs(HttpServletResponse response,HttpServletRequest request) throws IOException {
+        //获取前台传递的分页参数
         int start=Integer.parseInt(request.getParameter("start"));
         int limit=Integer.parseInt(request.getParameter("limit"));
         String name=request.getParameter("name");
         String createDate=request.getParameter("date");
 
-        JSONObject result=jobService.findJobs(start,limit,name,createDate);
+        JSONObject result=jobService.findJobs(start, limit, name, createDate);
         response.setContentType("text/html;charset=utf-8");
         PrintWriter out=response.getWriter();
         out.write(result.toString());
@@ -48,13 +49,13 @@ public class TaskController {
     //转换管理
     @ResponseBody
     @RequestMapping(method=RequestMethod.POST, value="/getTrans")
-    protected void getTrans(HttpServletResponse response,HttpServletRequest request) throws Exception {
+    protected void getTrans(HttpServletResponse response,HttpServletRequest request) throws IOException {
         //获取前台传递的分页参数
         String transName=request.getParameter("name");
         int start=Integer.parseInt(request.getParameter("start"));
         int limit=Integer.parseInt(request.getParameter("limit"));
         String createDate=request.getParameter("date");
-        JSONObject result=transService.findTrans(start,limit,transName,createDate);
+        JSONObject result=transService.findTrans(start, limit, transName, createDate);
         //输出结果返回给客户端
         response.setContentType("text/html;charset=utf-8");
         PrintWriter out=response.getWriter();

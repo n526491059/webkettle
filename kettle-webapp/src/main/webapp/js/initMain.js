@@ -102,26 +102,40 @@ Ext.onReady(function() {
     
 });
 
-function treeClick(node, e) {
-	if (node.isLeaf()) {
+// function treeClick(node,e) {
+// 	//判断是否是叶子节点
+// 	if(node.leaf){
+// 		var nodeId=node.id;
+// 		//如果点击的是作业管理节点 并且作业板块未曾打开过则生成一个作业的panel
+// 		if(nodeId=='jobMonitor' && !Ext.getCmp("JobPanel")){
+// 			generateJobPanel();
+// 		};
+// 		if(nodeId=='transMonitor' && !Ext.getCmp("transPanel")){
+// 			generateTrans();
+// 		}
+// 	}
+// }
 
-		if(node.id=='newTrans'){
-
-			var guide =  Ext.getCmp('secondGuidePanel');
-			guide.removeAll();
-			guide.add('transGuidePanel');
-			guide.doLayout();
-			//secondGuidePanel.show();
-
-		}else if(node.id=='newJob'){
-			var guide =  Ext.getCmp('secondGuidePanel');
-			guide.removeAll();
-			guide.add('jobGuidePanel');
-			guide.doLayout();
-			//secondGuidePanel.show();
-		}
-	}
-}
+// function treeClick(node, e) {
+// 	if (node.isLeaf()) {
+//
+// 		if(node.id=='newTrans'){
+//
+// 			var guide =  Ext.getCmp('secondGuidePanel');
+// 			guide.removeAll();
+// 			guide.add('transGuidePanel');
+// 			guide.doLayout();
+// 			//secondGuidePanel.show();
+//
+// 		}else if(node.id=='newJob'){
+// 			var guide =  Ext.getCmp('secondGuidePanel');
+// 			guide.removeAll();
+// 			guide.add('jobGuidePanel');
+// 			guide.doLayout();
+// 			//secondGuidePanel.show();
+// 		}
+// 	}
+// }
 
 //fristGuidePanel.on('click', treeClick);
 
@@ -364,19 +378,6 @@ Ext.override(Ext.data.Store, {
 
 
 
-function treeClick(node,e) {
-	//判断是否是叶子节点
-	if(node.leaf){
-		var nodeId=node.id;
-		//如果点击的是作业管理节点 并且作业板块未曾打开过则生成一个作业的panel
-		if(nodeId=='jobMonitor' && !Ext.getCmp("JobPanel")){
-			generateJobPanel("","",undefined);
-		};
-		if(nodeId=='transMonitor' && !Ext.getCmp("transPanel")){
-			generateTrans("","",undefined);
-		}
-	}
-}
 
 //fristGuidePanel.addListener('click', treeClick);
 
