@@ -23,6 +23,7 @@ public class TransServiceImpl implements TransService {
 
     @Override
     public JSONObject findTrans(int start, int limit, String transName, String createDate) throws Exception{
+
         //创建分页对象以及需要返回客户端的数据
         net.sf.json.JSONObject result=null;
         PageforBean pages=new PageforBean();
@@ -52,5 +53,12 @@ public class TransServiceImpl implements TransService {
         }
         result=net.sf.json.JSONObject.fromObject(pages,Util.configJson("yyyy-MM-dd HH:mm:ss"));
         return result;
+    }
+
+    @Override
+    public void deleteTransformation(String[] args) throws Exception {
+        for (String id:args){
+            System.out.println(id);
+        }
     }
 }

@@ -11,4 +11,6 @@ import java.util.List;
  */
 public interface TransService {
     public JSONObject findTrans(int start,int limit,String namme,String date) throws Exception;
+
+    public void deleteTransformation(String[] args) throws Exception;
 }

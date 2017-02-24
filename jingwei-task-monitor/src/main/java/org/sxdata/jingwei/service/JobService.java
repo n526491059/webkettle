@@ -7,4 +7,6 @@ import net.sf.json.JSONObject;
  */
 public interface JobService {
     public JSONObject findJobs(int start,int limit,String name,String createDate) throws Exception;
+
+    public void deleteJobs(String[] arrgs) throws Exception;
 }

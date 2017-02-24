@@ -13,9 +13,15 @@ public class Transformation {
     private Date modifiedDate;//修改时间
     private String name;
     private String createUser; //创建用户
-    private Timestamp createDateStamp;
-    private Timestamp modifiedDateStamp;
+    private Integer transformationId;
 
+    public void setTransformationId(Integer transformationId) {
+        this.transformationId = transformationId;
+    }
+
+    public Integer getTransformationId() {
+        return transformationId;
+    }
 
     public Date getCreateDate() {
         return createDate;

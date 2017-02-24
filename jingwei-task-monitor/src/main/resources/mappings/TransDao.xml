@@ -3,6 +3,7 @@
     <select id="getThisPageTrans" resultType="org.sxdata.jingwei.entity.Transformation">
         select
         j.name as name,
+        j.ID_TRANSFORMATION as transformationId,
         j.CREATED_USER as createUser,
         j.CREATED_DATE as createDate,
         j.MODIFIED_USER as modifiedUser,
@@ -17,6 +18,7 @@
     <select id="conditionFindTrans" resultType="org.sxdata.jingwei.entity.Transformation">
         select
         j.name as name,
+        j.ID_TRANSFORMATION as transformationId,
         j.CREATED_USER as createUser,
         j.CREATED_DATE as createDate,
         j.MODIFIED_USER as modifiedUser,

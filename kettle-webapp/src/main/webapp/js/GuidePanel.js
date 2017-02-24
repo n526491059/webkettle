@@ -117,7 +117,6 @@ GuidePanel = Ext.extend(Ext.Panel, {
 										method: 'POST',
 										success: function(response, opts) {
 											try {
-												
 												var transComponentTree = new Ext.tree.TreePanel({
 										     		region: 'west',
 										     		split: true,

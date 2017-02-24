@@ -198,7 +198,7 @@ public class RepositoryController {
 		
 		if(RepositoryObjectType.TRANSFORMATION.getTypeDescription().equals(type)) {
 			ObjectId id = repository.getTransformationID(name, directory);
-			repository.deleteTransformation(id);
+			repository.deleteTransformation(id); 
 		} else if(RepositoryObjectType.JOB.getTypeDescription().equals(type)) {
 			ObjectId id = repository.getJobId(name, directory);
 			repository.deleteJob(id);

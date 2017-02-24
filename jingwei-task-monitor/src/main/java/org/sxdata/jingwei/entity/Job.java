@@ -9,12 +9,20 @@ import java.util.Date;
  * 作业
  */
 public class Job {
+    private Integer jobId;//作业id
     private Date createDate;//创建时间
     private String modifiedUser;//修改用户
     private Date modifiedDate;//修改时间
     private String name;
     private String createUser; //创建用户
 
+    public Integer getJobId() {
+        return jobId;
+    }
+
+    public void setJobId(Integer jobId) {
+        this.jobId = jobId;
+    }
 
     public Date getCreateDate() {
         return createDate;

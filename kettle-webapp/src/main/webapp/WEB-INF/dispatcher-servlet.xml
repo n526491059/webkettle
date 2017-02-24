@@ -57,6 +57,8 @@
 	<import resource="classpath*:org/sxdata/jingwei/container-*.xml"/>
 	   
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+
+		<!--192.168.1.201:3306   hadoop-->
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
 		<property name="url" value="jdbc:mysql://192.168.1.201:3306/kettle?characterEncoding=gbk" />
 		<property name="username" value="root" />
@@ -64,7 +66,8 @@
 	</bean> 
 	
 	<!-- spring集成MyBatis3 -->
-	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">  
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
         <property name="dataSource" ref="dataSource" />  
         <property name="mapperLocations" value="classpath:mappings/*.xml" />
 
