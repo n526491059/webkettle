@@ -15,6 +15,15 @@ public class Job {
     private Date modifiedDate;//修改时间
     private String name;
     private String createUser; //创建用户
+    private String directory;//作业所在的层级目录
+
+    public String getDirectory() {
+        return directory;
+    }
+
+    public void setDirectory(String directory) {
+        this.directory = directory;
+    }
 
     public Integer getJobId() {
         return jobId;
