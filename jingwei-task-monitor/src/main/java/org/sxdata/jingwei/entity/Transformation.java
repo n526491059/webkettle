@@ -14,6 +14,25 @@ public class Transformation {
     private String name;
     private String createUser; //创建用户
     private Integer transformationId;
+    private Integer directoryId;    //与层级目录表主键关联 代表该转换存放于哪个目录下
+    private String directoryName;   //所在的直接父级目录名
+
+    public String getDirectoryName() {
+        return directoryName;
+    }
+
+    public void setDirectoryName(String directoryName) {
+        this.directoryName = directoryName;
+    }
+
+
+    public Integer getDirectoryId() {
+        return directoryId;
+    }
+
+    public void setDirectoryId(Integer directoryId) {
+        this.directoryId = directoryId;
+    }
 
     public void setTransformationId(Integer transformationId) {
         this.transformationId = transformationId;

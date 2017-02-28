@@ -8,7 +8,8 @@ function generateTrans(transName,createDate,inputName){
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
         sm,
         {header:"转换ID",width:30,dataIndex:"transformationId"},
-        {header:"转换名",width:250,dataIndex:"name"},
+        {header:"所在目录",width:150,dataIndex:"directoryName"},
+        {header:"转换名",width:150,dataIndex:"name"},
         {header:"创建用户",width:100,dataIndex:"createUser"},
         {header:"创建时间",width:150,dataIndex:"createDate",tooltip:"这是创建时间",format:"y-M-d H:m:s"},
         {header:"最终修改的用户",width:100,dataIndex:"modifiedUser",align:"center"},
@@ -21,6 +22,7 @@ function generateTrans(transName,createDate,inputName){
     //Record定义记录结果
     var human=Ext.data.Record.create([
         {name:"transformationId",type:"string",mapping:"transformationId"},
+        {name:"directoryName",type:"string",mapping:"directoryName"},
         {name:"name",type:"string",mapping:"name"},
         {name:"createUser",type:"string",mapping:"createUser"},
         {name:"createDate",type:"string",mapping:"createDate"},
@@ -94,8 +96,8 @@ function generateTrans(transName,createDate,inputName){
                     handler:function(){
                         var flag=false;
                         var view=grid.getView();
-                        //数组用来存放用户选择的一至多行的记录的ID
-                        var transIdArray=new Array();
+                        //数组用来存放用户选择的一至多行的转换的绝对目录名
+                        var pathArray=new Array();
                         //获得行选择模型
                         var rsm=grid.getSelectionModel();
                         //遍历所有行
@@ -104,22 +106,24 @@ function generateTrans(transName,createDate,inputName){
                             if(rsm.isSelected(i)){
                                 flag=true;
                                 //如果该行被选中则获取该行列名为transformationId的单元格的值,并且放入数组
-                                transIdArray.push(grid.getStore().getAt(i).get("transformationId"));
+                                pathArray.push(grid.getStore().getAt(i).get("directoryName"));
                             }
                         }
                         if(flag==true){
                             Ext.MessageBox.confirm("确认","确认删除所选行?",function(btn){
                                 if(btn=="yes"){
                                     Ext.Ajax.request({
-                                        url:"/task/deleteTransformation.do",
+                                        url:"/task/delete.do",
                                         success:function(response,config){
-                                            generateTrans("","",undefined);
-                                            Ext.MessageBox.alert("提示","删除记录成功~!")
+                                            secondGuidePanel.removeAll(true);
+                                            secondGuidePanel.add(generateTrans("","",undefined));
+                                            secondGuidePanel.doLayout();
+                                            Ext.MessageBox.alert("提示","删除转换记录成功~!")
                                         },
                                         failure:function(){
                                             Ext.MessageBox.alert("result","内部错误,删除失败!")
                                         },
-                                        params:{arrayId:transIdArray}
+                                        params:{path:pathArray,flag:"transformation"}
                                     })
                                 }
                             });
@@ -134,20 +138,22 @@ function generateTrans(transName,createDate,inputName){
                         Ext.MessageBox.confirm("确认","确认删除所有行?",function(btn){
                             if(btn=="yes"){
                                 var view=grid.getView();
-                                var transIdArray=new Array();
+                                var pathArray=new Array();
                                 for(var i= 0;i<view.getRows().length;i++){
-                                    transIdArray.push(grid.getStore().getAt(i).get("transformationId"));
+                                    pathArray.push(grid.getStore().getAt(i).get("transformationId"));
                                 }
                                 Ext.Ajax.request({
-                                    url:"/task/deleteTransformation.do",
+                                    url:"/task/delete.do",
                                     success:function(response,config){
-                                        generateTrans("","",undefined);
+                                        secondGuidePanel.removeAll(true);
+                                        secondGuidePanel.add(generateTrans("","",undefined));
+                                        secondGuidePanel.doLayout();
                                         Ext.MessageBox.alert("提示","删除记录成功~!")
                                     },
                                     failure:function(){
                                         Ext.MessageBox.alert("result","内部错误,删除失败!")
                                     },
-                                    params:{arrayId:transIdArray}
+                                    params:{path:pathArray,flag:"transformation"}
                                 })
                             }
                         })
@@ -164,5 +170,6 @@ function generateTrans(transName,createDate,inputName){
         })
     });
     grid.getColumnModel().setHidden(2,true);
+    //grid.getColumnModel().setHidden(3,true);
     return grid;
 }

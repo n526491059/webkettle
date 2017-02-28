@@ -20,6 +20,7 @@
     <select id="getThisPageJob" resultType="org.sxdata.jingwei.entity.Job">
         select
             j.name as name,
+            j.ID_DIRECTORY as directoryId,
             j.ID_JOB as jobId,
             j.CREATED_USER as createUser,
             j.CREATED_DATE as createDate,
@@ -36,6 +37,7 @@
         select
         j.name as name,
         j.ID_JOB as jobId,
+        j.ID_DIRECTORY as directoryId,
         j.CREATED_USER as createUser,
         j.CREATED_DATE as createDate,
         j.MODIFIED_USER as modifiedUser,

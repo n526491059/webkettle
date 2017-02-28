@@ -1,6 +1,10 @@
 package org.sxdata.jingwei.controller;
 
 import net.sf.json.JSONObject;
+import org.flhy.ext.App;
+import org.pentaho.di.repository.Repository;
+import org.pentaho.di.repository.RepositoryDirectoryInterface;
+import org.pentaho.di.repository.RepositoryObjectType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,31 +57,26 @@ public class TaskController {
         }
     }
 
-    //删除作业
-    @RequestMapping(value="/deleteJobs.do")
+    //删除作业OR转换
+    @RequestMapping(value="/delete")
     @ResponseBody
     protected void deleteJobs(HttpServletResponse response,HttpServletRequest request) {
         try{
-            String[] jobIdArray=request.getParameterValues("arrayId");
-            jobService.deleteJobs(jobIdArray);
+            String[] pathArray=request.getParameterValues("path");
+            String flag=request.getParameter("flag");
+            //判断是需要删除转换还是需要删除作业
+            if (flag.equals("transformation")){
+                transService.deleteTransformation(pathArray,flag);
+            }else if(flag.equals("job")){
+                jobService.deleteJobs(pathArray,flag);
+            }
+
         }catch (Exception e){
             String errorMessage=e.getMessage();
             e.printStackTrace();
         }
     }
 
-    //删除转换
-    @RequestMapping(value="/deleteTransformation.do")
-    @ResponseBody
-    protected void deleteTransformation(HttpServletResponse response,HttpServletRequest request) {
-        try{
-            String[] transformationIdArray=request.getParameterValues("arrayId");
-            transService.deleteTransformation(transformationIdArray);
-        }catch (Exception e){
-            String errorMessage=e.getMessage();
-            e.printStackTrace();
-        }
-    }
 
     //查询转换;包括条件查询
     @ResponseBody

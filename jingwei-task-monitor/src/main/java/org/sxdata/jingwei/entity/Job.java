@@ -15,14 +15,23 @@ public class Job {
     private Date modifiedDate;//修改时间
     private String name;
     private String createUser; //创建用户
-    private String directory;//作业所在的层级目录
+    private Integer directoryId;// 作业所在的目录的id,与层级目录表的id对应,用于标识该作业是存放在哪个目录,根目录是/
+    private String directoryName;   //所在的直接父级目录名
 
-    public String getDirectory() {
-        return directory;
+    public String getDirectoryName() {
+        return directoryName;
     }
 
-    public void setDirectory(String directory) {
-        this.directory = directory;
+    public void setDirectoryName(String directoryName) {
+        this.directoryName = directoryName;
+    }
+
+    public Integer getDirectoryId() {
+        return directoryId;
+    }
+
+    public void setDirectoryId(Integer directoryId) {
+        this.directoryId = directoryId;
     }
 
     public Integer getJobId() {

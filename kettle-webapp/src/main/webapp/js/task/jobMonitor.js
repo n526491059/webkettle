@@ -12,6 +12,7 @@ function generateJobPanel(jobName,createDate,inputName){
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
         sm,
         {header:"id",width:30,dataIndex:"jobId"},
+        {header:"所在目录",width:60,dataIndex:"directoryName"},
         {header:"名字",width:100,dataIndex:"name"},
         {header:"创建用户",width:100,dataIndex:"createUser"},
         {header:"创建时间",width:150,dataIndex:"createDate",tooltip:"这是创建时间",format:"y-M-d H:m:s"},
@@ -34,6 +35,7 @@ function generateJobPanel(jobName,createDate,inputName){
     //Record定义记录结果
     var human=Ext.data.Record.create([
         {name:"jobId",type:"string",mapping:"jobId"},
+        {name:"directoryName",type:"string",mapping:"directoryName"},
         {name:"name",type:"string",mapping:"name"},
         {name:"createUser",type:"string",mapping:"createUser"},
         {name:"createDate",type:"string",mapping:"createDate"},
@@ -84,7 +86,7 @@ function generateJobPanel(jobName,createDate,inputName){
     var grid=new Ext.grid.GridPanel({
         id:"JobPanel",
         title:"JobPanel",
-        width:1030,
+        width:1200,
         height:470,
         cm:cm,      //列模型
         sm:sm,
@@ -111,28 +113,30 @@ function generateJobPanel(jobName,createDate,inputName){
                         //获得行选择模型
                         var rsm=grid.getSelectionModel();
                         //定义存放所选行的一至多个作业的id
-                        var jobIdArray=new Array();
+                        var pathArray=new Array();
                         for(var i= 0;i<view.getRows().length;i++){
                             //判断是否被选中
                             if(rsm.isSelected(i)){
                                 flag=true;
                                 //获得第i行中 列名为jodId的那一列的值 并且添加的数组中
-                                jobIdArray.push(grid.getStore().getAt(i).get("jobId"));
+                                pathArray.push(grid.getStore().getAt(i).get("directoryName"));
                             }
                         }
                         if(flag==true){
                             Ext.MessageBox.confirm("确认","确认删除所选行?",function(btn){
                                 if(btn=="yes"){
                                     Ext.Ajax.request({
-                                        url:"/task/deleteJobs.do",
+                                        url:"/task/delete.do",
                                         success:function(response,config){
-                                            generateJobPanel("","",undefined);
-                                            Ext.MessageBox.alert("提示","删除记录成功~!")
+                                            secondGuidePanel.removeAll(true);
+                                            secondGuidePanel.add(generateJobPanel("","",undefined));
+                                            secondGuidePanel.doLayout();
+                                            Ext.MessageBox.alert("提示","删除作业成功~!");
                                         },
                                         failure:function(){
                                             Ext.MessageBox.alert("result","内部错误,删除失败!")
                                         },
-                                        params:{arrayId:jobIdArray}
+                                        params:{path:pathArray,flag:"job"}
                                     })
                                 }
                             })
@@ -147,20 +151,22 @@ function generateJobPanel(jobName,createDate,inputName){
                         Ext.MessageBox.confirm("确认","确认删除所有行?",function(btn){
                             if(btn=="yes"){
                                 var view=grid.getView();
-                                var jobIdArray=new Array();
+                                var pathArray=new Array();
                                 for(var i= 0;i<view.getRows().length;i++){
-                                    jobIdArray.push(grid.getStore().getAt(i).get("jobId"));
+                                    pathArray.push(grid.getStore().getAt(i).get("directoryName"));
                                 }
                                 Ext.Ajax.request({
-                                    url:"/task/deleteJobs.do",
+                                    url:"/task/delete.do",
                                     success:function(response,config){
+                                        secondGuidePanel.removeAll();
                                         generateJobPanel("","",undefined);
-                                        Ext.MessageBox.alert("提示","删除记录成功~!")
+                                        secondGuidePanel.add(grid);
+                                        Ext.MessageBox.alert("提示","删除作业记录成功~!");
                                     },
                                     failure:function(){
                                         Ext.MessageBox.alert("result","内部错误,删除失败!")
                                     },
-                                    params:{arrayId:jobIdArray}
+                                    params:{path:pathArray,flag:"job"}
                                 })
                             }
                         })
@@ -177,18 +183,10 @@ function generateJobPanel(jobName,createDate,inputName){
         })
     });
     grid.getColumnModel().setHidden(2,true);
-    
+    //grid.getColumnModel().setHidden(3,true);
     return grid;
 }
 
-
-function deleteJob(){
-    alert("23");
-}
-
-function changeJob(){
-    alert("23");
-}
 
 
 
