@@ -40,7 +40,7 @@ public class SlaveServiceImpl implements SlaveService{
                     slave.setStatus("<font color='green'>节点正常</font>");
                 } else {
                     slave.setLoadAvg(0);
-                    slave.setStatus("该节点连接资源数据库异常");
+                    slave.setStatus("<font color='red'>该节点连接资源数据库异常</font>");
                 }
 
             } else {

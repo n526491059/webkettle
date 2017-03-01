@@ -35,7 +35,7 @@ function generateTrans(transName,createDate,inputName){
         proxy:proxy,
         reader:reader
     })
-    store.load({params:{start:0,limit:5,name:transName,date:createDate}});
+    store.load({params:{start:0,limit:15,name:transName,date:createDate}});
 
 
     var nameField=new Ext.form.TextField({
@@ -188,7 +188,7 @@ function generateTrans(transName,createDate,inputName){
     return grid;
 }
 
-function generateSlaveWindow(path,flag){
+function generateSlaveWindow(path,flag2){
     var sm2=new Ext.grid.CheckboxSelectionModel();
 
     //节点列模型
@@ -274,16 +274,16 @@ function generateSlaveWindow(path,flag){
                             return;
                         }
                         if(flag==true && j==1){
-                            if(status=="节点正常"){
+                            if(status=="<font color='green'>节点正常</font>"){
                                 Ext.Ajax.request({
                                     url:"/task/execute.do",
                                     success:function(response,config){
-                                        Ext.MessageBox.alert("result","OK")
+                                        Ext.MessageBox.alert("result","已执行")
                                     },
                                     failure:function(){
                                         Ext.MessageBox.alert("result","内部错误,执行失败!")
                                     },
-                                    params:{path:path,hostName:hostName,slaveId:slaveId,flag:flag}
+                                    params:{path:path,hostName:hostName,slaveId:slaveId,flag:flag2}
                                 })
                             }else{
                                 Ext.MessageBox.alert("提示","该节点异常,请重新选择!");

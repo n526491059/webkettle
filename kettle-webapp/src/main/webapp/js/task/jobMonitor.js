@@ -48,7 +48,7 @@ function generateJobPanel(jobName,createDate,inputName){
         proxy:proxy,
         reader:reader
     })
-    store.load({params:{start:0,limit:3,name:jobName,date:createDate}});
+    store.load({params:{start:0,limit:15,name:jobName,date:createDate}});
 
     var nameField=new Ext.form.TextField({
         name: "name",
@@ -172,12 +172,18 @@ function generateJobPanel(jobName,createDate,inputName){
                         })
                     }
                 },"-",{
-                    text:"编辑作业",
+                    text:"执行作业",
                     handler:function(){
-                        Ext.Ajax.request({
-
-                        })
-
+                        var path="";
+                        var view=grid.getView();
+                        var rsm=grid.getSelectionModel();
+                        for(var i= 0;i<view.getRows().length;i++){
+                            if(rsm.isSelected(i)){
+                                //获取被选中的作业全目录路径
+                                path=grid.getStore().getAt(i).get("directoryName");
+                            }
+                        }
+                        generateSlaveWindow(path,"job");
                     }
                 }
             ]

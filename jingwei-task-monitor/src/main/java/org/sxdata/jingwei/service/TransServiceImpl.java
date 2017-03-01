@@ -131,6 +131,7 @@ public class TransServiceImpl implements TransService {
         String urlString="/?rep="+repoId+"&user="+loginUser.getLogin()+"&pass="+loginUser.getPassword()+"&trans="+path+"&level=Basic";
         urlString = Const.replace(urlString, "/", "%2F");
         urlString = carteClient.getHttpUrl() + CarteClient.EXECREMOTE_TRANS +urlString;
+        System.out.println("请求远程节点的url字符串为"+urlString);
         CarteTaskManager.addTask(carteClient, "trans_exec", urlString);
     }
 }
