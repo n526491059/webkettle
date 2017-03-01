@@ -37,7 +37,7 @@ public class SlaveServiceImpl implements SlaveService{
                     carteStatusVo = CarteStatusVo.parseXml(status);
                     //设置负载以及节点是否正常
                     slave.setLoadAvg(carteStatusVo.getLoadAvg());
-                    slave.setStatus("节点正常");
+                    slave.setStatus("<font color='green'>节点正常</font>");
                 } else {
                     slave.setLoadAvg(0);
                     slave.setStatus("该节点连接资源数据库异常");
@@ -45,7 +45,7 @@ public class SlaveServiceImpl implements SlaveService{
 
             } else {
                 slave.setLoadAvg(0);
-                slave.setStatus("节点异常");
+                slave.setStatus("<font color='red'>节点异常</font>");
             }
         }
         Integer totalCount=slaveDao.getSlaveTotalCount();
