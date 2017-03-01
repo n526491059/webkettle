@@ -8,7 +8,7 @@ function generateTrans(transName,createDate,inputName){
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
         sm,
         {header:"转换ID",width:30,dataIndex:"transformationId"},
-        {header:"所在目录",width:150,dataIndex:"directoryName"},
+        {header:"目录",width:150,dataIndex:"directoryName"},
         {header:"转换名",width:150,dataIndex:"name"},
         {header:"创建用户",width:100,dataIndex:"createUser"},
         {header:"创建时间",width:150,dataIndex:"createDate",tooltip:"这是创建时间",format:"y-M-d H:m:s"},
@@ -131,34 +131,7 @@ function generateTrans(transName,createDate,inputName){
                             Ext.MessageBox.alert("提示","请先勾选需要删除的行再进行该操作!");
                         }
                     }
-                },"-",
-                {
-                    text:"删除所有转换",
-                    handler:function(){
-                        Ext.MessageBox.confirm("确认","确认删除该页所有转换?",function(btn){
-                            if(btn=="yes"){
-                                var view=grid.getView();
-                                var pathArray=new Array();
-                                for(var i= 0;i<view.getRows().length;i++){
-                                    pathArray.push(grid.getStore().getAt(i).get("transformationId"));
-                                }
-                                Ext.Ajax.request({
-                                    url:"/task/delete.do",
-                                    success:function(response,config){
-                                        secondGuidePanel.removeAll(true);
-                                        secondGuidePanel.add(generateTrans("","",undefined));
-                                        secondGuidePanel.doLayout();
-                                        Ext.MessageBox.alert("提示","删除记录成功~!")
-                                    },
-                                    failure:function(){
-                                        Ext.MessageBox.alert("result","内部错误,删除失败!")
-                                    },
-                                    params:{path:pathArray,flag:"transformation"}
-                                })
-                            }
-                        })
-                    }
-                },"-",{
+                },"-", {
                     text:"执行转换",
                     handler:function(){
                        var path="";
@@ -177,7 +150,7 @@ function generateTrans(transName,createDate,inputName){
         }),
         bbar:new Ext.PagingToolbar({
             store:store,
-            pageSize:5,
+            pageSize:15,
             displayInfo:true,
             displayMsg:"本页显示第{0}条到第{1}条的记录,一共{2}条",
             emptyMsg:"没有记录"
