@@ -1,5 +1,6 @@
 package org.sxdata.jingwei.dao;
 
+import org.springframework.stereotype.Repository;
 import org.sxdata.jingwei.entity.Transformation;
 
 import java.util.Date;
@@ -8,6 +9,7 @@ import java.util.List;
 /**
  * Created by cRAZY on 2017/2/22.
  */
+@Repository
 public interface TransDao {
     public List<Transformation> getThisPageTrans(int start,int limit ); //获取当页的记录
 
