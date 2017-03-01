@@ -116,4 +116,9 @@ public class JobServiceImpl implements JobService{
             repository.deleteJob(id);
         }
     }
+
+    @Override
+    public void executeJob(String path, String hostname, Integer slaveId) throws Exception {
+        System.out.println("-------------------------------executeJob执行----------------------------");
+    }
 }

@@ -9,4 +9,6 @@ public interface JobService {
     public JSONObject findJobs(int start,int limit,String name,String createDate) throws Exception;
 
     public void deleteJobs(String[] arrgs,String flag) throws Exception;
+
+    public void executeJob(String path,String hostname,Integer slaveId) throws Exception;
 }

@@ -111,7 +111,12 @@ public class TaskController {
             String path=request.getParameter("path");
             String hostName=request.getParameter("hostName");
             Integer slaveId=Integer.valueOf(request.getParameter("slaveId"));
-            transService.executeTransformation(path,hostName,slaveId);
+            String flag=request.getParameter("flag");
+            if(flag.equals("job")){
+                jobService.executeJob(path,hostName,slaveId);
+            }else if(flag.equals("transformation")){
+                transService.executeTransformation(path,hostName,slaveId);
+            }
             //输出结果返回给客户端
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();

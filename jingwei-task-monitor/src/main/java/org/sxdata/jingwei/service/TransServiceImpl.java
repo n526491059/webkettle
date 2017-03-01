@@ -117,7 +117,7 @@ public class TransServiceImpl implements TransService {
     }
 
     @Override
-    public void executeTransformation(String path, String hostName,Integer slaveId) throws Exception {
+    public void executeTransformation(String path, String hostname,Integer slaveId) throws Exception {
         //获取用户信息
         User loginUser=userDao.getUserbyName("admin");
         loginUser.setPassword(KettleEncr.decryptPasswd("Encrypted " + loginUser.getPassword()));
@@ -126,7 +126,7 @@ public class TransServiceImpl implements TransService {
         slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));
         CarteClient carteClient=new CarteClient(slave);
         //拼接资源库名
-        String repoId=hostName+"_"+CarteClient.databaseName;
+        String repoId=hostname+"_"+CarteClient.databaseName;
         //拼接http请求字符串
         String urlString="/?rep="+repoId+"&user="+loginUser.getLogin()+"&pass="+loginUser.getPassword()+"&trans="+path+"&level=Basic";
         System.out.println("----------------------------------------" + urlString);

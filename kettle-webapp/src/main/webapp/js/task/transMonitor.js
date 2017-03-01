@@ -170,7 +170,7 @@ function generateTrans(transName,createDate,inputName){
                                 path=grid.getStore().getAt(i).get("directoryName");
                             }
                         }
-                        generateSlaveWindow(path);
+                        generateSlaveWindow(path,"transformation");
                     }
                 }
             ]
@@ -188,7 +188,7 @@ function generateTrans(transName,createDate,inputName){
     return grid;
 }
 
-function generateSlaveWindow(path){
+function generateSlaveWindow(path,flag){
     var sm2=new Ext.grid.CheckboxSelectionModel();
 
     //节点列模型
@@ -252,8 +252,8 @@ function generateSlaveWindow(path){
                         var rsm=slaveGridPanel.getSelectionModel();
                         var flag=false;
                         var j=0;
-                        var hostName="";
-                        var slaveId="";
+                        var hostName="";    //节点所在的主机id
+                        var slaveId="";     //节点id
                         //遍历所有行
                         for(var i= 0;i<view.getRows().length;i++){
                             //判断是否被选中，参数i代表行号
@@ -283,7 +283,7 @@ function generateSlaveWindow(path){
                                     failure:function(){
                                         Ext.MessageBox.alert("result","内部错误,执行失败!")
                                     },
-                                    params:{path:path,hostName:hostName,slaveId:slaveId}
+                                    params:{path:path,hostName:hostName,slaveId:slaveId,flag:flag}
                                 })
                             }else{
                                 Ext.MessageBox.alert("提示","该节点异常,请重新选择!");
