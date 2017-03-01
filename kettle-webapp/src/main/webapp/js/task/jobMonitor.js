@@ -165,6 +165,14 @@ function generateJobPanel(jobName,createDate,inputName){
                             }
                         })
                     }
+                },"-",{
+                    text:"编辑作业",
+                    handler:function(){
+                        Ext.Ajax.request({
+
+                        })
+
+                    }
                 }
             ]
         }),
