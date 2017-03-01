@@ -1,7 +1,7 @@
 //转换
 function generateTrans(transName,createDate,inputName){
     var secondGuidePanel=Ext.getCmp("secondGuidePanel");
-    //为表格添加一行复选框用于选择需要删除的记录
+    //为表格添加一行复选框用于选择需要操作 的记录
     var sm=new Ext.grid.CheckboxSelectionModel();
     //列模型
     var cm=new Ext.grid.ColumnModel([
@@ -92,7 +92,7 @@ function generateTrans(transName,createDate,inputName){
                     }
                 },'-',
                 {
-                    text:"删除所选行",
+                    text:"删除所选转换",
                     handler:function(){
                         var flag=false;
                         var view=grid.getView();
@@ -110,7 +110,7 @@ function generateTrans(transName,createDate,inputName){
                             }
                         }
                         if(flag==true){
-                            Ext.MessageBox.confirm("确认","确认删除所选行?",function(btn){
+                            Ext.MessageBox.confirm("确认","确认删除所选转换?",function(btn){
                                 if(btn=="yes"){
                                     Ext.Ajax.request({
                                         url:"/task/delete.do",
@@ -133,9 +133,9 @@ function generateTrans(transName,createDate,inputName){
                     }
                 },"-",
                 {
-                    text:"删除所有行",
+                    text:"删除所有转换",
                     handler:function(){
-                        Ext.MessageBox.confirm("确认","确认删除所有行?",function(btn){
+                        Ext.MessageBox.confirm("确认","确认删除该页所有转换?",function(btn){
                             if(btn=="yes"){
                                 var view=grid.getView();
                                 var pathArray=new Array();
@@ -158,6 +158,20 @@ function generateTrans(transName,createDate,inputName){
                             }
                         })
                     }
+                },"-",{
+                    text:"执行转换",
+                    handler:function(){
+                       var path="";
+                        var view=grid.getView();
+                        var rsm=grid.getSelectionModel();
+                        for(var i= 0;i<view.getRows().length;i++){
+                            if(rsm.isSelected(i)){
+                                //获取被选中的转换全目录路径
+                                path=grid.getStore().getAt(i).get("directoryName");
+                            }
+                        }
+                        generateSlaveWindow(path);
+                    }
                 }
             ]
         }),
@@ -172,4 +186,120 @@ function generateTrans(transName,createDate,inputName){
     grid.getColumnModel().setHidden(2,true);
     //grid.getColumnModel().setHidden(3,true);
     return grid;
+}
+
+function generateSlaveWindow(path){
+    var sm2=new Ext.grid.CheckboxSelectionModel();
+
+    //节点列模型
+    var slaveModel=new Ext.grid.ColumnModel([
+        new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
+        sm2,
+        {header:"ID",width:55,dataIndex:"slaveId"},
+        {header:"主机名",width:140,dataIndex:"hostName"},
+        {header:"端口",width:90,dataIndex:"port"},
+        {header:"负载指数",width:90,dataIndex:"loadAvg",tooltip:"这是负载指数"},
+        {header:"状态",width:200,dataIndex:"status",align:"center"},
+    ]);
+
+
+    var proxy=new Ext.data.HttpProxy({url:"/slave/getSlave.do"});
+
+    var slaveRecord=Ext.data.Record.create([
+        {name:"slaveId",type:"string",mapping:"slaveId"},
+        {name:"hostName",type:"string",mapping:"hostName"},
+        {name:"port",type:"string",mapping:"port"},
+        {name:"loadAvg",type:"string",mapping:"loadAvg"},
+        {name:"status",type:"string",mapping:"status"}
+    ])
+    var reader=new Ext.data.JsonReader({totalProperty:"totalProperty",root:"root"},slaveRecord);
+
+    var store=new Ext.data.Store({
+        proxy:proxy,
+        reader:reader
+    })
+    store.load({params:{start:0,limit:5}});
+
+    var slaveGridPanel=new Ext.grid.GridPanel({
+        id:"slaveGridPanel",
+        title:"选择节点",
+        width:595,
+        height:370,
+        cm:slaveModel,      //列模型
+        sm:sm2,      //行选择框
+        store:store,    //数据源
+        closable:true,
+        bbar:new Ext.PagingToolbar({
+            store:store,
+            pageSize:5,
+            displayInfo:true,
+            displayMsg:"本页显示第{0}条到第{1}条的记录,一共{2}条",
+            emptyMsg:"没有记录"
+        }),
+        tbar:new Ext.Toolbar({
+            buttons:[
+                {
+                    text:"取消",
+                    handler:function(){
+                        executeWindow.close();
+                    }
+
+                },"-",
+                {
+                    text:"确认执行",
+                    handler:function(){
+                        var view=slaveGridPanel.getView();
+                        var rsm=slaveGridPanel.getSelectionModel();
+                        var flag=false;
+                        var j=0;
+                        var hostName="";
+                        var slaveId="";
+                        //遍历所有行
+                        for(var i= 0;i<view.getRows().length;i++){
+                            //判断是否被选中，参数i代表行号
+                            if(rsm.isSelected(i)){
+                                var status=slaveGridPanel.getStore().getAt(i).get("status");
+                                hostName=slaveGridPanel.getStore().getAt(i).get("hostName");
+                                slaveId=slaveGridPanel.getStore().getAt(i).get("slaveId");
+                                flag=true;
+                                j++;
+                            }
+                        }
+                        if(flag==false){
+                            Ext.MessageBox.alert("提示","请至少选择一个正常节点再执行转换!");
+                            return;
+                        }
+                        if(flag==true && j>1){
+                            Ext.MessageBox.alert("提示","只能选中一个节点进行运行");
+                            return;
+                        }
+                        if(flag==true && j==1){
+                            if(status=="节点正常"){
+                                Ext.Ajax.request({
+                                    url:"/task/execute.do",
+                                    success:function(response,config){
+                                        Ext.MessageBox.alert("result","OK")
+                                    },
+                                    failure:function(){
+                                        Ext.MessageBox.alert("result","内部错误,执行失败!")
+                                    },
+                                    params:{path:path,hostName:hostName,slaveId:slaveId}
+                                })
+                            }else{
+                                Ext.MessageBox.alert("提示","该节点异常,请重新选择!");
+                            }
+                        }
+                    }
+                }
+            ]
+        })
+    })
+
+    var executeWindow=new Ext.Window({
+        title:"执行窗口",
+        width:600,
+        height:380
+    })
+    executeWindow.add(slaveGridPanel);
+    executeWindow.show(Ext.getCmp("transPanel"));
 }

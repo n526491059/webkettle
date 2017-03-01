@@ -103,6 +103,25 @@ public class TaskController {
         }
     }
 
-
+    //在节点上执行转换OR作业
+    @ResponseBody
+    @RequestMapping(value="/execute")
+    protected void execute(HttpServletResponse response,HttpServletRequest request) {
+        try{
+            String path=request.getParameter("path");
+            String hostName=request.getParameter("hostName");
+            Integer slaveId=Integer.valueOf(request.getParameter("slaveId"));
+            transService.executeTransformation(path,hostName,slaveId);
+            //输出结果返回给客户端
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write("......");
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            String errorMessage=e.getMessage();
+            e.printStackTrace();
+        }
+    }
 
 }

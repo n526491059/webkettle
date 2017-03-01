@@ -63,8 +63,12 @@
 		<property name="url" value="jdbc:mysql://192.168.1.201:3306/kettle?characterEncoding=gbk" />
 		<property name="username" value="root" />
 		<property name="password" value="hadoop"/>
-	</bean> 
-	
+	</bean>
+
+	<bean id="carteClient" class="org.sxdata.jingwei.entity.CarteClient">
+
+	</bean>
+
 	<!-- spring集成MyBatis3 -->
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="configLocation" value="classpath:mybatis-config.xml"></property>

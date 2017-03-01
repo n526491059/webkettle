@@ -2,17 +2,19 @@ package org.sxdata.jingwei.service;
 
 import net.sf.json.JSONObject;
 import org.flhy.ext.App;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sxdata.jingwei.dao.DirectoryDao;
+import org.sxdata.jingwei.dao.SlaveDao;
 import org.sxdata.jingwei.dao.TransDao;
-import org.sxdata.jingwei.entity.Directory;
-import org.sxdata.jingwei.entity.Job;
-import org.sxdata.jingwei.entity.PageforBean;
-import org.sxdata.jingwei.entity.Transformation;
+import org.sxdata.jingwei.dao.UserDao;
+import org.sxdata.jingwei.entity.*;
+import org.sxdata.jingwei.util.CarteTaskManager;
+import org.sxdata.jingwei.util.KettleEncr;
 import org.sxdata.jingwei.util.Util;
 
 import java.text.SimpleDateFormat;
@@ -25,6 +27,10 @@ import java.util.List;
 public class TransServiceImpl implements TransService {
     @Autowired
     protected TransDao transDao;
+    @Autowired
+    protected SlaveDao slaveDao;
+    @Autowired
+    protected UserDao userDao;
 
     @Autowired
     private DirectoryDao directoryDao;
@@ -108,5 +114,24 @@ public class TransServiceImpl implements TransService {
             ObjectId id = repository.getTransformationID(name, directory);
             repository.deleteTransformation(id);
         }
+    }
+
+    @Override
+    public void executeTransformation(String path, String hostName,Integer slaveId) throws Exception {
+        //获取用户信息
+        User loginUser=userDao.getUserbyName("admin");
+        loginUser.setPassword(KettleEncr.decryptPasswd("Encrypted " + loginUser.getPassword()));
+        //构造Carte对象
+        Slave slave=slaveDao.getSlaveById(slaveId);
+        slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));
+        CarteClient carteClient=new CarteClient(slave);
+        //拼接资源库名
+        String repoId=hostName+"_"+CarteClient.databaseName;
+        //拼接http请求字符串
+        String urlString="/?rep="+repoId+"&user="+loginUser.getLogin()+"&pass="+loginUser.getPassword()+"&trans="+path+"&level=Basic";
+        System.out.println("----------------------------------------" + urlString);
+        urlString = Const.replace(urlString, "/", "%2F");
+        urlString = carteClient.getHttpUrl() + CarteClient.EXECREMOTE_TRANS +urlString;
+        CarteTaskManager.addTask(carteClient, "trans_exec", urlString);
     }
 }
