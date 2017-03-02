@@ -2,6 +2,7 @@ package org.sxdata.jingwei.service;
 
 import net.sf.json.JSONObject;
 import org.flhy.ext.App;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
@@ -11,9 +12,11 @@ import org.springframework.stereotype.Service;
 import org.sxdata.jingwei.bean.RepositoryNode;
 import org.sxdata.jingwei.dao.DirectoryDao;
 import org.sxdata.jingwei.dao.JobDao;
-import org.sxdata.jingwei.entity.Directory;
-import org.sxdata.jingwei.entity.Job;
-import org.sxdata.jingwei.entity.PageforBean;
+import org.sxdata.jingwei.dao.SlaveDao;
+import org.sxdata.jingwei.dao.UserDao;
+import org.sxdata.jingwei.entity.*;
+import org.sxdata.jingwei.util.CarteTaskManager;
+import org.sxdata.jingwei.util.KettleEncr;
 import org.sxdata.jingwei.util.Util;
 
 import java.text.SimpleDateFormat;
@@ -27,6 +30,10 @@ import java.util.List;
 public class JobServiceImpl implements JobService{
     @Autowired
     protected JobDao jobDao;
+    @Autowired
+    protected UserDao userDao;
+    @Autowired
+    protected SlaveDao slaveDao;
 
     @Autowired
     protected DirectoryDao directoryDao;
@@ -119,6 +126,22 @@ public class JobServiceImpl implements JobService{
 
     @Override
     public void executeJob(String path, String hostname, Integer slaveId) throws Exception {
-        System.out.println("-------------------------------executeJob执行----------------------------");
+        //获取用户信息
+        User loginUser=userDao.getUserbyName("admin");
+        loginUser.setPassword(KettleEncr.decryptPasswd("Encrypted " + loginUser.getPassword()));
+        //构造Carte对象
+        Slave slave=slaveDao.getSlaveById(slaveId);
+        slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));
+        CarteClient carteClient=new CarteClient(slave);
+        //拼接资源库名
+        String repoId=hostname+"_"+CarteClient.databaseName;
+        //拼接http请求字符串
+        String urlString="/?rep="+repoId+"&user="+loginUser.getLogin()+"&pass="+loginUser.getPassword()+"&job="+path+"&level=Basic";
+        urlString = Const.replace(urlString, "/", "%2F");
+        urlString = carteClient.getHttpUrl() + CarteClient.EXECREMOTE_JOB +urlString;
+        System.out.println("请求远程执行作业的url字符串为" + urlString);
+        CarteTaskManager.addTask(carteClient, "trans_exec", urlString);
     }
+
+
 }

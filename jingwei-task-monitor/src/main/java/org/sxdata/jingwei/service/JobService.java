@@ -11,4 +11,5 @@ public interface JobService {
     public void deleteJobs(String[] arrgs,String flag) throws Exception;
 
     public void executeJob(String path,String hostname,Integer slaveId) throws Exception;
+
 }

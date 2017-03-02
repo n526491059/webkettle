@@ -11,4 +11,7 @@ import java.util.List;
 public interface SlaveService {
     public PageforBean getThisPageSlave(int start,int limit) throws Exception;
 
+    public List<Slave> getAllSlave() throws Exception;
+
+    public Slave getSlaveByLoadAvg(List<Slave> slaves) throws Exception;
 }

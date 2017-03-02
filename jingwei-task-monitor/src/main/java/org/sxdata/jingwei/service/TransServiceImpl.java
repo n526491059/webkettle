@@ -134,4 +134,5 @@ public class TransServiceImpl implements TransService {
         System.out.println("请求远程节点的url字符串为"+urlString);
         CarteTaskManager.addTask(carteClient, "trans_exec", urlString);
     }
+
 }

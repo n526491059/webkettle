@@ -145,6 +145,26 @@ function generateTrans(transName,createDate,inputName){
                         }
                         generateSlaveWindow(path,"transformation");
                     }
+                },"-",{
+                    text:"智能执行",
+                    handler:function(){
+                        Ext.MessageBox.confirm("确认","确认执行?",function(btn){
+                            if(btn=="yes"){
+                                var path="";
+                                var view=grid.getView();
+                                var rsm=grid.getSelectionModel();
+                                for(var i= 0;i<view.getRows().length;i++){
+                                    if(rsm.isSelected(i)){
+                                        //获取被选中的转换全目录路径
+                                        path=grid.getStore().getAt(i).get("directoryName");
+                                    }
+                                }
+                                powerExecute(path,"transformation");
+                            }else{
+                                return;
+                            }
+                        })
+                    }
                 }
             ]
         }),
@@ -251,7 +271,8 @@ function generateSlaveWindow(path,flag2){
                                 Ext.Ajax.request({
                                     url:"/task/execute.do",
                                     success:function(response,config){
-                                        Ext.MessageBox.alert("result","已执行")
+                                        Ext.MessageBox.alert("result","已执行");
+                                        setTimeout("closeWindwo()",1500);
                                     },
                                     failure:function(){
                                         Ext.MessageBox.alert("result","内部错误,执行失败!")
@@ -271,8 +292,27 @@ function generateSlaveWindow(path,flag2){
     var executeWindow=new Ext.Window({
         title:"执行窗口",
         width:600,
-        height:380
+        height:380,
+        id:"executeWindow"
     })
     executeWindow.add(slaveGridPanel);
     executeWindow.show(Ext.getCmp("transPanel"));
+}
+
+function closeWindwo(){
+    Ext.getCmp("executeWindow").close();
+}
+
+//智能执行
+function powerExecute(path,powerFlag){
+    Ext.Ajax.request({
+        url:"/task/powerExecute.do",
+        success:function(response,config){
+            Ext.MessageBox.alert("result","已执行")
+        },
+        failure:function(){
+            Ext.MessageBox.alert("result","内部错误,执行失败!")
+        },
+        params:{path:path,powerFlag:powerFlag}
+    })
 }

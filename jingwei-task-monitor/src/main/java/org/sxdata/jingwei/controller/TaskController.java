@@ -10,7 +10,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.sxdata.jingwei.entity.Slave;
 import org.sxdata.jingwei.service.JobService;
+import org.sxdata.jingwei.service.SlaveService;
 import org.sxdata.jingwei.service.TransService;
 import org.sxdata.jingwei.util.Util;
 import javax.servlet.http.HttpServletRequest;
@@ -30,6 +32,8 @@ public class TaskController {
     protected TransService transService;
     @Autowired
     protected JobService jobService;
+    @Autowired
+    protected SlaveService slaveService;
 
 
     //查询作业;包括条件查询
@@ -129,4 +133,29 @@ public class TaskController {
         }
     }
 
+    //智能执行转换OR作业
+    @ResponseBody
+    @RequestMapping(value="/powerExecute")
+    protected void powerExecute(HttpServletResponse response,HttpServletRequest request) {
+        try{
+            String path=request.getParameter("path");
+            String flag=request.getParameter("powerFlag");
+            //在所有节点中获取负载最低的节点
+            Slave minSlave=slaveService.getSlaveByLoadAvg(slaveService.getAllSlave());
+            if(flag.equals("job")){
+                jobService.executeJob(path,minSlave.getHostName(),minSlave.getSlaveId());
+            }else if(flag.equals("transformation")){
+                transService.executeTransformation(path,minSlave.getHostName(),minSlave.getSlaveId());
+            }
+            //输出结果返回给客户端
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write("......");
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            String errorMessage=e.getMessage();
+            e.printStackTrace();
+        }
+    }
 }

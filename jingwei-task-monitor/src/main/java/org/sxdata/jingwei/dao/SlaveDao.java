@@ -15,4 +15,6 @@ public interface SlaveDao {
     public Integer getSlaveTotalCount();
 
     public Slave getSlaveById(Integer id);
+
+    public List<Slave> getAllSlave();
 }

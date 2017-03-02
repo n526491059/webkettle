@@ -158,6 +158,26 @@ function generateJobPanel(jobName,createDate,inputName){
                         }
                         generateSlaveWindow(path,"job");
                     }
+                },"-",{
+                    text:"智能执行",
+                    handler:function(){
+                        Ext.MessageBox.confirm("确认","确认执行?",function(btn){
+                            if(btn=="yes"){
+                                var path="";
+                                var view=grid.getView();
+                                var rsm=grid.getSelectionModel();
+                                for(var i= 0;i<view.getRows().length;i++){
+                                    if(rsm.isSelected(i)){
+                                        //获取被选中的转换全目录路径
+                                        path=grid.getStore().getAt(i).get("directoryName");
+                                    }
+                                }
+                                powerExecute(path,"job");
+                            }else{
+                                return;
+                            }
+                        })
+                    }
                 }
             ]
         }),
