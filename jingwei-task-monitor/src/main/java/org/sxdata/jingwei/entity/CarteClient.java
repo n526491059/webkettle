@@ -9,12 +9,16 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.message.BasicHeader;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
+import org.mybatis.spring.SqlSessionFactoryBean;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.www.*;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.sxdata.jingwei.util.HttpClientUtil;
+import org.sxdata.jingwei.util.TaskUtil.CarteTaskManager;
+import org.sxdata.jingwei.util.TaskUtil.HttpClientUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,17 +32,24 @@ public class CarteClient implements ApplicationContextAware {
     private String httpUrl;
     private Header authorization;
     private Slave slave;
-    public static String databaseName;
+    public static String databaseName;  //数据库名
 
 
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         BasicDataSource dataSource=(BasicDataSource)applicationContext.getBean("dataSource");
+        DefaultSqlSessionFactory factoryBean=(DefaultSqlSessionFactory)applicationContext.getBean("sqlSessionFactory");
         String url=dataSource.getUrl();
         int a=url.lastIndexOf("/");
         int b=url.indexOf("?");
         databaseName=url.substring(a+1,b);
+        //开启作业定时
+        try{
+            CarteTaskManager.startJobTimeTask(factoryBean);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 

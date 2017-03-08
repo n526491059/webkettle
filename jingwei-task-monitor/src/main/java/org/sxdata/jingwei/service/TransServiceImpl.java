@@ -13,9 +13,9 @@ import org.sxdata.jingwei.dao.SlaveDao;
 import org.sxdata.jingwei.dao.TransDao;
 import org.sxdata.jingwei.dao.UserDao;
 import org.sxdata.jingwei.entity.*;
-import org.sxdata.jingwei.util.CarteTaskManager;
-import org.sxdata.jingwei.util.KettleEncr;
-import org.sxdata.jingwei.util.Util;
+import org.sxdata.jingwei.util.TaskUtil.CarteTaskManager;
+import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
+import org.sxdata.jingwei.util.CommonUtil.Util;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -74,7 +74,7 @@ public class TransServiceImpl implements TransService {
             if(directoryId==0){
                 directoryName="/"+tran.getName();
             }else{
-                //不是在根目录下获取作业所在当前目录的目录名  并且拼接上作业名
+                //不是在根目录下,获取作业所在当前目录的目录名  并且拼接上作业名
                 Directory directory=directoryDao.getDirectoryById(directoryId);
                 directoryName=directory.getDirectoryName()+"/"+tran.getName();
                 Integer parentId=directory.getParentDirectoryId();
@@ -117,7 +117,7 @@ public class TransServiceImpl implements TransService {
     }
 
     @Override
-    public void executeTransformation(String path, String hostname,Integer slaveId) throws Exception {
+    public void executeTransformation(String path,Integer slaveId) throws Exception {
         //获取用户信息
         User loginUser=userDao.getUserbyName("admin");
         loginUser.setPassword(KettleEncr.decryptPasswd("Encrypted " + loginUser.getPassword()));
@@ -126,7 +126,7 @@ public class TransServiceImpl implements TransService {
         slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));
         CarteClient carteClient=new CarteClient(slave);
         //拼接资源库名
-        String repoId=hostname+"_"+CarteClient.databaseName;
+        String repoId=slave.getHostName()+"_"+CarteClient.databaseName;
         //拼接http请求字符串
         String urlString="/?rep="+repoId+"&user="+loginUser.getLogin()+"&pass="+loginUser.getPassword()+"&trans="+path+"&level=Basic";
         urlString = Const.replace(urlString, "/", "%2F");

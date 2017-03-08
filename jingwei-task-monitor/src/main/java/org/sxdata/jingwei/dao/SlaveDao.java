@@ -10,7 +10,6 @@ import java.util.List;
  */
 @Repository
 public interface SlaveDao {
-    public List<Slave> getSlaveByPage(int start,int limit);//获取当页的节点
 
     public Integer getSlaveTotalCount();
 

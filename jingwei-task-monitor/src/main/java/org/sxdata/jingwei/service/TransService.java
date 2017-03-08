@@ -14,7 +14,7 @@ public interface TransService {
 
     public void deleteTransformation(String[] args,String flag) throws Exception;
 
-    public void executeTransformation(String path,String hostname,Integer slaveId) throws Exception;
+    public void executeTransformation(String path,Integer slaveId) throws Exception;
 
 
 }

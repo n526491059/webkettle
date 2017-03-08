@@ -19,6 +19,8 @@ public interface JobDao {
 
     public List<Job> conditionFindJobs(int start,int limit,String namme,String date);//带条件的查询
 
-    public Integer conditionFindJobCount(String name,String date);//带条件查询总记录数u
+    public Integer conditionFindJobCount(String name,String date);//带条件查询总记录数
+
+    public Job getJobById(Integer jobId);
 
 }

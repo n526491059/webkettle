@@ -1,0 +1,30 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sxdata.jingwei.dao.JobSchedulerDao">
+
+    <!--获得所有的定时作业-->
+    <select id="getAllTimerJob" resultType="org.sxdata.jingwei.entity.JobTimeScheduler">
+        select
+            d.ID_JOBTASK as idJobtask,
+            d.ID_JOB as idJob,
+            d.JOB_NAME as jobName,
+            d.SLAVES as slaves,
+            d.ISREPEAT as isrepeat,
+            d.SCHEDULERTYPE as schedulertype,
+            d.INTERVALMINUTES as intervalminutes,
+            d.`HOUR` as hour,
+            d.MINUTES as minutes,
+            d.WEEKDAY as weekday,
+            d.DAYOFMONTH as dayofmonth,
+            d.REPO_ID as repoId
+          from d_timerscheduler d
+    </select>
+
+    <!--添加新的定时作业-->
+    <insert id="addTimerJob" parameterType="org.sxdata.jingwei.entity.JobTimeScheduler">
+		insert into d_timerscheduler values(#{idJobtask},#{idJob},
+		#{slaves},#{jobName},#{isrepeat},#{schedulertype},
+		#{intervalminutes},#{hour},
+		#{minutes},#{weekday},#{dayofmonth},#{repoId}
+		)
+    </insert>
+</mapper>

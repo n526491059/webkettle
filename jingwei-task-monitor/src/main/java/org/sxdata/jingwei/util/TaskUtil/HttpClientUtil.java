@@ -1,4 +1,4 @@
-package org.sxdata.jingwei.util;
+package org.sxdata.jingwei.util.TaskUtil;
 
 import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;

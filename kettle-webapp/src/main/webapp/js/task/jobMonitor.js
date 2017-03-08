@@ -156,7 +156,8 @@ function generateJobPanel(jobName,createDate,inputName){
                                 path=grid.getStore().getAt(i).get("directoryName");
                             }
                         }
-                        generateSlaveWindow(path,"job");
+                        var executeWindow=generateSlaveWindow(path,"job");
+                        executeWindow.show(grid);
                     }
                 },"-",{
                     text:"智能执行",
@@ -178,6 +179,12 @@ function generateJobPanel(jobName,createDate,inputName){
                             }
                         })
                     }
+                },"-",{
+                    text:"定时执行",
+                    handler:function(){
+                        var fiexdWindow=fixedExecuteWindow();
+                        fiexdWindow.show(grid);
+                    }
                 }
             ]
         }),
@@ -194,5 +201,26 @@ function generateJobPanel(jobName,createDate,inputName){
     return grid;
 }
 
-
+//获得被选中的作业的id 全目录名 作业名等信息
+function getJobInfo(){
+    var result=new Array();
+    var jobId=0;
+    var jobName="";
+    var jobPath="";
+    var grid=Ext.getCmp("JobPanel");
+    var view=grid.getView();
+    var rsm=grid.getSelectionModel();
+    for(var i= 0;i<view.getRows().length;i++){
+        if(rsm.isSelected(i)){
+            //获取被选中的转换全目录路径
+            jobPath=grid.getStore().getAt(i).get("directoryName");
+            jobId=grid.getStore().getAt(i).get("jobId");
+            jobName=grid.getStore().getAt(i).get("name");
+            result.push(jobId);
+            result.push(jobName);
+            result.push(jobPath);
+        }
+    }
+    return result;
+}
 

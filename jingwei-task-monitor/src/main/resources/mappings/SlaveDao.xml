@@ -1,15 +1,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.sxdata.jingwei.dao.SlaveDao">
 
-    <select id="getSlaveByPage" resultType="org.sxdata.jingwei.entity.Slave">
-        select
-          r.ID_SLAVE as slaveId,
-          r.HOST_NAME as hostName,
-          r.`PORT` as port,
-          r.USERNAME as username,
-          r.PASSWORD as password
-        from r_slave r limit #{0},#{1}
-    </select>
 
     <select id="getSlaveTotalCount" resultType="java.lang.Integer">
         select count(1) from r_slave
