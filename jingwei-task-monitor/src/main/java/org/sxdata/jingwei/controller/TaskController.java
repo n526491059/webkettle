@@ -18,12 +18,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.sxdata.jingwei.entity.Slave;
 import org.sxdata.jingwei.service.JobService;
+import org.sxdata.jingwei.service.SlaveService;
 import org.sxdata.jingwei.service.TransService;
-import org.sxdata.jingwei.util.Util;
+import org.sxdata.jingwei.util.CommonUtil.Util;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 
@@ -38,6 +39,8 @@ public class TaskController {
     protected TransService transService;
     @Autowired
     protected JobService jobService;
+    @Autowired
+    protected SlaveService slaveService;
 
 
     //查询作业;包括条件查询
@@ -51,7 +54,6 @@ public class TaskController {
             //获取前台传递的查询参数 作业名以及创建时间 如果为空则代表是全部查询
             String name=request.getParameter("name");
             String createDate=request.getParameter("date");
-
             JSONObject result=jobService.findJobs(start, limit, name, createDate);
 
             response.setContentType("text/html;charset=utf-8");
@@ -78,7 +80,6 @@ public class TaskController {
             }else if(flag.equals("job")){
                 jobService.deleteJobs(pathArray,flag);
             }
-
         }catch (Exception e){
             String errorMessage=e.getMessage();
             e.printStackTrace();
@@ -117,13 +118,12 @@ public class TaskController {
     protected void execute(HttpServletResponse response,HttpServletRequest request) {
         try{
             String path=request.getParameter("path");
-            String hostName=request.getParameter("hostName");
             Integer slaveId=Integer.valueOf(request.getParameter("slaveId"));
             String flag=request.getParameter("flag");
             if(flag.equals("job")){
-                jobService.executeJob(path,hostName,slaveId);
+                jobService.executeJob(path,slaveId);
             }else if(flag.equals("transformation")){
-                transService.executeTransformation(path,hostName,slaveId);
+                transService.executeTransformation(path,slaveId);
             }
             //输出结果返回给客户端
             response.setContentType("text/html;charset=utf-8");
@@ -137,6 +137,53 @@ public class TaskController {
         }
     }
 
+    //智能执行转换OR作业
+    @ResponseBody
+    @RequestMapping(value="/powerExecute")
+    protected void powerExecute(HttpServletResponse response,HttpServletRequest request) throws Exception{
+            String path=request.getParameter("path");
+            String flag=request.getParameter("powerFlag");
+            //在所有节点中获取负载最低的节点
+            Slave minSlave=slaveService.getSlaveByLoadAvg(slaveService.getAllSlave());
+            if(minSlave==null){
+                throw new Exception("当前无可用的正常节点!");
+            }else{
+                if(flag.equals("job")){
+                    jobService.executeJob(path,minSlave.getSlaveId());
+                }else if(flag.equals("transformation")){
+                    transService.executeTransformation(path,minSlave.getSlaveId());
+                }
+                //输出结果返回给客户端
+                response.setContentType("text/html;charset=utf-8");
+                PrintWriter out=response.getWriter();
+                out.write("......");
+                out.flush();
+                out.close();
+            }
+    }
+
+    //定时执行作业
+    @ResponseBody
+    @RequestMapping(value="/fiexdExecute")
+    protected void fiexdExecute(HttpServletResponse response,HttpServletRequest request) throws Exception{
+        boolean isSuccess=false;
+        String json="";
+        try{
+            isSuccess=jobService.timeExecuteJob(Util.getMapByRequest(request));
+            if(isSuccess){
+                json="{'success':true,'isSuccess':true}";
+            }else{
+                json="{'success':true,'isSuccess':false}";
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        response.setContentType("text/html;charset=utf-8");
+        PrintWriter out=response.getWriter();
+        out.write(json);
+        out.flush();
+        out.close();
+    }
     //获取结构图信息
     @ResponseBody
     @RequestMapping(method=RequestMethod.POST, value="/detail")

@@ -1,4 +1,4 @@
-package org.sxdata.jingwei.util;
+package org.sxdata.jingwei.util.CommonUtil;
 
 import net.sf.json.JsonConfig;
 import net.sf.json.processors.JsonValueProcessor;

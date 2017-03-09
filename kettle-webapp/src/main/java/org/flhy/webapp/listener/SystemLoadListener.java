@@ -5,15 +5,18 @@ import java.io.File;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.flhy.ext.App;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.flhy.ext.core.PropsUI;
+import org.mybatis.spring.SqlSessionFactoryBean;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.Props;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.logging.KettleLogStore;
-import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
-import org.sxdata.jingwei.util.CarteTaskManager;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.sxdata.jingwei.dao.JobSchedulerDao;
+import org.sxdata.jingwei.util.TaskUtil.CarteTaskManager;
 
 public class SystemLoadListener implements ServletContextListener {
 
@@ -42,12 +45,12 @@ public class SystemLoadListener implements ServletContextListener {
 			meta.setName("default");
 			meta.setReadOnly(false);
 			meta.setHidingHiddenFiles(true);
-			
-//			KettleFileRepository rep = new KettleFileRepository();
-//			rep.init(meta);
-//			
-//			App.getInstance().initDefault(rep);
-		} catch (KettleException e) {
+
+			//Thread.sleep(1 * 1000L);
+			//开启作业定时
+			//CarteTaskManager.startJobTimeTask();
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

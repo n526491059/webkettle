@@ -69,6 +69,7 @@
 
 	</bean>
 
+
 	<!-- spring集成MyBatis3 -->
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="configLocation" value="classpath:mybatis-config.xml"></property>

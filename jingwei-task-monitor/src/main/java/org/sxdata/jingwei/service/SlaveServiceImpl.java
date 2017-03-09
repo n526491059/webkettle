@@ -1,14 +1,12 @@
 package org.sxdata.jingwei.service;
 
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sxdata.jingwei.dao.SlaveDao;
 import org.sxdata.jingwei.entity.CarteClient;
 import org.sxdata.jingwei.entity.CarteStatusVo;
-import org.sxdata.jingwei.entity.PageforBean;
 import org.sxdata.jingwei.entity.Slave;
-import org.sxdata.jingwei.util.KettleEncr;
+import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
 
 import java.util.List;
 
@@ -21,9 +19,10 @@ public class SlaveServiceImpl implements SlaveService{
     protected SlaveDao slaveDao;
 
     @Override
-    public PageforBean getThisPageSlave(int start, int limit) throws Exception{
-        List<Slave> items=slaveDao.getSlaveByPage(start, limit);
-        for(Slave slave:items){
+    //获取所有节点信息
+    public List<Slave> getAllSlave() throws Exception {
+        List<Slave> slaves=slaveDao.getAllSlave();
+        for(Slave slave:slaves){
             //对取出的节点密码进行解码重新赋值
             slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));
             //获取节点状态的相关信息
@@ -42,17 +41,36 @@ public class SlaveServiceImpl implements SlaveService{
                     slave.setLoadAvg(0);
                     slave.setStatus("<font color='red'>该节点连接资源数据库异常</font>");
                 }
-
             } else {
                 slave.setLoadAvg(0);
                 slave.setStatus("<font color='red'>节点异常</font>");
             }
         }
-        Integer totalCount=slaveDao.getSlaveTotalCount();
-        PageforBean pageBean=new PageforBean();
-        pageBean.setTotalProperty(totalCount);
-        pageBean.setRoot(items);
-        //....
-        return pageBean;
+        return slaves;
+    }
+
+    @Override
+    //选择一个负载指数最低的节点
+    public Slave getSlaveByLoadAvg(List<Slave> slaves) throws Exception {
+        Slave minSlave=null;
+        if(slaves!=null && slaves.size()>0){
+            //把不正常的节点移除
+            for(int i=0;i<slaves.size();i++){
+                if (slaves.get(i).getLoadAvg()==0){
+                    slaves.remove(i);
+                }
+            }
+            if(slaves.size()==1){
+                minSlave=slaves.get(0);
+            }else if(slaves.size()>1){
+                minSlave=slaves.get(0);
+                for(int i=0;i<slaves.size();i++){
+                    if (slaves.get(i).getLoadAvg()<minSlave.getLoadAvg()){
+                        minSlave=slaves.get(i+1);
+                    }
+                }
+            }
+        }
+        return minSlave;
     }
 }

@@ -2,23 +2,23 @@ package org.sxdata.jingwei.service;
 
 import net.sf.json.JSONObject;
 import org.flhy.ext.App;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
-import org.pentaho.di.repository.RepositoryElementMetaInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.sxdata.jingwei.bean.RepositoryNode;
-import org.sxdata.jingwei.dao.DirectoryDao;
-import org.sxdata.jingwei.dao.JobDao;
-import org.sxdata.jingwei.entity.Directory;
-import org.sxdata.jingwei.entity.Job;
-import org.sxdata.jingwei.entity.PageforBean;
-import org.sxdata.jingwei.util.Util;
+import org.sxdata.jingwei.dao.*;
+import org.sxdata.jingwei.entity.*;
+import org.sxdata.jingwei.util.TaskUtil.CarteTaskManager;
+import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
+import org.sxdata.jingwei.util.CommonUtil.Util;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by cRAZY on 2017/2/22.
@@ -27,42 +27,33 @@ import java.util.List;
 public class JobServiceImpl implements JobService{
     @Autowired
     protected JobDao jobDao;
-
+    @Autowired
+    protected UserDao userDao;
+    @Autowired
+    protected SlaveDao slaveDao;
     @Autowired
     protected DirectoryDao directoryDao;
+    @Autowired
+    protected JobSchedulerDao jobSchedulerDao;
 
     protected SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private final Integer loadElement =3;   //表示只加载转换和作业,根据业务需求会作不同修改
     private final String path="";           //表示查询资源库下根目录的所有作业  根据业务需求会作不同修改
 
+
     @Override
-    public JSONObject findJobs(int start, int limit, String name, String createDate) throws Exception{
-        PageforBean pages=new PageforBean();
-        net.sf.json.JSONObject result=null;
-        //该页的作业信息以及整个表(可能是条件查询)的总记录条数
-        List<Job> jobs=null;
-        Integer totalCount=0;
-        if (Util.isEmpty(name)  && Util.isEmpty(createDate)){
-          jobs=jobDao.getThisPageJob(start,limit);
-            //对日期进行处理转换成指定的格式
-            for (Job job:jobs){
-                job.setCreateDate(format.parse(format.format(job.getCreateDate())));
-                job.setModifiedDate(format.parse(format.format(job.getModifiedDate())));
-            }
-            totalCount=jobDao.getTotalCount();
-        }else{
-            createDate+=" 00:00:00";
-            jobs=jobDao.conditionFindJobs(start, limit, name, createDate);
-            for (Job job:jobs){
-                job.setCreateDate(format.parse(format.format(job.getCreateDate())));
-                job.setModifiedDate(format.parse(format.format(job.getModifiedDate())));
-            }
-            totalCount=jobDao.conditionFindJobCount(name,createDate);
-        }
+    public Job getJobById(Integer jobId) {
+        return jobDao.getJobById(jobId);
+    }
 
+    @Override
+    public List<JobTimeScheduler> getAllTimerJob() {
+        return jobSchedulerDao.getAllTimerJob();
+    }
 
-
+    public List<Job> getJobPath(List<Job> jobs){
+        List<Job> resultJobs=new ArrayList<Job>();
         //根据作业的id来查找该作业在资源库的绝对目录
         for (Job job:jobs){
             String directoryName="";
@@ -90,7 +81,37 @@ public class JobServiceImpl implements JobService{
 
             }
             job.setDirectoryName(directoryName);
+            resultJobs.add(job);
         }
+        return resultJobs;
+    }
+
+    @Override
+    public JSONObject findJobs(int start, int limit, String name, String createDate) throws Exception{
+        PageforBean pages=new PageforBean();
+        net.sf.json.JSONObject result=null;
+        //该页的作业信息以及整个表(可能是条件查询)的总记录条数
+        List<Job> jobs=null;
+        Integer totalCount=0;
+        if (Util.isEmpty(name)  && Util.isEmpty(createDate)){
+          jobs=jobDao.getThisPageJob(start,limit);
+            //对日期进行处理转换成指定的格式
+            for (Job job:jobs){
+                job.setCreateDate(format.parse(format.format(job.getCreateDate())));
+                job.setModifiedDate(format.parse(format.format(job.getModifiedDate())));
+            }
+            totalCount=jobDao.getTotalCount();
+        }else{
+            createDate+=" 00:00:00";
+            jobs=jobDao.conditionFindJobs(start, limit, name, createDate);
+            for (Job job:jobs){
+                job.setCreateDate(format.parse(format.format(job.getCreateDate())));
+                job.setModifiedDate(format.parse(format.format(job.getModifiedDate())));
+            }
+            totalCount=jobDao.conditionFindJobCount(name,createDate);
+        }
+
+       jobs=this.getJobPath(jobs);
 
         pages.setRoot(jobs);
         pages.setTotalProperty(totalCount);
@@ -118,7 +139,193 @@ public class JobServiceImpl implements JobService{
     }
 
     @Override
-    public void executeJob(String path, String hostname, Integer slaveId) throws Exception {
-        System.out.println("-------------------------------executeJob执行----------------------------");
+    public void executeJob(String path,Integer slaveId) throws Exception {
+        //获取用户信息
+        User loginUser=userDao.getUserbyName("admin");
+        loginUser.setPassword(KettleEncr.decryptPasswd("Encrypted " + loginUser.getPassword()));
+        //构造Carte对象
+        Slave slave=slaveDao.getSlaveById(slaveId);
+        slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));
+        CarteClient carteClient=new CarteClient(slave);
+        //拼接资源库名
+        String repoId=slave.getHostName()+"_"+CarteClient.databaseName;
+        //拼接http请求字符串
+        String urlString="/?rep="+repoId+"&user="+loginUser.getLogin()+"&pass="+loginUser.getPassword()+"&job="+path+"&level=Basic";
+        urlString = Const.replace(urlString, "/", "%2F");
+        urlString = carteClient.getHttpUrl() + CarteClient.EXECREMOTE_JOB +urlString;
+        System.out.println("请求远程执行作业的url字符串为" + urlString);
+        CarteTaskManager.addTask(carteClient, "trans_exec", urlString);
+    }
+
+
+    //判断是否在数据库中已经存在相同类型 相同执行周期的同一个作业
+    public boolean judgeJobIsAlike(JobTimeScheduler willAddJobTimer){
+        boolean flag=false;
+        List<JobTimeScheduler> jobs=jobSchedulerDao.getAllTimerJob();
+
+        if(jobs!=null && jobs.size()>=1){
+            //遍历查找是否有作业名与用户选择的作业名相同的作业
+            List<JobTimeScheduler> jobNameEqual=new ArrayList<>(); //存放作业名与用户选择的相同的作业
+            for(JobTimeScheduler nameEqual:jobs){
+                if(nameEqual.getJobName().equals(willAddJobTimer.getJobName())){
+                    jobNameEqual.add(nameEqual);
+                }
+            }
+
+            //遍历查找相同作业名的情况下 是否有作业定时类型也相同的作业
+            if(jobNameEqual.size()>=1){
+                List<JobTimeScheduler> typeEqualJobs=new ArrayList<>(); //存放定时类型与用户传递的定时运行相同的作业
+                for(JobTimeScheduler jobTimer:jobs){
+                    if(jobTimer.getSchedulertype()==willAddJobTimer.getSchedulertype()){
+                        typeEqualJobs.add(jobTimer);
+                    }
+                }
+                //进一步判断定时的具体时间是否相同
+                if(typeEqualJobs.size()>=1){
+                    Integer timerType=willAddJobTimer.getSchedulertype();
+                    switch(timerType) {
+                        //类型为1也就是间隔执行 判断间隔执行的分钟间隔是否相同
+                        case 1:
+                            for(JobTimeScheduler jobTime:typeEqualJobs){
+                                if(willAddJobTimer.getIntervalminutes()==jobTime.getIntervalminutes()){
+                                    flag=true;
+                                }
+                            }
+                            break;
+
+                        //类型为2也就每天执行类型  进一步判断每天执行的小时 分钟是否一样
+                        case 2:
+                            List<JobTimeScheduler> hourLikeByTypeTwo=new ArrayList<>(); //存放每天执行 小时与用户设置值一样的定时作业
+                            for(JobTimeScheduler jobTime:typeEqualJobs){
+                                if(willAddJobTimer.getHour()==jobTime.getHour()){
+                                    hourLikeByTypeTwo.add(jobTime);
+                                }
+                            }
+                            //如果有小时相同的记录 进一步判断是否分钟相同
+                            if(hourLikeByTypeTwo.size()>=1){
+                                for(JobTimeScheduler jobTime:hourLikeByTypeTwo){
+                                    if(willAddJobTimer.getMinutes()==jobTime.getMinutes()){
+                                        flag=true;
+                                    }
+                                }
+                            }
+                            break;
+
+                        //类型为3 每周执行
+                        case 3:
+                            //首先判断每周执行的星期值week是否相同
+                            List<JobTimeScheduler> weekLikeByTypeThree=new ArrayList<>();//存放星期数值与用户传递值相同的记录
+                            for(JobTimeScheduler jobTime:typeEqualJobs){
+                                if(jobTime.getWeekday()==willAddJobTimer.getWeekday()){
+                                    weekLikeByTypeThree.add(jobTime);
+                                }
+                            }
+                            List<JobTimeScheduler> weekAndHourLikeByTypeThree=new ArrayList<>();//存放星期数值和小时与用户传递值相同的记录
+                            //如果星期值相同判断小时是是否也相同
+                            if(weekLikeByTypeThree.size()>=1){
+                                for(JobTimeScheduler weekLikeJob:weekAndHourLikeByTypeThree){
+                                    if(weekLikeJob.getHour()==willAddJobTimer.getHour()){
+                                        weekAndHourLikeByTypeThree.add(weekLikeJob);
+                                    }
+                                }
+                            }
+                            //如果星期值和小时值都相同则最终判断分钟是否相同
+                            if(weekAndHourLikeByTypeThree.size()>=1){
+                                for(JobTimeScheduler weekAndHourLikeJob:weekAndHourLikeByTypeThree){
+                                    if(weekAndHourLikeJob.getMinutes()==willAddJobTimer.getMinutes()){
+                                        flag=true;
+                                    }
+                                }
+                            }
+                            break;
+
+                        //类型4 每月执行
+                        case 4:
+                            //首先判断每月执行的日期xx号是否相同
+                            List<JobTimeScheduler> dayLikeByTypeFour=new ArrayList<>();
+                            for(JobTimeScheduler jobTime:typeEqualJobs){
+                                if(jobTime.getDayofmonth()==willAddJobTimer.getDayofmonth()){
+                                    dayLikeByTypeFour.add(jobTime);
+                                }
+                            }
+                            //如果日期xx号相同则继续判断时间hour是否相同
+                            List<JobTimeScheduler> dayAndHourLikeByTypeFour=new ArrayList<>();
+                            if(dayLikeByTypeFour.size()>=1){
+                                for(JobTimeScheduler dayLike:dayLikeByTypeFour){
+                                    if(dayLike.getHour()==willAddJobTimer.getHour()){
+                                        dayAndHourLikeByTypeFour.add(dayLike);
+                                    }
+                                }
+                            }
+                            //如果日期和时间值都相同则最终判断minute是否相同
+                            if(dayAndHourLikeByTypeFour.size()>=1){
+                                for(JobTimeScheduler dayAndHourLike:dayAndHourLikeByTypeFour){
+                                    if(dayAndHourLike.getMinutes()==willAddJobTimer.getMinutes()){
+                                        flag=true;
+                                    }
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+        return flag;
+    }
+
+    @Override
+    //定时作业
+    public boolean timeExecuteJob(Map<String, Object> params) throws Exception {
+        boolean isSuccess=false;
+        Slave slave=slaveDao.getSlaveById(Integer.parseInt(params.get("slaveId").toString()));
+        JobTimeScheduler jobTimeScheduler=new JobTimeScheduler();
+        jobTimeScheduler.setIdJobtask(System.nanoTime());   //定时的ID 唯一标识
+        jobTimeScheduler.setIdJob(Integer.parseInt(params.get("jobId").toString()));    //所需定时的作业ID
+        jobTimeScheduler.setJobName(params.get("jobName").toString());                  //作业名
+        jobTimeScheduler.setSlaves(slave.getSlaveId() + "_" + slave.getHostName());         //节点信息
+        jobTimeScheduler.setIsrepeat("Y");                                       //是否重复执行 暂时默认重复执行Y
+        jobTimeScheduler.setRepoId(slave.getHostName()+"_"+CarteClient.databaseName);
+        //设置定时类型
+        String typeInfo=params.get("typeChoose").toString();
+        int schedulerType=0;
+        //如果是间隔执行则设置执行的时间间隔
+        if(typeInfo.trim().equals("间隔执行")){
+            schedulerType=1;
+            jobTimeScheduler.setIntervalminutes(Integer.parseInt(params.get("intervalminute").toString()));
+        }else if(typeInfo.trim().equals("每天执行")){
+            schedulerType=2;
+        }else if(typeInfo.trim().equals("每周执行")){
+            //每周执行则设置每周的时间week
+            schedulerType=3;
+            jobTimeScheduler.setWeekday(Util.getIntWeek(params.get("weekChoose").toString()));
+        }else if(typeInfo.trim().equals("每月执行")){
+            //每月执行设置每月多少号执行 monthDay
+            schedulerType=4;
+            jobTimeScheduler.setDayofmonth(Util.getdayInt(params.get("monthChoose").toString()));
+        }
+        jobTimeScheduler.setSchedulertype(schedulerType);
+        //只要不是间隔执行 其它三种都需要设置hour minute 执行的具体时间
+        if(schedulerType!=1){
+            jobTimeScheduler.setHour(Integer.parseInt(params.get("hour").toString()));
+            jobTimeScheduler.setMinutes(Integer.parseInt(params.get("minute").toString()));
+        }
+        //如果库中不存在该作业的相同定时 则加入定时操作
+        if(!this.judgeJobIsAlike(jobTimeScheduler)){
+            isSuccess=true;
+            //封装定时任务需要的参数 作业全路径名 所有节点组成的map集合(暂时不支持集群,集合只有一个元素) 日志等级
+            String jobPath=params.get("jobPath").toString();
+            HashMap<String,String> thisIdIpMap=new HashMap<String,String>();
+            thisIdIpMap.put(slave.getSlaveId().toString(),slave.getHostName());
+            //TODO 登录功能暂未实现 暂时使用默认用户admin
+            User loginUser=userDao.getUserbyName("admin");
+            loginUser.setPassword(KettleEncr.decryptPasswd("Encrypted " + loginUser.getPassword()));
+            //执行定时任务
+            CarteTaskManager.addTimerTask(thisIdIpMap.keySet(),jobPath,null,jobTimeScheduler,slave,loginUser);
+            //把该定时信息更新到数据库
+            jobSchedulerDao.addTimerJob(jobTimeScheduler);
+        }
+        return isSuccess;
     }
 }

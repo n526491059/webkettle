@@ -124,5 +124,8 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initStore.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/jobMonitor.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/transMonitor.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/slave.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/fixedtimeExecute.js"></script>
+
 	</body>
 </html>
