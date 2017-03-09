@@ -145,6 +145,106 @@ function generateTrans(transName,createDate,inputName){
                         }
                         generateSlaveWindow(path,"transformation");
                     }
+                },"-",{
+                    text:"编辑转换",
+                    handler:function(){
+                        var path="";//被选中的任务路径
+                        var view=grid.getView();
+                        var rsm=grid.getSelectionModel();
+                        for(var i= 0;i<view.getRows().length;i++){
+                            if(rsm.isSelected(i)){
+                                //获取被选中的作业全目录路径
+                                path=grid.getStore().getAt(i).get("directoryName");
+                            }
+                        }
+                        secondGuidePanel.removeAll(true);
+                        Ext.Ajax.request({
+                            url: GetUrl('repository/open.do'),
+                            timeout: 120000,
+                            params: {path: path, type: 'trans'},
+                            method: 'POST',
+                            success: function(response, opts) {
+                                try {
+                                    var transComponentTree = new Ext.tree.TreePanel({
+                                        region: 'west',
+                                        split: true,
+                                        width: 200,
+
+                                        title: '核心对象',
+                                        useArrows: true,
+                                        root: new Ext.tree.AsyncTreeNode({text: 'root'}),
+                                        loader: new Ext.tree.TreeLoader({
+                                            dataUrl: GetUrl('system/steps.do')
+                                        }),
+                                        enableDD:true,
+                                        ddGroup:'TreePanelDDGroup',
+                                        autoScroll: true,
+                                        animate: false,
+                                        rootVisible: false
+                                    });
+
+                                    var graphPanel = Ext.create({repositoryId: path, region: 'center'}, 'TransGraph');
+
+                                    secondGuidePanel.add({
+                                        layout: 'border',
+                                        items: [transComponentTree, graphPanel]
+                                    });
+                                    secondGuidePanel.doLayout();
+
+                                    activeGraph = graphPanel;
+
+
+                                    var xmlDocument = mxUtils.parseXml(decodeURIComponent(response.responseText));
+                                    var decoder = new mxCodec(xmlDocument);
+                                    var node = xmlDocument.documentElement;
+
+                                    var graph = graphPanel.getGraph();
+                                    decoder.decode(node, graph.getModel());
+
+                                    graphPanel.fireEvent('load');
+                                } finally {
+                                    Ext.getBody().unmask();
+                                }
+                            },
+                            failure: failureResponse
+                        });
+                    }
+                },"-",{
+                    text:"结构图",
+                    handler:function () {
+                        var taskName="";//被选中的任务路径
+                        var view=grid.getView();
+                        var rsm=grid.getSelectionModel();
+                        for(var i= 0;i<view.getRows().length;i++){
+                            if(rsm.isSelected(i)){
+                                //获取被选中的作业全目录路径
+                                taskName=grid.getStore().getAt(i).get("directoryName");
+                            }
+                        }
+                        Ext.Ajax.request({
+                            url: GetUrl('task/detail.do'),
+                            method: 'POST',
+                            params: {taskName: taskName,type:'trans'},
+                            success: function(response) {
+                                var resObj = Ext.decode(response.responseText);
+                                var graphPanel = Ext.create({border: false, readOnly: true, }, resObj.GraphType);
+                                var dialog = new LogDetailDialog({
+                                    items: graphPanel
+                                });
+                                dialog.show(null, function() {
+                                    var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
+                                    var decoder = new mxCodec(xmlDocument);
+                                    var node = xmlDocument.documentElement;
+
+                                    var graph = graphPanel.getGraph();
+                                    decoder.decode(node, graph.getModel());
+                                    graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
+
+                                    graphPanel.doResult(Ext.decode(resObj.executionLog));
+                                });
+                            }
+                        });
+                    }
                 }
             ]
         }),
