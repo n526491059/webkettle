@@ -182,7 +182,7 @@ function generateTrans(transName,createDate,inputName){
                         Ext.Ajax.request({
                             url: GetUrl('repository/open.do'),
                             timeout: 120000,
-                            params: {path: path, type: 'trans'},
+                            params: {path: path, type: 'transformation'},
                             method: 'POST',
                             success: function(response, opts) {
                                 try {
