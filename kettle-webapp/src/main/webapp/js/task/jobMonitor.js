@@ -1,6 +1,6 @@
 
 function generateJobPanel(jobName,createDate,inputName){
-    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+    var secondGuidePanel=Ext.getCmp("secondGuidePanel");//二级菜单
 
     //为表格添加一行复选框用于选择行
     var sm=new Ext.grid.CheckboxSelectionModel();
@@ -145,7 +145,7 @@ function generateJobPanel(jobName,createDate,inputName){
                 },"-",{
                     text:"执行作业",
                     handler:function(){
-                        var path="";
+                        var path="";//被选中的任务路径
                         var view=grid.getView();
                         var rsm=grid.getSelectionModel();
                         for(var i= 0;i<view.getRows().length;i++){
@@ -182,6 +182,107 @@ function generateJobPanel(jobName,createDate,inputName){
                     handler:function(){
                         var fiexdWindow=fixedExecuteWindow("添加",new Array(),"/task/fiexdExecute.do");
                         fiexdWindow.show(grid);
+                    }
+                },"-",{
+                    text:"编辑作业",
+                    handler:function(){
+                        var path="";//被选中的任务路径
+                        var view=grid.getView();
+                        var rsm=grid.getSelectionModel();
+                        for(var i= 0;i<view.getRows().length;i++){
+                            if(rsm.isSelected(i)){
+                                //获取被选中的作业全目录路径
+                                path=grid.getStore().getAt(i).get("directoryName");
+                            }
+                        }
+                        secondGuidePanel.removeAll(true);
+                        Ext.Ajax.request({
+                            url: GetUrl('repository/open.do'),
+                            timeout: 120000,
+                            params: {path: path, type: 'job'},
+                            method: 'POST',
+                            success: function(response, opts) {
+                                try {
+
+                                    var jobComponentTree = new Ext.tree.TreePanel({
+                                        region: 'west',
+                                        split: true,
+                                        width: 200,
+
+                                        title: '核心对象',
+                                        useArrows: true,
+                                        root: new Ext.tree.AsyncTreeNode({text: 'root'}),
+                                        loader: new Ext.tree.TreeLoader({
+                                            dataUrl: GetUrl('system/jobentrys.do')
+                                        }),
+                                        enableDD:true,
+                                        ddGroup:'TreePanelDDGroup',
+                                        autoScroll: true,
+                                        animate: false,
+                                        rootVisible: false
+                                    });
+
+                                    var graphPanel = Ext.create({repositoryId: path, region: 'center'}, 'JobGraph');
+
+                                    secondGuidePanel.add({
+                                        layout: 'border',
+                                        items: [jobComponentTree, graphPanel]
+                                    });
+                                    secondGuidePanel.doLayout();
+
+                                    activeGraph = graphPanel;
+
+
+                                    var xmlDocument = mxUtils.parseXml(decodeURIComponent(response.responseText));
+                                    var decoder = new mxCodec(xmlDocument);
+                                    var node = xmlDocument.documentElement;
+
+                                    var graph = graphPanel.getGraph();
+                                    decoder.decode(node, graph.getModel());
+
+                                    graphPanel.fireEvent('load');
+                                } finally {
+                                    Ext.getBody().unmask();
+                                }
+                            },
+                            failure: failureResponse
+                        });
+                    }
+                },"-",{
+                    text:"结构图",
+                    handler:function () {
+                            var taskName="";//被选中的任务路径
+                            var view=grid.getView();
+                            var rsm=grid.getSelectionModel();
+                            for(var i= 0;i<view.getRows().length;i++){
+                                if(rsm.isSelected(i)){
+                                    //获取被选中的作业全目录路径
+                                    taskName=grid.getStore().getAt(i).get("directoryName");
+                                }
+                            }
+                            Ext.Ajax.request({
+                                url: GetUrl('task/detail.do'),
+                                method: 'POST',
+                                params: {taskName: taskName,type:'job'},
+                                success: function(response) {
+                                    var resObj = Ext.decode(response.responseText);
+                                    var graphPanel = Ext.create({border: false, readOnly: true, }, resObj.GraphType);
+                                    var dialog = new LogDetailDialog({
+                                        items: graphPanel
+                                    });
+                                    dialog.show(null, function() {
+                                        var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
+                                        var decoder = new mxCodec(xmlDocument);
+                                        var node = xmlDocument.documentElement;
+
+                                        var graph = graphPanel.getGraph();
+                                        decoder.decode(node, graph.getModel());
+                                        graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
+
+                                        graphPanel.doResult(Ext.decode(resObj.executionLog));
+                                    });
+                                }
+                            });
                     }
                 }
             ]

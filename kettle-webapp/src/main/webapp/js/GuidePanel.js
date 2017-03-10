@@ -116,7 +116,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 			if(node.text == "<font size = '2px'>新建转换</font>")
 			{
 				secondGuidePanel.removeAll(true);
-				
+
 				Ext.Msg.prompt('系统提示', '请输入转换名称:', function(btn, text){
 				    if (btn == 'ok' && text != '') {
 				    	Ext.getBody().mask('正在创建转换，请稍后...');
@@ -128,13 +128,12 @@ GuidePanel = Ext.extend(Ext.Panel, {
 							success: function(response) {
 								try {
 									var path = Ext.decode(response.responseText).message;
-
 									Ext.getBody().mask('正在加载，请稍后...', 'x-mask-loading');
 									
 									Ext.Ajax.request({
 										url: GetUrl('repository/open.do'),
 										timeout: 120000,
-										params: {path: path, type: 'trans'},
+										params: {path: path, type: 'transformation'},
 										method: 'POST',
 										success: function(response, opts) {
 											try {
@@ -142,7 +141,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 										     		region: 'west',
 										     		split: true,
 										     		width: 200,
-										     		
+
 										     		title: '核心对象',
 										     		useArrows: true,
 										     		root: new Ext.tree.AsyncTreeNode({text: 'root'}),
@@ -155,25 +154,25 @@ GuidePanel = Ext.extend(Ext.Panel, {
 										     		animate: false,
 										     		rootVisible: false
 										     	});
-												
+
 												var graphPanel = Ext.create({repositoryId: path, region: 'center'}, 'TransGraph');
-												
+
 												secondGuidePanel.add({
 													layout: 'border',
 													items: [transComponentTree, graphPanel]
 												});
 												secondGuidePanel.doLayout();
-												
+
 												activeGraph = graphPanel;
-												
-												
+
+
 												var xmlDocument = mxUtils.parseXml(decodeURIComponent(response.responseText));
 												var decoder = new mxCodec(xmlDocument);
 												var node = xmlDocument.documentElement;
-												
+
 												var graph = graphPanel.getGraph();
 												decoder.decode(node, graph.getModel());
-												
+
 												graphPanel.fireEvent('load');
 											} finally {
 												Ext.getBody().unmask();
@@ -210,9 +209,6 @@ GuidePanel = Ext.extend(Ext.Panel, {
 							success: function(response) {
 								try {
 									var path = Ext.decode(response.responseText).message;
-
-
-
 									Ext.getBody().mask('正在加载，请稍后...', 'x-mask-loading');
 
 									Ext.Ajax.request({
@@ -222,12 +218,12 @@ GuidePanel = Ext.extend(Ext.Panel, {
 										method: 'POST',
 										success: function(response, opts) {
 											try {
-												
-												var transComponentTree = new Ext.tree.TreePanel({
+
+												var jobComponentTree = new Ext.tree.TreePanel({
 										     		region: 'west',
 										     		split: true,
 										     		width: 200,
-										     		
+
 										     		title: '核心对象',
 										     		useArrows: true,
 										     		root: new Ext.tree.AsyncTreeNode({text: 'root'}),
@@ -240,12 +236,12 @@ GuidePanel = Ext.extend(Ext.Panel, {
 										     		animate: false,
 										     		rootVisible: false
 										     	});
-												
+
 												var graphPanel = Ext.create({repositoryId: path, region: 'center'}, 'JobGraph');
-												
+
 												secondGuidePanel.add({
 													layout: 'border',
-													items: [transComponentTree, graphPanel]
+													items: [jobComponentTree, graphPanel]
 												});
 												secondGuidePanel.doLayout();
 
@@ -266,7 +262,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 										},
 										failure: failureResponse
 									});
-									
+
 								} finally {
 									Ext.getBody().unmask();
 								}

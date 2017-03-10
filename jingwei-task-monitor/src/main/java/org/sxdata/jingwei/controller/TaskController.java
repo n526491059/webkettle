@@ -1,10 +1,22 @@
 package org.sxdata.jingwei.controller;
 
 import net.sf.json.JSONObject;
+import org.flhy.ext.App;
+import org.flhy.ext.PluginFactory;
+import org.flhy.ext.base.GraphCodec;
+import org.flhy.ext.utils.JsonUtils;
+import org.flhy.ext.utils.RepositoryUtils;
+import org.flhy.ext.utils.StringEscapeHelper;
+import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.repository.Repository;
+import org.pentaho.di.repository.RepositoryDirectoryInterface;
+import org.pentaho.di.repository.RepositoryObjectType;
+import org.pentaho.di.trans.TransMeta;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.sxdata.jingwei.entity.SlaveEntity;
 import org.sxdata.jingwei.service.JobService;
@@ -171,5 +183,28 @@ public class TaskController {
         out.write(json);
         out.flush();
         out.close();
+    }
+    //获取结构图信息
+    @ResponseBody
+    @RequestMapping(method=RequestMethod.POST, value="/detail")
+    protected void detail(@RequestParam String taskName,@RequestParam String type) throws Exception {
+        org.flhy.ext.utils.JSONObject jsonObject = new org.flhy.ext.utils.JSONObject();
+        if(type.equals("trans")) {
+            TransMeta transMeta = RepositoryUtils.loadTransByPath(taskName);
+            jsonObject.put("GraphType", "TransGraph");
+            GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+            String graphXml = codec.encode(transMeta);
+
+            jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
+        } else if(type.equals("job")) {
+            JobMeta jobMeta = RepositoryUtils.loadJobbyPath(taskName);
+            jsonObject.put("GraphType", "JobGraph");
+
+            GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+            String graphXml = codec.encode(jobMeta);
+
+            jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
+        }
+        JsonUtils.response(jsonObject);
     }
 }

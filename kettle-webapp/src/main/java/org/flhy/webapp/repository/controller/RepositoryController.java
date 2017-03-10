@@ -276,7 +276,7 @@ public class RepositoryController {
 	protected void open(@RequestParam String path, @RequestParam String type) throws Exception {
 		String dir = path.substring(0, path.lastIndexOf("/"));
 		String name = path.substring(path.lastIndexOf("/") + 1);
-		
+		System.out.println(RepositoryObjectType.TRANSFORMATION.getTypeDescription());
 		Repository repository = App.getInstance().getRepository();
 		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
 		if(directory == null)
@@ -288,7 +288,6 @@ public class RepositoryController {
 	    	
 			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
 			String graphXml = codec.encode(transMeta);
-			System.out.println(graphXml);
 			JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
 		} else if(RepositoryObjectType.JOB.getTypeDescription().equals(type)) {
 			JobMeta jobMeta = repository.loadJob(name, directory, null, null);
@@ -660,7 +659,7 @@ public class RepositoryController {
 	/**
 	 * 获取资源库信息
 	 * 
-	 * @param loginInfo
+	 * @param
 	 * @throws IOException 
 	 * @throws KettleException 
 	 */
@@ -698,7 +697,7 @@ public class RepositoryController {
 	/**
 	 * 断开资源库
 	 * 
-	 * @param loginInfo
+	 * @param
 	 * @throws IOException 
 	 */
 	@ResponseBody
