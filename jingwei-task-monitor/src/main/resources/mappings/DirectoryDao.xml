@@ -2,7 +2,7 @@
 <mapper namespace="org.sxdata.jingwei.dao.DirectoryDao">
 
 
-    <select id="getDirectoryById" resultType="org.sxdata.jingwei.entity.Directory">
+    <select id="getDirectoryById" resultType="org.sxdata.jingwei.entity.DirectoryEntity">
         select
           r.DIRECTORY_NAME as directoryName,
           r.ID_DIRECTORY as directoryId,

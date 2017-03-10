@@ -1,21 +1,22 @@
 package org.sxdata.jingwei.entity;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by cRAZY on 2017/2/22.
- * 转换
+ * Created by cRAZY on 2017/2/15.
+ * 作业
  */
-public class Transformation {
+public class JobEntity {
+    private Integer jobId;//作业id
     private Date createDate;//创建时间
     private String modifiedUser;//修改用户
     private Date modifiedDate;//修改时间
     private String name;
     private String createUser; //创建用户
-    private Integer transformationId;
-    private Integer directoryId;    //与层级目录表主键关联 代表该转换存放于哪个目录下
-    private String directoryName;   //所在的直接父级目录名
+    private Integer directoryId;// 作业所在的目录的id,与层级目录表的id对应,用于标识该作业是存放在哪个目录,根目录是/
+    private String directoryName;   //作业的完整目录名
 
     public String getDirectoryName() {
         return directoryName;
@@ -25,7 +26,6 @@ public class Transformation {
         this.directoryName = directoryName;
     }
 
-
     public Integer getDirectoryId() {
         return directoryId;
     }
@@ -34,12 +34,12 @@ public class Transformation {
         this.directoryId = directoryId;
     }
 
-    public void setTransformationId(Integer transformationId) {
-        this.transformationId = transformationId;
+    public Integer getJobId() {
+        return jobId;
     }
 
-    public Integer getTransformationId() {
-        return transformationId;
+    public void setJobId(Integer jobId) {
+        this.jobId = jobId;
     }
 
     public Date getCreateDate() {

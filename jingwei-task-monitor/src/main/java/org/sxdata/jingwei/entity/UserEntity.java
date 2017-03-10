@@ -3,7 +3,7 @@ package org.sxdata.jingwei.entity;
 /**
  * Created by cRAZY on 2017/2/17.
  */
-public class User {
+public class UserEntity {
     private Integer userId;
     private String login;
     private String password;

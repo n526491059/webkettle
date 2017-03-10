@@ -6,11 +6,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.sxdata.jingwei.entity.Slave;
+import org.sxdata.jingwei.entity.SlaveEntity;
 import org.sxdata.jingwei.service.JobService;
 import org.sxdata.jingwei.service.SlaveService;
 import org.sxdata.jingwei.service.TransService;
-import org.sxdata.jingwei.util.CommonUtil.Util;
+import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -132,7 +132,7 @@ public class TaskController {
             String path=request.getParameter("path");
             String flag=request.getParameter("powerFlag");
             //在所有节点中获取负载最低的节点
-            Slave minSlave=slaveService.getSlaveByLoadAvg(slaveService.getAllSlave());
+            SlaveEntity minSlave=slaveService.getSlaveByLoadAvg(slaveService.getAllSlave());
             if(minSlave==null){
                 throw new Exception("当前无可用的正常节点!");
             }else{
@@ -157,7 +157,7 @@ public class TaskController {
         boolean isSuccess=false;
         String json="";
         try{
-            isSuccess=jobService.timeExecuteJob(Util.getMapByRequest(request));
+            isSuccess=jobService.timeExecuteJob(StringDateUtil.getMapByRequest(request));
             if(isSuccess){
                 json="{'success':true,'isSuccess':true}";
             }else{

@@ -4,7 +4,7 @@ package org.sxdata.jingwei.entity;
  * Created by cRAZY on 2017/3/6.
  * 作业定时调度类 包含了定时调度的时间信息以及被调度的作业、节点等信息
  */
-public class JobTimeScheduler {
+public class JobTimeSchedulerEntity {
     private long idJobtask;
     private Integer idJob;
     private String jobName;
@@ -17,6 +17,24 @@ public class JobTimeScheduler {
     private Integer weekday;
     private Integer dayofmonth;
     private String repoId;
+    private String timerInfo;   //定时信息的详细描述
+    private String hostName;    //节点ip
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
+    }
+
+    public String getTimerInfo() {
+        return timerInfo;
+    }
+
+    public void setTimerInfo(String timerInfo) {
+        this.timerInfo = timerInfo;
+    }
 
     public long getIdJobtask() {
         return idJobtask;

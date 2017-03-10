@@ -4,14 +4,10 @@ import org.pentaho.di.core.Const;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.sxdata.jingwei.entity.CarteClient;
-import org.sxdata.jingwei.entity.JobTimeScheduler;
-import org.sxdata.jingwei.entity.Slave;
-import org.sxdata.jingwei.entity.User;
+import org.sxdata.jingwei.util.TaskUtil.CarteClient;
+import org.sxdata.jingwei.entity.SlaveEntity;
+import org.sxdata.jingwei.entity.UserEntity;
 import org.sxdata.jingwei.util.TaskUtil.CarteTaskManager;
-
-import javax.jws.soap.SOAPBinding;
-import java.util.Set;
 
 /**
  * Created by cRAZY on 2017/3/6.
@@ -21,8 +17,8 @@ public class JobTimerTask implements Job{
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         String path = context.getJobDetail().getJobDataMap().getString("jobFullPath");
-        Slave slave=(Slave)context.getJobDetail().getJobDataMap().get("slave");
-        User user=(User)context.getJobDetail().getJobDataMap().get("loginUser");
+        SlaveEntity slave=(SlaveEntity)context.getJobDetail().getJobDataMap().get("slave");
+        UserEntity user=(UserEntity)context.getJobDetail().getJobDataMap().get("loginUser");
         try {
             CarteClient cc=new CarteClient(slave);
             //拼接资源库名

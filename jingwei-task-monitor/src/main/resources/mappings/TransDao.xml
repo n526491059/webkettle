@@ -1,7 +1,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.sxdata.jingwei.dao.TransDao">
     <!--不带条件分页查询-->
-    <select id="getThisPageTrans" resultType="org.sxdata.jingwei.entity.Transformation">
+    <select id="getThisPageTrans" resultType="org.sxdata.jingwei.entity.TransformationEntity">
         select
         j.name as name,
         j.ID_DIRECTORY as directoryId,
@@ -19,7 +19,7 @@
 
 
     <!--带条件分页查询-->
-    <select id="conditionFindTrans" resultType="org.sxdata.jingwei.entity.Transformation">
+    <select id="conditionFindTrans" resultType="org.sxdata.jingwei.entity.TransformationEntity">
         select
         j.name as name,
         j.ID_DIRECTORY as directoryId,

@@ -53,7 +53,7 @@ function generateSlaveWindow(path,flag2){
 }
 
 //获得节点的列表panel 参数为列表需要的功能按钮
-function getSlaveGridPanel(tbar,h){
+function getSlaveGridPanel(h){
     var sm2=new Ext.grid.CheckboxSelectionModel();
     //节点列模型
     var slaveModel=new Ext.grid.ColumnModel([
@@ -91,8 +91,7 @@ function getSlaveGridPanel(tbar,h){
         cm:slaveModel,      //列模型
         sm:sm2,      //行选择框
         store:store,    //数据源
-        closable:true,
-        tbar:tbar
+        closable:true
     })
     return slaveGridPanel;
 }

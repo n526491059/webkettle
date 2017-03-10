@@ -1,4 +1,4 @@
-package org.sxdata.jingwei.entity;
+package org.sxdata.jingwei.bean;
 
 import java.util.List;
 

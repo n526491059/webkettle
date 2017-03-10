@@ -1,4 +1,4 @@
-package org.sxdata.jingwei.service;
+package org.sxdata.jingwei.service.Impl;
 
 import net.sf.json.JSONObject;
 import org.flhy.ext.App;
@@ -8,14 +8,17 @@ import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.sxdata.jingwei.bean.PageforBean;
 import org.sxdata.jingwei.dao.DirectoryDao;
 import org.sxdata.jingwei.dao.SlaveDao;
 import org.sxdata.jingwei.dao.TransDao;
 import org.sxdata.jingwei.dao.UserDao;
 import org.sxdata.jingwei.entity.*;
+import org.sxdata.jingwei.service.TransService;
+import org.sxdata.jingwei.util.TaskUtil.CarteClient;
 import org.sxdata.jingwei.util.TaskUtil.CarteTaskManager;
 import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
-import org.sxdata.jingwei.util.CommonUtil.Util;
+import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -44,13 +47,13 @@ public class TransServiceImpl implements TransService {
         net.sf.json.JSONObject result=null;
         PageforBean pages=new PageforBean();
         Integer totalCount=0;
-        List<Transformation> trans=null;
+        List<TransformationEntity> trans=null;
 
         //如果传递的日期以及转换名参数都为空则代表是无条件查询,否则根据条件查询
-        if(Util.isEmpty(createDate) && Util.isEmpty(transName)){
+        if(StringDateUtil.isEmpty(createDate) && StringDateUtil.isEmpty(transName)){
            trans=transDao.getThisPageTrans(start, limit);
             //对日期进行处理转换成指定的格式
-            for (Transformation transformation:trans){
+            for (TransformationEntity transformation:trans){
                 transformation.setCreateDate(format.parse(format.format(transformation.getCreateDate())));
                 transformation.setModifiedDate(format.parse(format.format(transformation.getModifiedDate())));
             }
@@ -59,7 +62,7 @@ public class TransServiceImpl implements TransService {
         }else{
             createDate+=" 00:00:00";
             trans=transDao.conditionFindTrans(start,limit,transName,createDate);
-            for (Transformation transformation:trans){
+            for (TransformationEntity transformation:trans){
                 transformation.setCreateDate(format.parse(format.format(transformation.getCreateDate())));
                 transformation.setModifiedDate(format.parse(format.format(transformation.getModifiedDate())));
             }
@@ -67,7 +70,7 @@ public class TransServiceImpl implements TransService {
 
         }
         //根据转换的id来查找该作业在资源库的绝对目录
-        for (Transformation tran:trans){
+        for (TransformationEntity tran:trans){
             String directoryName="";
             Integer directoryId=tran.getDirectoryId();
             //判断该作业是否是在根目录下 如果对应的目录id为0代表在根目录/下面
@@ -75,7 +78,7 @@ public class TransServiceImpl implements TransService {
                 directoryName="/"+tran.getName();
             }else{
                 //不是在根目录下,获取作业所在当前目录的目录名  并且拼接上作业名
-                Directory directory=directoryDao.getDirectoryById(directoryId);
+                DirectoryEntity directory=directoryDao.getDirectoryById(directoryId);
                 directoryName=directory.getDirectoryName()+"/"+tran.getName();
                 Integer parentId=directory.getParentDirectoryId();
                 //继续判断该文件上一级的目录是否是根目录
@@ -84,7 +87,7 @@ public class TransServiceImpl implements TransService {
                 }else{
                     //循环判断该目录的父级目录是否是根目录 直到根部为止
                     while(parentId!=0){
-                        Directory parentDirectory=directoryDao.getDirectoryById(parentId);
+                        DirectoryEntity parentDirectory=directoryDao.getDirectoryById(parentId);
                         directoryName=parentDirectory.getDirectoryName()+"/"+directoryName;
                         parentId=parentDirectory.getParentDirectoryId();
                     }
@@ -98,7 +101,7 @@ public class TransServiceImpl implements TransService {
 
         pages.setRoot(trans);
         pages.setTotalProperty(totalCount);
-        result=net.sf.json.JSONObject.fromObject(pages,Util.configJson("yyyy-MM-dd HH:mm:ss"));
+        result=net.sf.json.JSONObject.fromObject(pages, StringDateUtil.configJson("yyyy-MM-dd HH:mm:ss"));
         return result;
     }
 
@@ -119,10 +122,10 @@ public class TransServiceImpl implements TransService {
     @Override
     public void executeTransformation(String path,Integer slaveId) throws Exception {
         //获取用户信息
-        User loginUser=userDao.getUserbyName("admin");
+        UserEntity loginUser=userDao.getUserbyName("admin");
         loginUser.setPassword(KettleEncr.decryptPasswd("Encrypted " + loginUser.getPassword()));
         //构造Carte对象
-        Slave slave=slaveDao.getSlaveById(slaveId);
+        SlaveEntity slave=slaveDao.getSlaveById(slaveId);
         slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));
         CarteClient carteClient=new CarteClient(slave);
         //拼接资源库名

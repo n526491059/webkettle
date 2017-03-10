@@ -286,6 +286,10 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				secondGuidePanel.removeAll(true);
 				secondGuidePanel.add(generateTrans("","",undefined));
 				secondGuidePanel.doLayout();
+			}else if(node.text == "<font size = '2px'>调度管理</font>") {
+				secondGuidePanel.removeAll(true);
+				secondGuidePanel.add(generateSchedulerMonitorPanel("","",""));
+				secondGuidePanel.doLayout();
 			}
 		});
 		

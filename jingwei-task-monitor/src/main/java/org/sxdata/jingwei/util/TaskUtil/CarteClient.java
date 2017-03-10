@@ -1,4 +1,4 @@
-package org.sxdata.jingwei.entity;
+package org.sxdata.jingwei.util.TaskUtil;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -9,16 +9,13 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.message.BasicHeader;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
-import org.mybatis.spring.SqlSessionFactoryBean;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.www.*;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.sxdata.jingwei.util.TaskUtil.CarteTaskManager;
-import org.sxdata.jingwei.util.TaskUtil.HttpClientUtil;
+import org.sxdata.jingwei.entity.SlaveEntity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,7 +28,7 @@ import java.io.InputStreamReader;
 public class CarteClient implements ApplicationContextAware {
     private String httpUrl;
     private Header authorization;
-    private Slave slave;
+    private SlaveEntity slave;
     public static String databaseName;  //数据库名
 
 
@@ -68,7 +65,7 @@ public class CarteClient implements ApplicationContextAware {
     public final static String REMOVE_JOB = RemoveJobServlet.CONTEXT_PATH;
     public final static String PAUSE_TRANS = PauseTransServlet.CONTEXT_PATH;
 
-    public CarteClient(Slave slave) {
+    public CarteClient(SlaveEntity slave) {
         this.httpUrl = "http://" + slave.getHostName() + ":" + slave.getPort();
         this.authorization = new BasicHeader("Authorization", "Basic " +
                 Base64.encodeBase64String((slave.getUsername() + ":" + slave.getPassword()).getBytes()));
@@ -148,7 +145,7 @@ public class CarteClient implements ApplicationContextAware {
         return authorization;
     }
 
-    public Slave getSlave() {
+    public SlaveEntity getSlave() {
         return slave;
     }
 
@@ -156,7 +153,7 @@ public class CarteClient implements ApplicationContextAware {
         this.httpUrl = httpUrl;
     }
 
-    public void setSlave(Slave slave) {
+    public void setSlave(SlaveEntity slave) {
         this.slave = slave;
     }
 
