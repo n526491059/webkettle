@@ -276,7 +276,6 @@ public class RepositoryController {
 	protected void open(@RequestParam String path, @RequestParam String type) throws Exception {
 		String dir = path.substring(0, path.lastIndexOf("/"));
 		String name = path.substring(path.lastIndexOf("/") + 1);
-		System.out.println(RepositoryObjectType.TRANSFORMATION.getTypeDescription());
 		Repository repository = App.getInstance().getRepository();
 		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
 		if(directory == null)
