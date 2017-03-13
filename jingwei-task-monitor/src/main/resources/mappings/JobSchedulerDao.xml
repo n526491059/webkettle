@@ -2,7 +2,7 @@
 <mapper namespace="org.sxdata.jingwei.dao.JobSchedulerDao">
 
     <!--获得所有的定时作业-->
-    <select id="getAllTimerJob" resultType="org.sxdata.jingwei.entity.JobTimeScheduler">
+    <select id="getAllTimerJob" resultType="org.sxdata.jingwei.entity.JobTimeSchedulerEntity">
         select
             d.ID_JOBTASK as idJobtask,
             d.ID_JOB as idJob,
@@ -19,12 +19,80 @@
           from d_timerscheduler d
     </select>
 
+    <!--分页形式获得所有的定时作业 附带条件查询-->
+    <select id="getTimerJobByPage" resultType="org.sxdata.jingwei.entity.JobTimeSchedulerEntity">
+        select
+        d.ID_JOBTASK as idJobtask,
+        d.ID_JOB as idJob,
+        d.JOB_NAME as jobName,
+        d.SLAVES as slaves,
+        d.ISREPEAT as isrepeat,
+        d.SCHEDULERTYPE as schedulertype,
+        d.INTERVALMINUTES as intervalminutes,
+        d.`HOUR` as hour,
+        d.MINUTES as minutes,
+        d.WEEKDAY as weekday,
+        d.DAYOFMONTH as dayofmonth,
+        d.REPO_ID as repoId
+        from d_timerscheduler d where 1=1
+        <if test='param3!=null and param3!=""'  >
+            and  d.SCHEDULERTYPE = #{2}
+        </if>
+        <if test='param4!=null and param4!=""'>
+            and d.SLAVES = #{3}
+        </if>
+        <if test='param5!=null and param5!=""'>
+            and d.JOB_NAME LIKE concat('%',#{4},'%')
+        </if>
+         limit #{0},#{1}
+    </select>
+
     <!--添加新的定时作业-->
-    <insert id="addTimerJob" parameterType="org.sxdata.jingwei.entity.JobTimeScheduler">
+    <insert id="addTimerJob" parameterType="org.sxdata.jingwei.entity.JobTimeSchedulerEntity">
 		insert into d_timerscheduler values(#{idJobtask},#{idJob},
 		#{slaves},#{jobName},#{isrepeat},#{schedulertype},
 		#{intervalminutes},#{hour},
 		#{minutes},#{weekday},#{dayofmonth},#{repoId}
 		)
     </insert>
+
+    <!--删除定时作业-->
+    <delete id="deleteScheduler">
+        delete from d_timerscheduler where d_timerscheduler.ID_JOBTASK=#{taskId}
+    </delete>
+
+    <select id="getTotalCount" resultType="java.lang.Integer">
+         select count(1) from d_timerscheduler
+    </select>
+
+    <select id="getSchedulerBytaskId" resultType="org.sxdata.jingwei.entity.JobTimeSchedulerEntity">
+        select
+        d.ID_JOBTASK as idJobtask,
+        d.ID_JOB as idJob,
+        d.JOB_NAME as jobName,
+        d.SLAVES as slaves,
+        d.ISREPEAT as isrepeat,
+        d.SCHEDULERTYPE as schedulertype,
+        d.INTERVALMINUTES as intervalminutes,
+        d.`HOUR` as hour,
+        d.MINUTES as minutes,
+        d.WEEKDAY as weekday,
+        d.DAYOFMONTH as dayofmonth,
+        d.REPO_ID as repoId
+        from d_timerscheduler d where d.ID_JOBTASK=#{taskId}
+    </select>
+
+    <update id="updateScheduler" parameterType="org.sxdata.jingwei.entity.JobTimeSchedulerEntity">
+        UPDATE d_timerscheduler
+        <trim prefix="set" suffixOverrides=",">
+            INTERVALMINUTES=#{intervalminutes},
+            SCHEDULERTYPE=#{schedulertype},
+            SLAVES=#{slaves},
+            d_timerscheduler.`HOUR`=#{hour},
+            MINUTES=#{minutes},
+            WEEKDAY=#{weekday},
+            DAYOFMONTH=#{dayofmonth}
+        </trim>
+        WHERE ID_JOBTASK=#{idJobtask}
+    </update>
 </mapper>

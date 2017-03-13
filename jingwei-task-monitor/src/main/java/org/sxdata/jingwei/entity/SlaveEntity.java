@@ -4,7 +4,7 @@ package org.sxdata.jingwei.entity;
  * Created by cRAZY on 2017/2/28.
  * 节点
  */
-public class Slave {
+public class SlaveEntity {
     private Integer slaveId;    //节点id
     private String hostName;    //节点的ip地址
     private String slaveUsername;

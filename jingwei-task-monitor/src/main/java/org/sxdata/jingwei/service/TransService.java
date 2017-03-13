@@ -1,10 +1,6 @@
 package org.sxdata.jingwei.service;
 
 import net.sf.json.JSONObject;
-import org.sxdata.jingwei.entity.PageforBean;
-import org.sxdata.jingwei.entity.Transformation;
-
-import java.util.List;
 
 /**
  * Created by cRAZY on 2017/2/22.

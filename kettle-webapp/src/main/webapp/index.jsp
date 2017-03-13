@@ -126,6 +126,6 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/transMonitor.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/slave.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/fixedtimeExecute.js"></script>
-
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/JobScheduler.js"></script>
 	</body>
 </html>

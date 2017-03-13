@@ -1,7 +1,6 @@
 package org.sxdata.jingwei.service;
 
-import org.sxdata.jingwei.entity.PageforBean;
-import org.sxdata.jingwei.entity.Slave;
+import org.sxdata.jingwei.entity.SlaveEntity;
 
 import java.util.List;
 
@@ -10,7 +9,7 @@ import java.util.List;
  */
 public interface SlaveService {
 
-    public List<Slave> getAllSlave() throws Exception;
+    public List<SlaveEntity> getAllSlave() throws Exception;
 
-    public Slave getSlaveByLoadAvg(List<Slave> slaves) throws Exception;
+    public SlaveEntity getSlaveByLoadAvg(List<SlaveEntity> slaves) throws Exception;
 }

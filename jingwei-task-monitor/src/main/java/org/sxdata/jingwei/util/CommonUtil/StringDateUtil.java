@@ -14,7 +14,7 @@ import java.util.Map;
  * Created by cRAZY on 2017/2/22.
  *
  */
-public class Util {
+public class StringDateUtil {
     //为json-lib日期返回正常的中的指定格式
     public static JsonConfig configJson(String datePattern){
         JsonConfig  config=new JsonConfig();
@@ -86,5 +86,35 @@ public class Util {
             result=1;
         }
         return result;
+    }
+
+    public  static String getWeekByValue(Integer weekValue){
+        String week="";
+        switch(weekValue){
+            case 1:
+                week="周日";
+                break;
+            case 2:
+                week="周一";
+                break;
+            case 3:
+                week="周二";
+                break;
+            case 4:
+                week="周三";
+                break;
+            case 5:
+                week="周四";
+                break;
+            case 6:
+                week="周五";
+                break;
+            case 7:
+                week="周六";
+                break;
+            default:
+                break;
+        }
+        return week;
     }
 }

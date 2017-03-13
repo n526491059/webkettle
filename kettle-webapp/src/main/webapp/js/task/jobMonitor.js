@@ -1,6 +1,4 @@
 
-
-
 function generateJobPanel(jobName,createDate,inputName){
     var secondGuidePanel=Ext.getCmp("secondGuidePanel");//二级菜单
 
@@ -182,7 +180,7 @@ function generateJobPanel(jobName,createDate,inputName){
                 },"-",{
                     text:"定时执行",
                     handler:function(){
-                        var fiexdWindow=fixedExecuteWindow();
+                        var fiexdWindow=fixedExecuteWindow("添加",new Array(),"/task/fiexdExecute.do");
                         fiexdWindow.show(grid);
                     }
                 },"-",{

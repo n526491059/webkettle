@@ -1,7 +1,7 @@
 package org.sxdata.jingwei.dao;
 
 import org.springframework.stereotype.Repository;
-import org.sxdata.jingwei.entity.Slave;
+import org.sxdata.jingwei.entity.SlaveEntity;
 
 import java.util.List;
 
@@ -13,7 +13,9 @@ public interface SlaveDao {
 
     public Integer getSlaveTotalCount();
 
-    public Slave getSlaveById(Integer id);
+    public SlaveEntity getSlaveById(Integer id);
 
-    public List<Slave> getAllSlave();
+    public List<SlaveEntity> getAllSlave();
+
+    public SlaveEntity getSlaveByHostName(String hostName);
 }

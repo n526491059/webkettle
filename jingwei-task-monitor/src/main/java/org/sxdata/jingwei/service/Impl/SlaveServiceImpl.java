@@ -1,11 +1,12 @@
-package org.sxdata.jingwei.service;
+package org.sxdata.jingwei.service.Impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sxdata.jingwei.dao.SlaveDao;
-import org.sxdata.jingwei.entity.CarteClient;
-import org.sxdata.jingwei.entity.CarteStatusVo;
-import org.sxdata.jingwei.entity.Slave;
+import org.sxdata.jingwei.service.SlaveService;
+import org.sxdata.jingwei.util.TaskUtil.CarteClient;
+import org.sxdata.jingwei.util.TaskUtil.CarteStatusVo;
+import org.sxdata.jingwei.entity.SlaveEntity;
 import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
 
 import java.util.List;
@@ -14,15 +15,15 @@ import java.util.List;
  * Created by cRAZY on 2017/2/28.
  */
 @Service
-public class SlaveServiceImpl implements SlaveService{
+public class SlaveServiceImpl implements SlaveService {
     @Autowired
     protected SlaveDao slaveDao;
 
     @Override
     //获取所有节点信息
-    public List<Slave> getAllSlave() throws Exception {
-        List<Slave> slaves=slaveDao.getAllSlave();
-        for(Slave slave:slaves){
+    public List<SlaveEntity> getAllSlave() throws Exception {
+        List<SlaveEntity> slaves=slaveDao.getAllSlave();
+        for(SlaveEntity slave:slaves){
             //对取出的节点密码进行解码重新赋值
             slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));
             //获取节点状态的相关信息
@@ -51,8 +52,8 @@ public class SlaveServiceImpl implements SlaveService{
 
     @Override
     //选择一个负载指数最低的节点
-    public Slave getSlaveByLoadAvg(List<Slave> slaves) throws Exception {
-        Slave minSlave=null;
+    public SlaveEntity getSlaveByLoadAvg(List<SlaveEntity> slaves) throws Exception {
+        SlaveEntity minSlave=null;
         if(slaves!=null && slaves.size()>0){
             //把不正常的节点移除
             for(int i=0;i<slaves.size();i++){

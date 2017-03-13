@@ -1,8 +1,8 @@
 package org.sxdata.jingwei.service;
 
 import net.sf.json.JSONObject;
-import org.sxdata.jingwei.entity.Job;
-import org.sxdata.jingwei.entity.JobTimeScheduler;
+import org.sxdata.jingwei.entity.JobEntity;
+import org.sxdata.jingwei.entity.JobTimeSchedulerEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +19,7 @@ public interface JobService {
 
     public boolean timeExecuteJob(Map<String,Object> params) throws Exception;
 
-    public List<JobTimeScheduler> getAllTimerJob();
+    public List<JobTimeSchedulerEntity> getAllTimerJob();
 
-    public Job getJobById(Integer jobId);
+    public JobEntity getJobById(Integer jobId);
 }

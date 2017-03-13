@@ -65,7 +65,7 @@
 		<property name="password" value="hadoop"/>
 	</bean>
 
-	<bean id="carteClient" class="org.sxdata.jingwei.entity.CarteClient">
+	<bean id="carteClient" class="org.sxdata.jingwei.util.TaskUtil.CarteClient">
 
 	</bean>
 

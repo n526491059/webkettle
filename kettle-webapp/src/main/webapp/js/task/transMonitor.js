@@ -282,8 +282,6 @@ function generateTrans(transName,createDate,inputName){
     return grid;
 }
 
-
-
 function closeWindwo(){
     Ext.getCmp("executeWindow").close();
 }

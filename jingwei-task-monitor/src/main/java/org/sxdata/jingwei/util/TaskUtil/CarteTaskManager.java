@@ -6,8 +6,8 @@ import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.sxdata.jingwei.entity.*;
-import org.sxdata.jingwei.entity.Job;
-import org.sxdata.jingwei.service.JobServiceImpl;
+import org.sxdata.jingwei.entity.JobEntity;
+import org.sxdata.jingwei.service.Impl.JobServiceImpl;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -39,7 +39,7 @@ public class CarteTaskManager {
 		queue.add(new CarteTask(carteClient, type, url));
 	}
 
-	public static void addTimerTask(Set<String> slaveIds, String jobFullPath, String loglevel, JobTimeScheduler dTimerschedulerEntity,Slave slave,User user) {
+	public static void addTimerTask(Set<String> slaveIds, String jobFullPath, String loglevel, JobTimeSchedulerEntity dTimerschedulerEntity,SlaveEntity slave,UserEntity user) {
 		queue.add(new JobTimerTask(slaveIds, jobFullPath, loglevel, dTimerschedulerEntity,slave,user));
 	}
 
@@ -79,11 +79,11 @@ public class CarteTaskManager {
 		Set<String> slaveIds;
 		String jobFullPath;
 		String loglevel;
-		JobTimeScheduler dTimerschedulerEntity;
-		Slave slave;
-		User loginUser;
+		JobTimeSchedulerEntity dTimerschedulerEntity;
+		SlaveEntity slave;
+		UserEntity loginUser;
 
-		public JobTimerTask(Set<String> slaveIds, String jobFullPath, String loglevel,JobTimeScheduler dTimerschedulerEntity,Slave slave,User user) {
+		public JobTimerTask(Set<String> slaveIds, String jobFullPath, String loglevel,JobTimeSchedulerEntity dTimerschedulerEntity,SlaveEntity slave,UserEntity user) {
 			this.slaveIds = slaveIds;
 			this.jobFullPath = jobFullPath;
 			this.loglevel = loglevel;
@@ -211,12 +211,12 @@ public class CarteTaskManager {
 		JobServiceImpl js=new JobServiceImpl();
 		//获取session对象查询所有定时作业
 		SqlSession session=bean.openSession();
-		List<JobTimeScheduler> jobsTimer=session.selectList("org.sxdata.jingwei.dao.JobSchedulerDao.getAllTimerJob");
+		List<JobTimeSchedulerEntity> jobsTimer=session.selectList("org.sxdata.jingwei.dao.JobSchedulerDao.getAllTimerJob");
 		SchedulerFactory factory=new StdSchedulerFactory();
 		if(jobsTimer==null || jobsTimer.size()<1){
 			System.out.println("当前暂无定时作业");
 		}else{
-			for(JobTimeScheduler timerJob:jobsTimer){
+			for(JobTimeSchedulerEntity timerJob:jobsTimer){
 				//获取定时作业的参数
 				String isRepeat = timerJob.getIsrepeat();
 				Integer schedulertype = timerJob.getSchedulertype();
@@ -230,8 +230,8 @@ public class CarteTaskManager {
 				Integer jobId = timerJob.getIdJob();
 				String repoName = timerJob.getRepoId();
 				//根据id获取当前作业
-				org.sxdata.jingwei.entity.Job thisJob=session.selectOne("org.sxdata.jingwei.dao.JobDao.getJobById",jobId);
-				List<Job> jobs=new ArrayList<Job>();
+				JobEntity thisJob=session.selectOne("org.sxdata.jingwei.dao.JobDao.getJobById",jobId);
+				List<JobEntity> jobs=new ArrayList<JobEntity>();
 				jobs.add(thisJob);
 				//获取作业的全路径
 				jobs=js.getJobPath(jobs);
@@ -242,10 +242,14 @@ public class CarteTaskManager {
 				//获取当前作业定时所用到的所有节点 封装在map中 当前暂不支持集群
 				HashMap<String, String> thisIdIpMap = new HashMap<String,String>();
 				String[] id_ip=slaves.split("_");
-				thisIdIpMap.put(id_ip[0],id_ip[1]);
+				thisIdIpMap.put(id_ip[0], id_ip[1]);
+				List<SlaveEntity> slaveList=session.selectList("org.sxdata.jingwei.dao.SlaveDao.getSlaveById",Integer.valueOf(id_ip[0]));
+				//TODO
+				List<UserEntity> userEntityList=session.selectList("org.sxdata.jingwei.dao.UserDao.getUserbyName","admin");
 
-				job.getJobDataMap().put("slaveIds", thisIdIpMap.keySet());
+				job.getJobDataMap().put("slave",slaveList.get(0));
 				job.getJobDataMap().put("jobFullPath", jobPath);
+				job.getJobDataMap().put("loginUser", userEntityList.get(0));
 				job.getJobDataMap().put("dTimerschedulerEntity", timerJob);
 				//设置定时规则
 				Trigger trigger =null;
