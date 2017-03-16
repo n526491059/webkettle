@@ -158,7 +158,7 @@ function generateSchedulerMonitorPanel(typeId,hostName,jobName){
                                     {
                                         case 1:
                                             Ext.getCmp("intervalminute").setValue(results.intervalminutes);
-                                            Ext.getCmp("typeChoose").setValue("间隔执行");
+                                            Ext.getCmp("typeChoose").setValue("间隔重复");
                                             break;
                                         case 2:
                                             Ext.getCmp("minuteField").setValue(results.minutes);
@@ -268,7 +268,7 @@ function generateSchedulerTypeSelect(typeId){
     })
     if(typeId!=undefined && typeId!=""){
         if(typeId=="1"){
-            typeChooseCom.setValue("间隔执行");
+            typeChooseCom.setValue("间隔重复");
         }else if(typeId=="2"){
             typeChooseCom.setValue("每天执行");
         }else if(typeId=="3"){

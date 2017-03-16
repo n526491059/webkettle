@@ -46,14 +46,21 @@ function generateSlaveWindow(path,flag2){
         ]
     })
     //给节点列表添加功能按钮
-    var slaveGridPanel=getSlaveGridPanel(tbar,300);
+    var slaveGridPanel=getSlaveGridPanel(300,tbar);
     //把展示节点的panel追加窗口中
     executeWindow.add(slaveGridPanel);
     return executeWindow;
 }
 
-//获得节点的列表panel 参数为列表需要的功能按钮
-function getSlaveGridPanel(h){
+//获得节点的列表panel
+function getSlaveGridPanel(h,tbar){
+    if(tbar==""){
+        tbar=new Ext.Toolbar({
+            buttons:[
+            ]
+        })
+    }
+
     var sm2=new Ext.grid.CheckboxSelectionModel();
     //节点列模型
     var slaveModel=new Ext.grid.ColumnModel([
@@ -91,7 +98,8 @@ function getSlaveGridPanel(h){
         cm:slaveModel,      //列模型
         sm:sm2,      //行选择框
         store:store,    //数据源
-        closable:true
+        closable:true,
+        tbar:tbar
     })
     return slaveGridPanel;
 }
@@ -131,5 +139,26 @@ function ifSlaveChoose(){
         }
     }
     return result;
+}
+
+function slaveManager(){
+    var tbar=new Ext.Toolbar({
+        buttons: [
+            {
+                text: "新增",
+                handler: function () {
+
+                }
+            }, "-",
+            {
+               text:"修改",
+                handler:function(){
+
+                }
+            }
+        ]
+    });
+    var slavePanel=getSlaveGridPanel(500,tbar);
+    return slavePanel;
 }
 

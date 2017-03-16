@@ -148,7 +148,7 @@ function IntevalMinuteTextField(){
 function fixedExecuteWindow(flag,formElementArray,uri){
      var chooseForm=generateDateForm(flag,formElementArray,uri);
     //获得节点展示列表
-    var slavePanel=getSlaveGridPanel(150);
+    var slavePanel=getSlaveGridPanel(150,"");
     var fiexdWindow=new Ext.Window({
         id:"fiexdWindow",
         title:"定时窗口",
@@ -188,7 +188,7 @@ function generateDateForm(flag,array,uri){
 function getExecuteTypeCombox(flag,uri){
     //下拉列表智能执行的数据来源  暂时支持4种定时
     var typeData=[
-        ["间隔执行","间隔执行"],
+        ["间隔重复","间隔重复"],
         ["每天执行","每天执行"],
         ["每周执行","每周执行"],
         ["每月执行","每月执行"]
@@ -231,7 +231,7 @@ function getExecuteTypeCombox(flag,uri){
                     case 0:
                         //按指定的时间间隔执行
                         formArray.push(IntevalMinuteTextField());
-                        chooseTypeName="间隔执行";
+                        chooseTypeName="间隔重复";
                         break;
                     case 1:
                         //每天的某个时间执行

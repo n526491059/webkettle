@@ -286,7 +286,16 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				secondGuidePanel.removeAll(true);
 				secondGuidePanel.add(generateSchedulerMonitorPanel("","",""));
 				secondGuidePanel.doLayout();
+			}else if(node.text=="<font size = '2px'>任务监控</font>"){
+				secondGuidePanel.removeAll(true);
+				secondGuidePanel.add(showTaskControlPanel());
+				secondGuidePanel.doLayout();
+			}else if(node.text=="<font size = '2px'>节点管理</font>"){
+				secondGuidePanel.removeAll(true);
+				secondGuidePanel.add(slaveManager());
+				secondGuidePanel.doLayout();
 			}
+			//TODO  节点管理
 		});
 		
 		this.items = [fristGuidePanel, secondGuidePanel];

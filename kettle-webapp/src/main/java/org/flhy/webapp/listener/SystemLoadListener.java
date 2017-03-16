@@ -30,7 +30,7 @@ public class SystemLoadListener implements ServletContextListener {
 //		System.setProperty(Const.KETTLE_CORE_STEPS_FILE, "org/flhy/ext/kettle-steps-file.xml");
 		try {
 			System.out.println("开启carte服务线程...");
-			CarteTaskManager.startThread(1);//启动一个线程处理执行carte服务默认开启一个
+			CarteTaskManager.startThread(1);//启动1个线程处理执行carte服务
 			// 日志缓冲不超过5000行，缓冲时间不超过720秒
 			KettleLogStore.init( 5000, 720 );
 			KettleEnvironment.init();

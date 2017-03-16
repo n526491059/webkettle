@@ -22,7 +22,7 @@ public class JobTimerTask implements Job{
         try {
             CarteClient cc=new CarteClient(slave);
             //拼接资源库名
-            String repoId=slave.getHostName()+"_"+CarteClient.databaseName;
+            String repoId=CarteClient.hostName+"_"+CarteClient.databaseName;
             //节点执行作业的请求
             String urlString="/?rep="+repoId+"&user="+user.getLogin()+"&pass="+user.getPassword()+"&job="+path+"&level=Basic";
             urlString = Const.replace(urlString, "/", "%2F");

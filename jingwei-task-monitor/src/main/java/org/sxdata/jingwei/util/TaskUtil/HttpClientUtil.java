@@ -44,7 +44,7 @@ public class HttpClientUtil {
         }
     }
 
-    public static HttpClient getHttpClient() {
+    public static synchronized HttpClient getHttpClient() {
         HttpParams params = new BasicHttpParams();
         params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION,
                 HttpVersion.HTTP_1_1);

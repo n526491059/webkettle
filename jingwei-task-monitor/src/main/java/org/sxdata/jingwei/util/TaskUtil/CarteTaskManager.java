@@ -31,6 +31,7 @@ public class CarteTaskManager {
 	public static boolean isRunFlag() {
 		return runFlag;
 	}
+
 	public static void setRunFlag(boolean runFlag) {
 		CarteTaskManager.runFlag = runFlag;
 	}
@@ -63,11 +64,7 @@ public class CarteTaskManager {
 			final String urlString = this.url;
 			String result = null;
 			try {
-//			if(!task.equals("trans_exec")){
-				result = cc.doGet(urlString);
-//			}else {
-//				cc.doGet(urlString);
-//			}
+				result=cc.doGet(urlString);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -206,6 +203,7 @@ public class CarteTaskManager {
 	}
 
 
+
 	//服务器启动后执行该方法 获取数据库中所有定时作业 开始执行
 	public static void startJobTimeTask(DefaultSqlSessionFactory bean) throws Exception{
 		JobServiceImpl js=new JobServiceImpl();
@@ -282,5 +280,4 @@ public class CarteTaskManager {
 			}
 		}
 	}
-
 }

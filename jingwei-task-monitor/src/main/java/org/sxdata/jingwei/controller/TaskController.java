@@ -1,5 +1,6 @@
 package org.sxdata.jingwei.controller;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.flhy.ext.App;
 import org.flhy.ext.PluginFactory;
@@ -12,6 +13,7 @@ import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.pentaho.di.repository.RepositoryObjectType;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.StepStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.sxdata.jingwei.entity.SlaveEntity;
+import org.sxdata.jingwei.entity.TaskControlEntity;
+import org.sxdata.jingwei.service.ControlService;
 import org.sxdata.jingwei.service.JobService;
 import org.sxdata.jingwei.service.SlaveService;
 import org.sxdata.jingwei.service.TransService;
@@ -26,6 +30,7 @@ import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
+import java.util.List;
 
 
 /**
@@ -41,6 +46,120 @@ public class TaskController {
     protected JobService jobService;
     @Autowired
     protected SlaveService slaveService;
+    @Autowired
+    protected ControlService controlService;
+
+    //停止转换/作业
+    @RequestMapping(value="/pauseOrStart")
+    @ResponseBody
+    protected void pauseOrStart(HttpServletResponse response,HttpServletRequest request){
+        try{
+            String[] idArray=request.getParameterValues("idArray");
+            String[] hostArray=request.getParameterValues("hostArray");
+            controlService.pauseOrStartTrans(idArray,hostArray);
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write("{\"success\":true}");
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            String errorMessage=e.getMessage();
+            e.printStackTrace();
+        }
+    }
+
+    //停止转换/作业
+    @RequestMapping(value="/stopTransOrJob")
+    @ResponseBody
+    protected void stopTransOrJob(HttpServletResponse response,HttpServletRequest request){
+        try{
+            String[] idArray=request.getParameterValues("idArray");
+            String[] hostArray=request.getParameterValues("hostArray");
+            String[] typeArray=request.getParameterValues("typeArray");
+            for(int i=0;i<typeArray.length;i++){
+                if(typeArray[i].trim().equals("作业")){
+                    controlService.stopJob(idArray[i],hostArray[i]);
+                }else{
+                    controlService.stopTrans(idArray[i],hostArray[i]);
+                }
+            }
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write("{\"success\":true}");
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            String errorMessage=e.getMessage();
+            e.printStackTrace();
+        }
+    }
+
+
+    //获取转换的详情列表
+    @RequestMapping(value="/getTransDetail")
+    @ResponseBody
+    protected void getTransDetail(HttpServletResponse response,HttpServletRequest request){
+        try{
+            String carteId=request.getParameter("carteId");
+            String hostName=request.getParameter("hostName");
+            List<StepStatus> lists=controlService.getTransDetail(carteId, hostName);
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write(JSONArray.fromObject(lists).toString());
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            String errorMessage=e.getMessage();
+            e.printStackTrace();
+        }
+    }
+
+    //获取某个任务的日志
+    @RequestMapping(value="/getLog")
+    @ResponseBody
+    protected void getLog(HttpServletResponse response,HttpServletRequest request){
+        try{
+            String result="";
+            String id=request.getParameter("id");
+            String type=request.getParameter("type");
+            String hostName=request.getParameter("hostName");
+            if(type.trim().equals("作业")){
+                result=controlService.getLogDetailForJob(id,hostName);
+            }else if(type.trim().equals("转换")){
+                result=controlService.getLogDetailForTrans(id,hostName);
+            }
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write(result);
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            String errorMessage=e.getMessage();
+            e.printStackTrace();
+        }
+    }
+
+    //获取所有正在运行中的任务(transformation job)
+    @RequestMapping(value="/getRunningTask")
+    @ResponseBody
+    protected void getRunningTask(HttpServletResponse response,HttpServletRequest request){
+        try{
+
+            List<TaskControlEntity> jobItems=controlService.getAllRunningJob();
+            for(TaskControlEntity item:controlService.getAllRunningTrans()){
+                jobItems.add(item);
+            }
+            String result=JSONArray.fromObject(jobItems).toString();
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write(result);
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            String errorMessage=e.getMessage();
+            e.printStackTrace();
+        }
+    }
 
 
     //查询作业;包括条件查询
@@ -184,6 +303,7 @@ public class TaskController {
         out.flush();
         out.close();
     }
+
     //获取结构图信息
     @ResponseBody
     @RequestMapping(method=RequestMethod.POST, value="/detail")
