@@ -102,7 +102,7 @@ public class CarteClient implements ApplicationContextAware {
         return flag ? status : null;
     }
 
-    public synchronized String doGet(String urlString) throws IOException {
+    public  String doGet(String urlString) throws IOException {
         urlString = Const.replace(urlString, " ", "%20");
         HttpGet httpGet = new HttpGet(urlString);
         if (this.authorization != null) {
