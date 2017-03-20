@@ -35,11 +35,19 @@ public class TaskSchedulerController {
             //获取查询参数
             Integer typeId=null;
             if(!StringDateUtil.isEmpty(request.getParameter("typeId"))){
-                typeId=Integer.parseInt(request.getParameter("typeId"));
+                if(request.getParameter("typeId").equals("间隔重复")){
+                    typeId=1;
+                }else if(request.getParameter("typeId").equals("每天执行")){
+                    typeId=2;
+                }else if(request.getParameter("typeId").equals("每周执行")){
+                    typeId=3;
+                }else{
+                    typeId=4;
+                }
             }
             String hostName=request.getParameter("hostName");
             String jobName=request.getParameter("jobName");
-            PageforBean bean=schedulerService.getAllSchedulerByPage(start, limit,typeId,hostName,jobName);
+            PageforBean bean=schedulerService.getAllSchedulerByPage(start,limit,typeId,hostName,jobName);
             //输出结果返回给客户端
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
@@ -93,7 +101,7 @@ public class TaskSchedulerController {
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
             String json="";
-            boolean isSuccess=schedulerService.updateSchedulerJob(StringDateUtil.getMapByRequest(request));
+                boolean isSuccess=schedulerService.updateSchedulerJob(StringDateUtil.getMapByRequest(request));
             if(isSuccess){
                 json="{'success':true,'isSuccess':true}";
             }else{

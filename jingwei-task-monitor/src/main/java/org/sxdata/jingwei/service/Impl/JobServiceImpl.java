@@ -136,7 +136,6 @@ public class JobServiceImpl implements JobService {
             if(directory == null)
                 directory = repository.getUserHomeDirectory();
             ObjectId id = repository.getJobId(name, directory);
-            System.out.println(id);
             repository.deleteJob(id);
         }
     }
@@ -151,13 +150,13 @@ public class JobServiceImpl implements JobService {
         slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));
         CarteClient carteClient=new CarteClient(slave);
         //拼接资源库名
-        String repoId=slave.getHostName()+"_"+CarteClient.databaseName;
+        String repoId=CarteClient.hostName+"_"+CarteClient.databaseName;
         //拼接http请求字符串
         String urlString="/?rep="+repoId+"&user="+loginUser.getLogin()+"&pass="+loginUser.getPassword()+"&job="+path+"&level=Basic";
         urlString = Const.replace(urlString, "/", "%2F");
         urlString = carteClient.getHttpUrl() + CarteClient.EXECREMOTE_JOB +urlString;
         System.out.println("请求远程执行作业的url字符串为" + urlString);
-        CarteTaskManager.addTask(carteClient, "trans_exec", urlString);
+        CarteTaskManager.addTask(carteClient, "job_exec", urlString);
     }
 
 
@@ -294,7 +293,7 @@ public class JobServiceImpl implements JobService {
         String typeInfo=params.get("typeChoose").toString();
         int schedulerType=0;
         //如果是间隔执行则设置执行的时间间隔
-        if(typeInfo.trim().equals("间隔执行")){
+        if(typeInfo.trim().equals("")){
             schedulerType=1;
             jobTimeScheduler.setIntervalminutes(Integer.parseInt(params.get("intervalminute").toString()));
         }else if(typeInfo.trim().equals("每天执行")){

@@ -30,6 +30,7 @@ public class CarteClient implements ApplicationContextAware {
     private Header authorization;
     private SlaveEntity slave;
     public static String databaseName;  //数据库名
+    public static String hostName;  //资源库ip
 
 
 
@@ -41,6 +42,9 @@ public class CarteClient implements ApplicationContextAware {
         int a=url.lastIndexOf("/");
         int b=url.indexOf("?");
         databaseName=url.substring(a+1,b);
+        int c=url.indexOf("/");
+        int d=url.lastIndexOf(":");
+        hostName=url.substring(c+2,d);
         //开启作业定时
         try{
             CarteTaskManager.startJobTimeTask(factoryBean);
@@ -84,8 +88,48 @@ public class CarteClient implements ApplicationContextAware {
         return dbflag;
     }
 
+    public String getJobLogText(String jobCarteId) throws Exception {
+        return SlaveServerJobStatus.fromXML(getJobStatus(jobCarteId)).getLoggingString();
+    }
+
+    public String getJobStatus(String jobId) throws Exception {
+        String urlString = httpUrl + JOB_STATUS + "?xml=Y&id=" + jobId;
+        return doGet(urlString);
+    }
+
     public String getDBStatus() throws Exception {
         String urlString = httpUrl + CARTE_STATUS;
+        return doGet(urlString);
+    }
+
+    public String getTransLogText(String transCarteId) throws Exception {
+        return SlaveServerTransStatus.fromXML(getTransStatus(transCarteId)).getLoggingString();
+    }
+
+    public String stopTrans(String transId) throws Exception {
+        String urlString = httpUrl + STOP_TRANS + "/?" + "xml=Y&id=" + transId;
+        return doGet(urlString);
+    }
+
+    /*
+	暂停某个转换
+	 */
+    public String pauseTrans(String transId) throws Exception {
+        if (SlaveServerTransStatus.fromXML(getTransStatus(transId)).isRunning() || SlaveServerTransStatus.fromXML(getTransStatus(transId)).isPaused()) {
+            String urlString = httpUrl + PAUSE_TRANS + "/?" + "xml=Y&id=" + transId;
+            return doGet(urlString);
+        } else {
+            return "the trans is not running.";
+        }
+    }
+
+    public String stopJob(String jobId) throws Exception {
+        String urlString = httpUrl + STOP_JOB + "/?" + "xml=Y&id=" + jobId;
+        return doGet(urlString);
+    }
+
+    public String getTransStatus(String transId) throws Exception {
+        String urlString = httpUrl + TRANS_STATUS + "?xml=Y&id=" + transId;
         return doGet(urlString);
     }
 
@@ -101,6 +145,8 @@ public class CarteClient implements ApplicationContextAware {
         }
         return flag ? status : null;
     }
+
+
 
     public  String doGet(String urlString) throws IOException {
         urlString = Const.replace(urlString, " ", "%20");
@@ -124,9 +170,20 @@ public class CarteClient implements ApplicationContextAware {
             if (in != null) in.close();
             if (content != null) content.close();
         }
-
         return result;
     }
+
+    public String getTransStatus(String transName, String transId) throws Exception {
+        String urlString = httpUrl + TRANS_STATUS + "?xml=Y&id=" + transId + "&name=" + transName;
+        return doGet(urlString);
+    }
+
+    public String getJobStatus(String jobName, String jobId) throws Exception {
+        String urlString = httpUrl + JOB_STATUS + "?xml=Y&id=" + jobId + "&name=" + jobName;
+        return doGet(urlString);
+    }
+
+
 
     public String getStatus() throws Exception {
         String urlString = httpUrl + CARTE_STATUS + URL_SUF;

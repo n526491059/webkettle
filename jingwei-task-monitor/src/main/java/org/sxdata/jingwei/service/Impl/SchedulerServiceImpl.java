@@ -216,7 +216,6 @@ public class SchedulerServiceImpl implements SchedulerService {
 
     @Override
     public boolean updateSchedulerJob(Map<String, Object> params) throws Exception{
-        System.out.print(params.toString());
         boolean isSuccess=false;
         //获取修改前对象
         JobTimeSchedulerEntity oldJobScheduler=schedulerDao.getSchedulerBytaskId(Long.valueOf(params.get("taskId").toString()));
@@ -232,7 +231,7 @@ public class SchedulerServiceImpl implements SchedulerService {
         SlaveEntity slave=slaveDao.getSlaveById(Integer.valueOf(params.get("slaveId").toString()));
         oldJobScheduler.setSlaves(slave.getSlaveId() + "_" + slave.getHostName());
         String type=params.get("typeChoose").toString().trim();
-        if(type.equals("间隔执行")){
+        if(type.equals("间隔重复")){
             Integer intervalMinutes=Integer.valueOf(params.get("intervalminute").toString());
             oldJobScheduler.setIntervalminutes(intervalMinutes);
             oldJobScheduler.setSchedulertype(1);
