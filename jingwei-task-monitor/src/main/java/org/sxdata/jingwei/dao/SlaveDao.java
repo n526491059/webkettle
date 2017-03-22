@@ -18,4 +18,7 @@ public interface SlaveDao {
     public List<SlaveEntity> getAllSlave();
 
     public SlaveEntity getSlaveByHostName(String hostName);
+
+    public List<SlaveEntity> findSlaveByPageInfo(Integer start,Integer limit);
+
 }

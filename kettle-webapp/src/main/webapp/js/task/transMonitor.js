@@ -135,13 +135,19 @@ function generateTrans(transName,createDate,inputName){
                     text:"执行转换",
                     handler:function(){
                        var path="";
+                        var num=0;
                         var view=grid.getView();
                         var rsm=grid.getSelectionModel();
                         for(var i= 0;i<view.getRows().length;i++){
                             if(rsm.isSelected(i)){
                                 //获取被选中的转换全目录路径
                                 path=grid.getStore().getAt(i).get("directoryName");
+                                num++;
                             }
+                        }
+                        if(num!=1){
+                            Ext.MessageBox.alert("请先选择一个(只能一个)转换再执行");
+                            return;
                         }
                         var executeWindow=generateSlaveWindow(path,"transformation");
                         executeWindow.show(grid);
@@ -149,17 +155,23 @@ function generateTrans(transName,createDate,inputName){
                 },"-",{
                     text:"智能执行",
                     handler:function(){
+                        var path="";
+                        var view=grid.getView();
+                        var rsm=grid.getSelectionModel();
+                        var num=0;
+                        for(var i= 0;i<view.getRows().length;i++){
+                            if(rsm.isSelected(i)){
+                                //获取被选中的转换全目录路径
+                                path=grid.getStore().getAt(i).get("directoryName");
+                                num++;
+                            }
+                        }
+                        if(num!=1){
+                            Ext.MessageBox.alert("请先选择一个(只能一个)转换再执行");
+                            return;
+                        }
                         Ext.MessageBox.confirm("确认","确认执行?",function(btn){
                             if(btn=="yes"){
-                                var path="";
-                                var view=grid.getView();
-                                var rsm=grid.getSelectionModel();
-                                for(var i= 0;i<view.getRows().length;i++){
-                                    if(rsm.isSelected(i)){
-                                        //获取被选中的转换全目录路径
-                                        path=grid.getStore().getAt(i).get("directoryName");
-                                    }
-                                }
                                 powerExecute(path,"transformation");
                             }else{
                                 return;
@@ -248,7 +260,7 @@ function generateTrans(transName,createDate,inputName){
                             params: {taskName: taskName,type:'trans'},
                             success: function(response) {
                                 var resObj = Ext.decode(response.responseText);
-                                var graphPanel = Ext.create({border: false, readOnly: true, }, resObj.GraphType);
+                                var graphPanel = Ext.create({border: false, readOnly: true }, resObj.GraphType);
                                 var dialog = new LogDetailDialog({
                                     items: graphPanel
                                 });

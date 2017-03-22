@@ -1,10 +1,12 @@
 package org.sxdata.jingwei.controller;
 
+import net.sf.json.JSONObject;
 import org.flhy.ext.utils.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.sxdata.jingwei.bean.PageforBean;
 import org.sxdata.jingwei.entity.SlaveEntity;
 import org.sxdata.jingwei.service.SlaveService;
 
@@ -69,6 +71,97 @@ public class SlaveController {
             out.close();
         }catch(Exception e){
 
+        }
+    }
+
+    //所有节点的指标信息
+    @RequestMapping(value="/allSlaveQuato")
+    @ResponseBody
+    protected  void allSlaveQuato(HttpServletResponse response,HttpServletRequest request){
+        try{
+            String result=slaveService.allSlaveQuato();
+            PrintWriter out=response.getWriter();
+            System.out.println(result);
+            out.write(result);
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
+    //节点管理列表
+    @RequestMapping(value="/slaveManager")
+    @ResponseBody
+    protected  void slaveManager(HttpServletResponse response,HttpServletRequest request){
+        try{
+            Integer start=Integer.valueOf(request.getParameter("start"));
+            Integer limit=Integer.valueOf(request.getParameter("limit"));
+            PageforBean result=slaveService.findSlaveByPageInfo(start, limit);
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write(JSONObject.fromObject(result).toString());
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    //删除节点
+    @RequestMapping(value="/deleteSlave")
+    @ResponseBody
+    protected  void deleteSlave(HttpServletResponse response,HttpServletRequest request){
+        try{
+            String[] items=request.getParameterValues("items");
+            slaveService.deleteSlave(items);
+            PrintWriter out=response.getWriter();
+            out.write("{success:true}");
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    //节点体检
+    @RequestMapping(value="/slaveTest")
+    @ResponseBody
+    protected  void slaveTest(HttpServletResponse response,HttpServletRequest request){
+        try{
+            String hostName=request.getParameter("hostName");
+            String result=slaveService.slaveTest(hostName);
+            PrintWriter out=response.getWriter();
+            out.write(result);
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    //单独对节点的某项指标进行监
+    @RequestMapping(value="/slaveQuatoByCondition")
+    @ResponseBody
+    protected  void slaveQuatoByCondition(HttpServletResponse response,HttpServletRequest request){
+        try{
+            String chooseDate=request.getParameter("chooseDate");
+            System.out.println(chooseDate);
+            String quatoType=request.getParameter("quatoTypeValue");
+            String maxOrAvg=request.getParameter("maxOrAvg");
+            //默认使用折线图作为展现方式
+            String result=slaveService.slaveQuatoByCondition(quatoType,"折线图",maxOrAvg,chooseDate);
+
+            if(null==result){
+                result="";
+            }
+            PrintWriter out=response.getWriter();
+            out.write(result);
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 }

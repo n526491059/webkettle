@@ -36,7 +36,6 @@ public class SystemLoadListener implements ServletContextListener {
 			KettleEnvironment.init();
 //			Props.init( Props.TYPE_PROPERTIES_KITCHEN );
 			PropsUI.init( "KettleWebConsole", Props.TYPE_PROPERTIES_KITCHEN );
-			
 //			String path = context.getServletContext().getRealPath("/reposity/");
 			File path = new File("samples/repository");
 			KettleFileRepositoryMeta meta = new KettleFileRepositoryMeta();

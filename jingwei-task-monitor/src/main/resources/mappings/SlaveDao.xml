@@ -36,4 +36,14 @@
         from r_slave r
     </select>
 
+    <select id="findSlaveByPageInfo" resultType="org.sxdata.jingwei.entity.SlaveEntity">
+        select
+        r.ID_SLAVE as slaveId,
+        r.HOST_NAME as hostName,
+        r.`PORT` as port,
+        r.USERNAME as slaveUsername,
+        r.PASSWORD as slavePassword
+        from r_slave r limit #{0},#{1}
+    </select>
+
 </mapper>

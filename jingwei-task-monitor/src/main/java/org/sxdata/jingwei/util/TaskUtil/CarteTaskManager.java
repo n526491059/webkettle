@@ -202,8 +202,6 @@ public class CarteTaskManager {
 		}
 	}
 
-
-
 	//服务器启动后执行该方法 获取数据库中所有定时作业 开始执行
 	public static void startJobTimeTask(DefaultSqlSessionFactory bean) throws Exception{
 		JobServiceImpl js=new JobServiceImpl();
@@ -229,6 +227,7 @@ public class CarteTaskManager {
 				String repoName = timerJob.getRepoId();
 				//根据id获取当前作业
 				JobEntity thisJob=session.selectOne("org.sxdata.jingwei.dao.JobDao.getJobById",jobId);
+				System.out.println("定时作业 →"+thisJob.getName()+"已加入定时执行");
 				List<JobEntity> jobs=new ArrayList<JobEntity>();
 				jobs.add(thisJob);
 				//获取作业的全路径
@@ -279,5 +278,7 @@ public class CarteTaskManager {
 				}
 			}
 		}
+		session.close();
 	}
+
 }
