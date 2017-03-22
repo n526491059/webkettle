@@ -39,8 +39,9 @@ public class StringDateUtil {
         return simple.parse(source);
     }
 
-    //日期按照指定格式转换为字符串
-    public static String dateToString(String source,String pattern) throws Exception{
+
+
+    public static String dateToString(Date source,String pattern) throws Exception{
         SimpleDateFormat simple=new SimpleDateFormat(pattern);
         return simple.format(source);
     }
@@ -116,5 +117,56 @@ public class StringDateUtil {
                 break;
         }
         return week;
+    }
+
+    public static float getMaxValueByFloatArray(float[] arryas){
+        float max=0;
+        if(arryas.length<1){
+            return 0;
+        }else if(arryas.length==1){
+            return arryas[0];
+        }else{
+            max=arryas[0];
+            for(int i=0;i<arryas.length;i++){
+                if(arryas[i]>max){
+                    max=arryas[i];
+                }
+            }
+        }
+        return max;
+    }
+
+    public static Integer getMaxValueByIntArray(int[] arryas){
+        Integer max=0;
+        if(arryas.length<1){
+            return 0;
+        }else if(arryas.length==1){
+            return arryas[0];
+        }else{
+            max=arryas[0];
+            for(int i=0;i<arryas.length;i++){
+                if(arryas[i]>max){
+                    max=arryas[i];
+                }
+            }
+        }
+        return max;
+    }
+
+    public static double getMaxValueBydoubleArray(double[] arryas){
+        double max=0;
+        if(arryas.length<1){
+            return 0;
+        }else if(arryas.length==1){
+            return arryas[0];
+        }else{
+            max=arryas[0];
+            for(int i=0;i<arryas.length;i++){
+                if(arryas[i]>max){
+                    max=arryas[i];
+                }
+            }
+        }
+        return max;
     }
 }

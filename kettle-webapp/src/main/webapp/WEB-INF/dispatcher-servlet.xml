@@ -65,8 +65,8 @@
 		<property name="password" value="hadoop"/>
 	</bean>
 
+	<!--实现applicationContextAware接口 获取更多的bean容器信息-->
 	<bean id="carteClient" class="org.sxdata.jingwei.util.TaskUtil.CarteClient">
-
 	</bean>
 
 
@@ -113,4 +113,38 @@
 <!--     	</mvc:interceptor> -->
 <!--     </mvc:interceptors> -->
 
+	<!--spring集成quartz-->
+	<!-- 使用MethodInvokingJobDetailFactoryBean，任务类可以不实现Job接口，通过targetMethod指定调用方法-->
+	<bean class="org.sxdata.jingwei.util.quartzUtil.SlaveQuota" id="slaveQuartz"></bean>
+	<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="group" value="job_work"/>
+		<property name="name" value="job_work_name"/>
+		<!--&false表示等上一个任务执行完后再开启新的任务-->
+		<property name="concurrent" value="false"/>
+		<property name="targetObject">
+			<ref bean="slaveQuartz"/>
+		</property>
+		<property name="targetMethod">
+			<value>quotaSlaveInfoRepeat</value>
+		</property>
+	</bean>
+	<bean id="myTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="name" value="work_default_name"/>
+		<property name="group" value="work_default"/>
+		<!--引用自上面配置好的jobDetail 这样就会根据自定义的时间规则调度目标方法-->
+		<property name="jobDetail">
+			<ref bean="jobDetail" />
+		</property>
+		<property name="cronExpression">
+			<value>0 0/15 * * * ?</value>
+		</property>
+	</bean>
+	<!--调度工厂  * 0/30 * * * ?  0/5 * * * * ?-->
+	<bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="myTrigger"/>
+			</list>
+		</property>
+	</bean>
 </beans>

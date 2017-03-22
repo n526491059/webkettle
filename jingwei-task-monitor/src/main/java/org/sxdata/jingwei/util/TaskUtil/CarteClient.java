@@ -16,6 +16,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.sxdata.jingwei.entity.SlaveEntity;
+import org.sxdata.jingwei.util.quartzUtil.SlaveQuota;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,13 +32,14 @@ public class CarteClient implements ApplicationContextAware {
     private SlaveEntity slave;
     public static String databaseName;  //数据库名
     public static String hostName;  //资源库ip
+    public static DefaultSqlSessionFactory sessionFactory;
 
 
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         BasicDataSource dataSource=(BasicDataSource)applicationContext.getBean("dataSource");
-        DefaultSqlSessionFactory factoryBean=(DefaultSqlSessionFactory)applicationContext.getBean("sqlSessionFactory");
+        sessionFactory=(DefaultSqlSessionFactory)applicationContext.getBean("sqlSessionFactory");
         String url=dataSource.getUrl();
         int a=url.lastIndexOf("/");
         int b=url.indexOf("?");
@@ -45,9 +47,10 @@ public class CarteClient implements ApplicationContextAware {
         int c=url.indexOf("/");
         int d=url.lastIndexOf(":");
         hostName=url.substring(c+2,d);
-        //开启作业定时
+
         try{
-            CarteTaskManager.startJobTimeTask(factoryBean);
+            //开启作业定时
+            CarteTaskManager.startJobTimeTask(sessionFactory);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -57,7 +60,7 @@ public class CarteClient implements ApplicationContextAware {
     public final static String URL_SUF = "?xml=Y";
     /**Kettle carte服务 servlet引用地址(统一收集于此处)*/
     public final static String CARTE_STATUS = GetStatusServlet.CONTEXT_PATH;
-    //public final static String SLAVE_STATUS = GetSlaveMonitorServlet.CONTEXT_PATH;
+    public final static String SLAVE_STATUS = "/kettle/slaveMonitor";
     public final static String TRANS_STATUS = GetTransStatusServlet.CONTEXT_PATH;
     public final static String JOB_STATUS = GetJobStatusServlet.CONTEXT_PATH;
     public final static String RUN_JOB = RunJobServlet.CONTEXT_PATH;
@@ -86,6 +89,22 @@ public class CarteClient implements ApplicationContextAware {
             dbflag = true;
         }
         return dbflag;
+    }
+    public boolean isActive() {
+        boolean flag = false;
+        try {
+            String status = getStatus();
+            flag = status.startsWith("<?xml version");
+        } catch (Exception e) {
+            e.printStackTrace();
+            flag = false;
+        }
+        return flag;
+    }
+
+    public String getSlaveHostInfo() throws Exception {
+        String urlString = httpUrl + SLAVE_STATUS;
+        return doGet(urlString);
     }
 
     public String getJobLogText(String jobCarteId) throws Exception {
@@ -188,6 +207,8 @@ public class CarteClient implements ApplicationContextAware {
         String urlString = httpUrl + CARTE_STATUS + URL_SUF;
         return doGet(urlString);
     }
+
+
 
     public CarteClient() {
 

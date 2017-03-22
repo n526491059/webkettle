@@ -1,4 +1,5 @@
 
+
 function generateJobPanel(jobName,createDate,inputName){
     var secondGuidePanel=Ext.getCmp("secondGuidePanel");//二级菜单
 
@@ -147,12 +148,18 @@ function generateJobPanel(jobName,createDate,inputName){
                     handler:function(){
                         var path="";//被选中的任务路径
                         var view=grid.getView();
+                        var num=0;
                         var rsm=grid.getSelectionModel();
                         for(var i= 0;i<view.getRows().length;i++){
                             if(rsm.isSelected(i)){
                                 //获取被选中的作业全目录路径
                                 path=grid.getStore().getAt(i).get("directoryName");
+                                num++;
                             }
+                        }
+                        if(num!=1){
+                            Ext.MessageBox.alert("请先选择一个(只能一个)作业再执行");
+                            return;
                         }
                         var executeWindow=generateSlaveWindow(path,"job");
                         executeWindow.show(grid);
@@ -160,17 +167,23 @@ function generateJobPanel(jobName,createDate,inputName){
                 },"-",{
                     text:"智能执行",
                     handler:function(){
+                        var path="";
+                        var view=grid.getView();
+                        var rsm=grid.getSelectionModel();
+                        var num=0;
+                        for(var i= 0;i<view.getRows().length;i++){
+                            if(rsm.isSelected(i)){
+                                //获取被选中的转换全目录路径
+                                path=grid.getStore().getAt(i).get("directoryName");
+                                num++;
+                            }
+                        }
+                        if(num!=1){
+                            Ext.MessageBox.alert("请先选择一个(只能一个)作业再执行");
+                            return;
+                        }
                         Ext.MessageBox.confirm("确认","确认执行?",function(btn){
                             if(btn=="yes"){
-                                var path="";
-                                var view=grid.getView();
-                                var rsm=grid.getSelectionModel();
-                                for(var i= 0;i<view.getRows().length;i++){
-                                    if(rsm.isSelected(i)){
-                                        //获取被选中的转换全目录路径
-                                        path=grid.getStore().getAt(i).get("directoryName");
-                                    }
-                                }
                                 powerExecute(path,"job");
                             }else{
                                 return;
@@ -180,6 +193,18 @@ function generateJobPanel(jobName,createDate,inputName){
                 },"-",{
                     text:"定时执行",
                     handler:function(){
+                        var view=grid.getView();
+                        var rsm=grid.getSelectionModel();
+                        var num=0;
+                        for(var i= 0;i<view.getRows().length;i++){
+                            if(rsm.isSelected(i)){
+                                num++;
+                            }
+                        }
+                        if(num!=1){
+                            Ext.MessageBox.alert("请先选择一个(只能一个)作业再进行定时设置");
+                            return;
+                        }
                         var fiexdWindow=fixedExecuteWindow("添加",new Array(),"/task/fiexdExecute.do");
                         fiexdWindow.show(grid);
                     }

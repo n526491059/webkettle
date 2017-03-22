@@ -117,7 +117,7 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/TextAreaDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/AnswerDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/FileExplorerWindow.js"></script>
-
+		<script type="text/javascript" src="${pageContext.request.contextPath}/ECharts/echarts.js"></script>
 	    <!-- 系统入口对话框 -->
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/GuidePanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initMain.js"></script>
@@ -128,5 +128,6 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/fixedtimeExecute.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/JobScheduler.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/taskControl.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/slaveMonitor.js"></script>
 	</body>
 </html>

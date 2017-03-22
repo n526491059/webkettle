@@ -42,7 +42,6 @@
 
 GuidePanel = Ext.extend(Ext.Panel, {
 	border:false,
-
 	initComponent: function() {
 		var fristGuidePanel = new Ext.tree.TreePanel({
 				useArrows: true,
@@ -294,13 +293,13 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				secondGuidePanel.removeAll(true);
 				secondGuidePanel.add(slaveManager());
 				secondGuidePanel.doLayout();
+			}else if(node.text=="<font size = '2px'>节点监控</font>"){
+				secondGuidePanel.removeAll(true);
+				showSlaveMonitorPanel(secondGuidePanel);
 			}
-			//TODO  节点管理
 		});
 		
 		this.items = [fristGuidePanel, secondGuidePanel];
-		
-		
 		GuidePanel.superclass.initComponent.call(this);
 	}
 });
