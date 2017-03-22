@@ -260,13 +260,14 @@ function generateJobPanel(jobName,createDate,inputName){
                                     taskName=grid.getStore().getAt(i).get("directoryName");
                                 }
                             }
-                            Ext.Ajax.request({
+                        Ext.Ajax.request({
                                 url: GetUrl('task/detail.do'),
                                 method: 'POST',
                                 params: {taskName: taskName,type:'job'},
                                 success: function(response) {
+                                    alert(response.responseText);
                                     var resObj = Ext.decode(response.responseText);
-                                    var graphPanel = Ext.create({border: false, readOnly: true, }, resObj.GraphType);
+                                    var graphPanel = Ext.create({border: false, Executable: true, showResult: true }, resObj.GraphType);
                                     var dialog = new LogDetailDialog({
                                         items: graphPanel
                                     });
@@ -281,7 +282,7 @@ function generateJobPanel(jobName,createDate,inputName){
 
                                         graphPanel.doResult(Ext.decode(resObj.executionLog));
                                     });
-                                }
+                                },
                             });
                     }
                 }

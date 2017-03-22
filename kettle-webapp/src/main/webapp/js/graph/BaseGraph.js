@@ -5,6 +5,7 @@ BaseGraph = Ext.extend(Ext.Panel, {
 	closable: true,
 	readOnly: false,
 	showResult: false,
+	Executable:false,
 
 	initComponent: function() {
 		var graphPanel = new Ext.Panel({

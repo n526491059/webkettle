@@ -176,8 +176,8 @@ public class JobGraphController {
 	 * 新建环节
 	 * 
 	 * @param graphXml
-	 * @param stepId
-	 * @param stepName
+	 * @param pluginId
+	 * @param name
 	 * @throws Exception
 	 */
 	@ResponseBody
@@ -239,8 +239,8 @@ public class JobGraphController {
 	 * 新建hop
 	 * 
 	 * @param graphXml
-	 * @param stepId
-	 * @param stepName
+	 * @param fromLabel
+	 * @param toLabel
 	 * @throws Exception
 	 */
 	@ResponseBody

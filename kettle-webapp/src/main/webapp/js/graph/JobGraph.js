@@ -1,5 +1,5 @@
 JobExecutor = Ext.extend(Ext.util.Observable, {
-	
+
 	executionId: null,
 	
 	constructor: function() {
@@ -42,9 +42,11 @@ JobGraph = Ext.extend(BaseGraph, {
 	iconCls: 'job',
 	
 	initComponent: function() {
+
 		var resultPanel = new JobResult({hidden: !this.showResult});
-		
-		if(this.readOnly === false) {
+
+		if(this.readOnly === false && this.Executable===false ) {
+
 			var jobExecutor = this.jobExecutor = new JobExecutor();
 			jobExecutor.on('beforerun', function(executor, defaultExecutionConfig) {
 				var dialog = new JobExecutionConfigurationDialog();
@@ -67,8 +69,22 @@ JobGraph = Ext.extend(BaseGraph, {
 			}, '-', {
 				iconCls: 'show-results', scope: this, handler: this.showResultPanel
 			}];
+		}else if(this.Executable===true&&this.readOnly === false){
+
+			var jobExecutor = this.jobExecutor = new JobExecutor();
+			jobExecutor.on('beforerun', function(executor, defaultExecutionConfig) {
+				var dialog = new JobExecutionConfigurationDialog();
+				dialog.show(null, function() {
+					dialog.initData(defaultExecutionConfig);
+				});
+			});
+			jobExecutor.on('result', this.doResult, this);
+			this.tbar = [{
+				iconCls: 'run', scope: this, tooltip: '运行这个任务', handler: this.run
+			}, {
+				iconCls: 'stop', scope: this, tooltip: '停止这个任务', handler: this.stop
+			}];
 		}
-		
 		this.items = [resultPanel];
 		
 		
@@ -98,8 +114,7 @@ JobGraph = Ext.extend(BaseGraph, {
 					        		var edit = new mxCellAttributeChange(edge, 'to', change.value);
 						        	graph.getModel().execute(edit);
 								});
-					        } finally
-					        {
+					        } finally{
 					            graph.getModel().endUpdate();
 					        }
 						}

@@ -67,7 +67,7 @@ JobResult = Ext.extend(Ext.TabPanel, {
 //		}
 		
 		this.loadLocal = function(result) {
-			if(result.jobMeasure.length > 0) {
+			if(0 >result.jobMeasure.length ) {
 				jobMeasure.getRootNode().removeAll(true);
 				jobMeasure.getRootNode().appendChild(result.jobMeasure);
 			}
