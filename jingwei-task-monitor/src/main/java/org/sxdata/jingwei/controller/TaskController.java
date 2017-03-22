@@ -325,6 +325,7 @@ public class TaskController {
 
             jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
         }
+        //jsonObject.put("executionLog", executionTrace.getExecutionLog());
         JsonUtils.response(jsonObject);
     }
 }
