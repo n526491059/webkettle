@@ -5,6 +5,7 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.sxdata.jingwei.dao.JobSchedulerDao;
 import org.sxdata.jingwei.dao.SlaveDao;
 import org.sxdata.jingwei.dao.UserDao;
@@ -157,8 +158,9 @@ public class SchedulerServiceImpl implements SchedulerService {
 
 
     @Override
+    @Transactional
     //移除被选中的定时任务
-    public void deleteScheduler(String[] taskIdArray) throws Exception{
+    public void deleteScheduler(String[] taskIdArray) throws org.quartz.SchedulerException{
         SchedulerFactory factory=new StdSchedulerFactory();
         Scheduler scheduler=factory.getScheduler();
         for(String taskId:taskIdArray){

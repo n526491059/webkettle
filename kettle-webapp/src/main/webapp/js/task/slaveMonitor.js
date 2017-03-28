@@ -10,6 +10,7 @@ function showSlaveMonitorPanel(secondGuidePanel){
         html:divHtml,
         tbar:tBar
     });
+    secondGuidePanel.removeAll(true);
     secondGuidePanel.add(slaveMonitorPanel);
     secondGuidePanel.doLayout();
     refreshSlaveMonitorPanel(slaveMonitorPanel,"负载指数","平均值","");

@@ -17,4 +17,6 @@ public interface TransDao {
     public List<TransformationEntity> conditionFindTrans(int start,int limit,String namme,String date);//带条件的查询
 
     public Integer conditionFindTransCount(String name,String date);//带条件查询总记录数u
+
+    public TransformationEntity getTransByName(String transName);
 }

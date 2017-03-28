@@ -21,4 +21,6 @@ public interface JobDao {
 
     public JobEntity getJobById(Integer jobId);
 
+    public JobEntity getJobByName(String jobName);
+
 }

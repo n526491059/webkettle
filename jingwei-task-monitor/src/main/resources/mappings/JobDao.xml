@@ -47,6 +47,18 @@
         </if>
     </select>
 
+    <select id="getJobByName" resultType="org.sxdata.jingwei.entity.JobEntity">
+        select
+        j.name as name,
+        j.ID_DIRECTORY as directoryId,
+        j.ID_JOB as jobId,
+        j.CREATED_USER as createUser,
+        j.CREATED_DATE as createDate,
+        j.MODIFIED_USER as modifiedUser,
+        j.MODIFIED_DATE as modifiedDate
+        from  r_job j where j.name = #{jobName}
+    </select>
+
     <select id="getJobById" resultType="org.sxdata.jingwei.entity.JobEntity" parameterType="java.lang.Integer">
         select
         j.name as name,

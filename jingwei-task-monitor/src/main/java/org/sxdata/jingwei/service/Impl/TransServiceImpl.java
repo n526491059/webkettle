@@ -8,11 +8,9 @@ import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.sxdata.jingwei.bean.PageforBean;
-import org.sxdata.jingwei.dao.DirectoryDao;
-import org.sxdata.jingwei.dao.SlaveDao;
-import org.sxdata.jingwei.dao.TransDao;
-import org.sxdata.jingwei.dao.UserDao;
+import org.sxdata.jingwei.dao.*;
 import org.sxdata.jingwei.entity.*;
 import org.sxdata.jingwei.service.TransService;
 import org.sxdata.jingwei.util.TaskUtil.CarteClient;
@@ -21,6 +19,7 @@ import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
 import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,11 +33,46 @@ public class TransServiceImpl implements TransService {
     protected SlaveDao slaveDao;
     @Autowired
     protected UserDao userDao;
+    @Autowired
+    protected TaskGroupDao taskGroupDao;
 
     @Autowired
     private DirectoryDao directoryDao;
-
     protected SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    @Override
+    public List<TransformationEntity> getTransPath(List<TransformationEntity> items) {
+        List<TransformationEntity> result=new ArrayList<TransformationEntity>();
+        for (TransformationEntity tran:items){
+            String directoryName="";
+            Integer directoryId=tran.getDirectoryId();
+            //判断该作业是否是在根目录下 如果对应的目录id为0代表在根目录/下面
+            if(directoryId==0){
+                directoryName="/"+tran.getName();
+            }else{
+                //不是在根目录下,获取作业所在当前目录的目录名  并且拼接上作业名
+                DirectoryEntity directory=directoryDao.getDirectoryById(directoryId);
+                directoryName=directory.getDirectoryName()+"/"+tran.getName();
+                Integer parentId=directory.getParentDirectoryId();
+                //继续判断该文件上一级的目录是否是根目录
+                if (parentId==0){
+                    directoryName="/"+directoryName;
+                }else{
+                    //循环判断该目录的父级目录是否是根目录 直到根部为止
+                    while(parentId!=0){
+                        DirectoryEntity parentDirectory=directoryDao.getDirectoryById(parentId);
+                        directoryName=parentDirectory.getDirectoryName()+"/"+directoryName;
+                        parentId=parentDirectory.getParentDirectoryId();
+                    }
+                    directoryName="/"+directoryName;
+                }
+
+            }
+            tran.setDirectoryName(directoryName);
+            result.add(tran);
+        }
+        return result;
+    }
 
     @Override
     public JSONObject findTrans(int start, int limit, String transName, String createDate) throws Exception{
@@ -70,34 +104,27 @@ public class TransServiceImpl implements TransService {
 
         }
         //根据转换的id来查找该作业在资源库的绝对目录
-        for (TransformationEntity tran:trans){
-            String directoryName="";
-            Integer directoryId=tran.getDirectoryId();
-            //判断该作业是否是在根目录下 如果对应的目录id为0代表在根目录/下面
-            if(directoryId==0){
-                directoryName="/"+tran.getName();
-            }else{
-                //不是在根目录下,获取作业所在当前目录的目录名  并且拼接上作业名
-                DirectoryEntity directory=directoryDao.getDirectoryById(directoryId);
-                directoryName=directory.getDirectoryName()+"/"+tran.getName();
-                Integer parentId=directory.getParentDirectoryId();
-                //继续判断该文件上一级的目录是否是根目录
-                if (parentId==0){
-                    directoryName="/"+directoryName;
+       trans=getTransPath(trans);
+
+        //设置每个转换所在的任务组(多个以逗号分隔)
+        for(TransformationEntity tran:trans){
+            List<TaskGroupAttributeEntity> items=taskGroupDao.getTaskGroupByTaskName(tran.getName(), "trans");
+            if(null!=items && items.size()>0){
+                if(items.size()==1){
+                    tran.setBelongToTaskGroup(items.get(0).getTaskGroupName());
                 }else{
-                    //循环判断该目录的父级目录是否是根目录 直到根部为止
-                    while(parentId!=0){
-                        DirectoryEntity parentDirectory=directoryDao.getDirectoryById(parentId);
-                        directoryName=parentDirectory.getDirectoryName()+"/"+directoryName;
-                        parentId=parentDirectory.getParentDirectoryId();
+                    String belongToTaskGroup="";
+                    for(int i=0;i<items.size();i++){
+                        if(i==items.size()-1){
+                            belongToTaskGroup+=items.get(i).getTaskGroupName();
+                            continue;
+                        }
+                        belongToTaskGroup+=items.get(i).getTaskGroupName()+",";
                     }
-                    directoryName="/"+directoryName;
+                    tran.setBelongToTaskGroup(belongToTaskGroup);
                 }
-
             }
-            tran.setDirectoryName(directoryName);
         }
-
 
         pages.setRoot(trans);
         pages.setTotalProperty(totalCount);
@@ -106,17 +133,18 @@ public class TransServiceImpl implements TransService {
     }
 
     @Override
-    public void deleteTransformation(String[] pathArray,String flag) throws Exception {
+    public void deleteTransformation(String transPath,String flag) throws Exception {
         Repository repository = App.getInstance().getRepository();
-        for (String path:pathArray){
-            String dir = path.substring(0, path.lastIndexOf("/"));
-            String name = path.substring(path.lastIndexOf("/") + 1);
-            RepositoryDirectoryInterface directory = repository.findDirectory(dir);
-            if(directory == null)
-                directory = repository.getUserHomeDirectory();
-            ObjectId id = repository.getTransformationID(name, directory);
-            repository.deleteTransformation(id);
-        }
+        String dir = transPath.substring(0, transPath.lastIndexOf("/"));
+        String name = transPath.substring(transPath.lastIndexOf("/") + 1);
+        //删除转换在任务组明细中的记录
+        taskGroupDao.deleteTaskGroupAttributesByTaskName(name,"trans");
+        //删除转换
+        RepositoryDirectoryInterface directory = repository.findDirectory(dir);
+        if(directory == null)
+            directory = repository.getUserHomeDirectory();
+        ObjectId id = repository.getTransformationID(name, directory);
+        repository.deleteTransformation(id);
     }
 
     @Override
@@ -138,4 +166,11 @@ public class TransServiceImpl implements TransService {
         CarteTaskManager.addTask(carteClient, "trans_exec", urlString);
     }
 
+    @Override
+    public TransformationEntity getTransByName(String transName) {
+        TransformationEntity entity=transDao.getTransByName(transName);
+        List<TransformationEntity> items=new ArrayList<TransformationEntity>();
+        items.add(entity);
+        return this.getTransPath(items).get(0);
+    }
 }

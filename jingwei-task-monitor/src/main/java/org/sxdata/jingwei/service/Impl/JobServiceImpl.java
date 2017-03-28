@@ -38,6 +38,8 @@ public class JobServiceImpl implements JobService {
     protected DirectoryDao directoryDao;
     @Autowired
     protected JobSchedulerDao jobSchedulerDao;
+    @Autowired
+    protected TaskGroupDao taskGroupDao;
 
     protected SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -55,6 +57,7 @@ public class JobServiceImpl implements JobService {
         return jobSchedulerDao.getAllTimerJob();
     }
 
+    @Override
     public List<JobEntity> getJobPath(List<JobEntity> jobs){
         List<JobEntity> resultJobs=new ArrayList<JobEntity>();
         //根据作业的id来查找该作业在资源库的绝对目录
@@ -114,7 +117,27 @@ public class JobServiceImpl implements JobService {
             totalCount=jobDao.conditionFindJobCount(name,createDate);
         }
 
+        //设置作业的全目录名
        jobs=this.getJobPath(jobs);
+        //设置作业所在的任务组名
+        for(JobEntity job:jobs){
+            List<TaskGroupAttributeEntity> items=taskGroupDao.getTaskGroupByTaskName(job.getName(), "job");
+            if(null!=items && items.size()>0){
+                if(items.size()==1){
+                    job.setBelongToTaskGroup(items.get(0).getTaskGroupName());
+                }else{
+                    String belongToTaskGroup="";
+                    for(int i=0;i<items.size();i++){
+                        if(i==items.size()-1){
+                            belongToTaskGroup+=items.get(i).getTaskGroupName();
+                            continue;
+                        }
+                        belongToTaskGroup+=items.get(i).getTaskGroupName()+",";
+                    }
+                    job.setBelongToTaskGroup(belongToTaskGroup);
+                }
+            }
+        }
 
         pages.setRoot(jobs);
         pages.setTotalProperty(totalCount);
@@ -123,21 +146,19 @@ public class JobServiceImpl implements JobService {
         return result;
     }
 
-
-
     @Override
-    public void deleteJobs(String[] pathArray,String flag) throws Exception {
+    public void deleteJobs(String jobPath,String flag) throws Exception {
         Repository repository = App.getInstance().getRepository();
-        //遍历进行删除
-        for (String path:pathArray){
-            String dir = path.substring(0, path.lastIndexOf("/"));
-            String name = path.substring(path.lastIndexOf("/") + 1);
-            RepositoryDirectoryInterface directory = repository.findDirectory(dir);
-            if(directory == null)
-                directory = repository.getUserHomeDirectory();
-            ObjectId id = repository.getJobId(name, directory);
-            repository.deleteJob(id);
-        }
+        String dir = jobPath.substring(0, jobPath.lastIndexOf("/"));
+        String name = jobPath.substring(jobPath.lastIndexOf("/") + 1);
+        //删除作业在任务组明细表中的记录
+        taskGroupDao.deleteTaskGroupAttributesByTaskName(name,"job");
+        //删除作业
+        RepositoryDirectoryInterface directory = repository.findDirectory(dir);
+        if(directory == null)
+            directory = repository.getUserHomeDirectory();
+        ObjectId id = repository.getJobId(name, directory);
+        repository.deleteJob(id);
     }
 
     @Override
@@ -158,7 +179,6 @@ public class JobServiceImpl implements JobService {
         System.out.println("请求远程执行作业的url字符串为" + urlString);
         CarteTaskManager.addTask(carteClient, "job_exec", urlString);
     }
-
 
     //判断是否在数据库中已经存在相同类型 相同执行周期的同一个作业
     public boolean judgeJobIsAlike(JobTimeSchedulerEntity willAddJobTimer){
@@ -329,5 +349,13 @@ public class JobServiceImpl implements JobService {
             jobSchedulerDao.addTimerJob(jobTimeScheduler);
         }
         return isSuccess;
+    }
+
+    @Override
+    public JobEntity getJobByName(String jobName) {
+        JobEntity job=jobDao.getJobByName(jobName);
+        List<JobEntity> jobs=new ArrayList<JobEntity>();
+        jobs.add(job);
+        return this.getJobPath(jobs).get(0);
     }
 }

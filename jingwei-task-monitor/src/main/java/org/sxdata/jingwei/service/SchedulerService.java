@@ -11,7 +11,7 @@ import java.util.Map;
 public interface SchedulerService {
     public PageforBean getAllSchedulerByPage(int start,int limit,Integer typeId,String slaves,String jobName) throws Exception;
 
-    public void deleteScheduler(String[] taskIdArray) throws Exception;
+    public void deleteScheduler(String[] taskIdArray) throws org.quartz.SchedulerException;
 
     public JSONObject beforeUpdate(String taskId);
 
