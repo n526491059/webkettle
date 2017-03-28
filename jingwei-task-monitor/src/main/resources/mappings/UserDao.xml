@@ -3,13 +3,68 @@
     <!--根据登录名查找用户-->
     <select id="getUserbyName" resultType="org.sxdata.jingwei.entity.UserEntity">
         select
-            r.DESCRIPTION as decription,
+            r.DESCRIPTION as description,
             r.ID_USER as userId,
             r.LOGIN as login,
             r.`PASSWORD` as password,
             r.`NAME` as name,
             r.ENABLED as enabled
         from r_user r where r.`login` = #{name}
+    </select>
+
+    <!--分页形式获取用户-->
+    <select id="getUsersLimit" resultType="org.sxdata.jingwei.entity.UserEntity">
+        select
+        r.DESCRIPTION as description,
+        r.ID_USER as userId,
+        r.LOGIN as login,
+        r.`PASSWORD` as password,
+        r.`NAME` as name,
+        r.ENABLED as enabled
+        from r_user r limit #{0},#{1}
+    </select>
+
+    <!--获取用户的总数量-->
+    <select id="getUserCount" resultType="java.lang.Integer">
+        select count(0)
+        from r_user
+    </select>
+
+    <!--修改用户-->
+    <update id="updateUser" parameterType="org.sxdata.jingwei.entity.UserEntity">
+      update r_user
+        <trim prefix="set" suffixOverrides=",">
+            r_user.DESCRIPTION=#{description},
+            r_user.`PASSWORD`=#{password}
+        </trim>
+      where r_user.ID_USER=#{userId}
+    </update>
+
+    <!--删除用户-->
+    <delete id="deleteUser" parameterType="java.lang.Integer">
+      delete from r_user where ID_USER=#{userId}
+    </delete>
+
+    <!--添加用户-->
+    <insert id="addUser" parameterType="org.sxdata.jingwei.entity.UserEntity">
+      insert r_user (ID_USER,LOGIN,PASSWORD,NAME,DESCRIPTION,ENABLED)
+      VALUES (#{userId},#{login},#{password},#{name},#{description},#{enabled});
+    </insert>
+
+    <!--获取所有用户-->
+    <select id="getAllUsers" resultType="org.sxdata.jingwei.entity.UserEntity">
+        select
+        r.DESCRIPTION as description,
+        r.ID_USER as userId,
+        r.LOGIN as login,
+        r.`PASSWORD` as password,
+        r.`NAME` as name,
+        r.ENABLED as enabled
+        from r_user r
+    </select>
+
+    <select id="selectMaxId" resultType="java.lang.Integer">
+        select MAX(r.ID_USER) from r_user r
     </select>
 
 </mapper>

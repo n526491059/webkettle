@@ -23,4 +23,8 @@ public interface JobSchedulerDao {
     public JobTimeSchedulerEntity getSchedulerBytaskId(long taskId);
 
     public void updateScheduler(JobTimeSchedulerEntity schedulerJob);
+
+    public void deleteSchedulerByJobName(String jobName);
+
+    public List<JobTimeSchedulerEntity> getTimerJobByJobName(String jobName);
 }

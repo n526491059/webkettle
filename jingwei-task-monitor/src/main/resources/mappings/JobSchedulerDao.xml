@@ -95,4 +95,26 @@
         </trim>
         WHERE ID_JOBTASK=#{idJobtask}
     </update>
+
+    <!--根据作业名删除定时记录-->
+    <delete id="deleteSchedulerByJobName">
+        delete from d_timerscheduler where JOB_NAME=#{0}
+    </delete>
+
+    <select id="getTimerJobByJobName" resultType="org.sxdata.jingwei.entity.JobTimeSchedulerEntity">
+         select
+        d.ID_JOBTASK as idJobtask,
+        d.ID_JOB as idJob,
+        d.JOB_NAME as jobName,
+        d.SLAVES as slaves,
+        d.ISREPEAT as isrepeat,
+        d.SCHEDULERTYPE as schedulertype,
+        d.INTERVALMINUTES as intervalminutes,
+        d.`HOUR` as hour,
+        d.MINUTES as minutes,
+        d.WEEKDAY as weekday,
+        d.DAYOFMONTH as dayofmonth,
+        d.REPO_ID as repoId
+        from d_timerscheduler d where d.JOB_NAME=#{0}
+    </select>
 </mapper>
