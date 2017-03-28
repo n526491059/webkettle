@@ -11,7 +11,6 @@ JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 	
 	initComponent: function() {
 		var  me = this;
-		
 		var wExecLocal = new Ext.form.Radio({name: 'execMethod', fieldLabel: '本地执行'});
 		var wExecRemote = new Ext.form.Radio({name: 'execMethod', fieldLabel: '远程执行'});
 		var wRemoteHost = null;

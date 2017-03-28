@@ -3,11 +3,14 @@ package org.sxdata.jingwei.controller;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.flhy.ext.App;
+import org.flhy.ext.JobExecutor;
 import org.flhy.ext.PluginFactory;
 import org.flhy.ext.base.GraphCodec;
+import org.flhy.ext.job.JobExecutionConfigurationCodec;
 import org.flhy.ext.utils.JsonUtils;
 import org.flhy.ext.utils.RepositoryUtils;
 import org.flhy.ext.utils.StringEscapeHelper;
+import org.pentaho.di.job.JobExecutionConfiguration;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
@@ -30,6 +33,7 @@ import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -48,7 +52,7 @@ public class TaskController {
     protected SlaveService slaveService;
     @Autowired
     protected ControlService controlService;
-
+    private static HashMap<String, JobExecutor> executions = new HashMap<String, JobExecutor>();
     //停止转换/作业
     @RequestMapping(value="/pauseOrStart")
     @ResponseBody
@@ -304,28 +308,4 @@ public class TaskController {
         out.close();
     }
 
-    //获取结构图信息
-    @ResponseBody
-    @RequestMapping(method=RequestMethod.POST, value="/detail")
-    protected void detail(@RequestParam String taskName,@RequestParam String type) throws Exception {
-        org.flhy.ext.utils.JSONObject jsonObject = new org.flhy.ext.utils.JSONObject();
-        if(type.equals("trans")) {
-            TransMeta transMeta = RepositoryUtils.loadTransByPath(taskName);
-            jsonObject.put("GraphType", "TransGraph");
-            GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
-            String graphXml = codec.encode(transMeta);
-
-            jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
-        } else if(type.equals("job")) {
-            JobMeta jobMeta = RepositoryUtils.loadJobbyPath(taskName);
-            jsonObject.put("GraphType", "JobGraph");
-
-            GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
-            String graphXml = codec.encode(jobMeta);
-
-            jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
-        }
-        //jsonObject.put("executionLog", executionTrace.getExecutionLog());
-        JsonUtils.response(jsonObject);
-    }
 }
