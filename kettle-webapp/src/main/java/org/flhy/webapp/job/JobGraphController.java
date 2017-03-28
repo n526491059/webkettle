@@ -13,10 +13,7 @@ import org.flhy.ext.base.GraphCodec;
 import org.flhy.ext.core.database.DatabaseCodec;
 import org.flhy.ext.job.JobExecutionConfigurationCodec;
 import org.flhy.ext.job.step.JobEntryEncoder;
-import org.flhy.ext.utils.JSONArray;
-import org.flhy.ext.utils.JSONObject;
-import org.flhy.ext.utils.JsonUtils;
-import org.flhy.ext.utils.StringEscapeHelper;
+import org.flhy.ext.utils.*;
 import org.flhy.webapp.utils.GetJobSQLProgress;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.RowMetaAndData;
@@ -39,6 +36,7 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositorySecurityProvider;
+import org.pentaho.di.trans.TransMeta;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -176,8 +174,8 @@ public class JobGraphController {
 	 * 新建环节
 	 * 
 	 * @param graphXml
-	 * @param stepId
-	 * @param stepName
+	 * @param pluginId
+	 * @param name
 	 * @throws Exception
 	 */
 	@ResponseBody
@@ -239,8 +237,8 @@ public class JobGraphController {
 	 * 新建hop
 	 * 
 	 * @param graphXml
-	 * @param stepId
-	 * @param stepName
+	 * @param fromLabel
+	 * @param toLabel
 	 * @throws Exception
 	 */
 	@ResponseBody
@@ -541,6 +539,33 @@ public class JobGraphController {
 		
 		JsonUtils.response(jsonObject);
 	}
-	
+
+	//获取结构图信息
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/detail")
+	protected void detail(@RequestParam String taskName,@RequestParam String type) throws Exception {
+		org.flhy.ext.utils.JSONObject jsonObject = new org.flhy.ext.utils.JSONObject();
+
+		if(type.equals("trans")) {
+			TransMeta transMeta = RepositoryUtils.loadTransByPath(taskName);
+			jsonObject.put("GraphType", "TransGraph");
+			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+			String graphXml = codec.encode(transMeta);
+
+			jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
+		} else if(type.equals("job")) {
+			JobMeta jobMeta = RepositoryUtils.loadJobbyPath(taskName);
+			jsonObject.put("GraphType", "JobGraph");
+
+			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+			String graphXml = codec.encode(jobMeta);
+
+			jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
+		}
+
+		//jsonObject.put("executionLog", executionTrace.getExecutionLog());
+		JsonUtils.response(jsonObject);
+	}
+
 	private static HashMap<String, JobExecutor> executions = new HashMap<String, JobExecutor>();
 }

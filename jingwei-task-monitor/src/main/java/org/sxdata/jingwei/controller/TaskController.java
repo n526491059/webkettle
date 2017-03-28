@@ -3,11 +3,14 @@ package org.sxdata.jingwei.controller;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.flhy.ext.App;
+import org.flhy.ext.JobExecutor;
 import org.flhy.ext.PluginFactory;
 import org.flhy.ext.base.GraphCodec;
+import org.flhy.ext.job.JobExecutionConfigurationCodec;
 import org.flhy.ext.utils.JsonUtils;
 import org.flhy.ext.utils.RepositoryUtils;
 import org.flhy.ext.utils.StringEscapeHelper;
+import org.pentaho.di.job.JobExecutionConfiguration;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
@@ -32,6 +35,7 @@ import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -50,6 +54,7 @@ public class TaskController {
     protected SlaveService slaveService;
     @Autowired
     protected ControlService controlService;
+    private static HashMap<String, JobExecutor> executions = new HashMap<String, JobExecutor>();
 
     //暂停/开始转换
     @RequestMapping(value="/pauseOrStart")

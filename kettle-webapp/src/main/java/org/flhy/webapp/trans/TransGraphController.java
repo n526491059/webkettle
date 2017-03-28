@@ -103,7 +103,7 @@ public class TransGraphController {
 	
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/save")
-	protected void save(HttpServletRequest request, HttpServletResponse response, @RequestParam String graphXml) throws Exception {
+	protected void save(@RequestParam String graphXml) throws Exception {
 		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
 		AbstractMeta transMeta = codec.decode(StringEscapeHelper.decode(graphXml));
 		Repository repository = App.getInstance().getRepository();
@@ -433,7 +433,7 @@ public class TransGraphController {
 	 * 执行转换
 	 * 
 	 * @param graphXml
-	 * @param executionConfig
+	 * @param executionConfiguration
 	 * @throws Exception
 	 */
 	@ResponseBody
@@ -448,7 +448,7 @@ public class TransGraphController {
 	    TransExecutor transExecutor = TransExecutor.initExecutor(transExecutionConfiguration, transMeta);
 	    Thread tr = new Thread(transExecutor, "TransExecutor_" + transExecutor.getExecutionId());
 	    tr.start();
-//        executions.put(transExecutor.getExecutionId(), transExecutor);
+//      executions.put(transExecutor.getExecutionId(), transExecutor);
 		
         JsonUtils.success(transExecutor.getExecutionId());
 	}
@@ -490,8 +490,8 @@ public class TransGraphController {
 	 * 新建步骤
 	 * 
 	 * @param graphXml
-	 * @param stepId
-	 * @param stepName
+	 * @param pluginId
+	 * @param name
 	 * @throws Exception
 	 */
 	@ResponseBody
