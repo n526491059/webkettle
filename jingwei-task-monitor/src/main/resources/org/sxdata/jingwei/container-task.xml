@@ -11,11 +11,10 @@
 	   http://www.springframework.org/schema/mvc
 	   http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-    <context:component-scan base-package="org.sxdata.jingwei" />
+
     <mvc:annotation-driven />
+    <context:component-scan base-package="org.sxdata.jingwei"/>
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="basePackage" value="org.sxdata.jingwei.dao"></property>
     </bean>
-
-
 </beans>

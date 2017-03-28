@@ -214,7 +214,6 @@ function generateSchedulerMonitorPanel(typeId,hostName,jobName){
     })
     jobSchedulerGrid.getColumnModel().setHidden(2,true);
     return jobSchedulerGrid;
-
 }
 
 //生成定时类型的下拉列表

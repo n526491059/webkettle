@@ -185,17 +185,15 @@ function showTransDetailWindow(grid){
     var view=grid.getView();
     var rsm=grid.getSelectionModel();
     var idArray=new Array();
-    var hostName=""
     for(var i= 0;i<view.getRows().length;i++){
         if(rsm.isSelected(i)){
             idArray.push(grid.getStore().getAt(i).get("id"));
             transDetailId=idArray[0];
-            hostName=grid.getStore().getAt(i).get("hostName");
-            transDetailHostName=hostName;
+            transDetailHostName=grid.getStore().getAt(i).get("hostName");
         }
     }
     if(idArray.length==1){
-        var transDetailPanel=generateTransDetailPanel(idArray[0],hostName);
+        var transDetailPanel=generateTransDetailPanel(idArray[0],transDetailHostName);
         transDetailWindow=new Ext.Window({
             id:"transDetail",
             title:"转换详情",

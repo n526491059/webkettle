@@ -13,6 +13,19 @@
         from  r_transformation j limit #{0},#{1}
     </select>
 
+    <!--根据转换名获取转换-->
+    <select id="getTransByName" resultType="org.sxdata.jingwei.entity.TransformationEntity">
+        select
+        j.name as name,
+        j.ID_DIRECTORY as directoryId,
+        j.ID_TRANSFORMATION as transformationId,
+        j.CREATED_USER as createUser,
+        j.CREATED_DATE as createDate,
+        j.MODIFIED_USER as modifiedUser,
+        j.MODIFIED_DATE as modifiedDate
+        from  r_transformation j WHERE j.name=#{0}
+    </select>
+
     <select id="getTotalSize" resultType="java.lang.Integer">
         select count(1) from r_transformation
     </select>

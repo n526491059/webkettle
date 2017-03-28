@@ -18,6 +18,8 @@
 	   http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
 
     <context:component-scan base-package="org.flhy.webapp" />
+
+
     <mvc:annotation-driven>
     	<mvc:message-converters>
     		<bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
@@ -79,14 +81,14 @@
 <!--         <property name="configLocation" value="classpath:mybatis.xml" />  -->
     </bean>  
 
-	<!-- 事务配置 -->    
+	<!-- 事务配置 -->
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
     	<property name="dataSource" ref="dataSource" />
     </bean>
     
     <tx:advice id="tx" transaction-manager="transactionManager">
     	<tx:attributes>
-    		<tx:method name="add*" propagation="REQUIRED" isolation="DEFAULT"/>
+    		<tx:method name="add*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>
     		<tx:method name="create*" propagation="REQUIRED" isolation="DEFAULT"/>
     		<tx:method name="update*" propagation="REQUIRED" isolation="DEFAULT"/>
     		<tx:method name="delete*" propagation="REQUIRED" isolation="DEFAULT"/>
@@ -95,7 +97,7 @@
     </tx:advice>
     
     <aop:config>
-    	<aop:pointcut expression="execution(* org.flhy..ServiceImpl*.*(..))" id="pc"/>
+    	<aop:pointcut expression="(execution(* org.flhy..ServiceImpl*.*(..))) or (execution(* org.sxdata.jingwei.service.Impl..*(..)))" id="pc"/>
     	<aop:advisor advice-ref="tx" pointcut-ref="pc"/>
     </aop:config>
 	<!-- 结束事务配置 -->

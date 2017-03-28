@@ -23,8 +23,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.sxdata.jingwei.entity.JobEntity;
 import org.sxdata.jingwei.entity.SlaveEntity;
 import org.sxdata.jingwei.entity.TaskControlEntity;
+import org.sxdata.jingwei.entity.TransformationEntity;
 import org.sxdata.jingwei.service.ControlService;
 import org.sxdata.jingwei.service.JobService;
 import org.sxdata.jingwei.service.SlaveService;
@@ -53,7 +55,8 @@ public class TaskController {
     @Autowired
     protected ControlService controlService;
     private static HashMap<String, JobExecutor> executions = new HashMap<String, JobExecutor>();
-    //停止转换/作业
+
+    //暂停/开始转换
     @RequestMapping(value="/pauseOrStart")
     @ResponseBody
     protected void pauseOrStart(HttpServletResponse response,HttpServletRequest request){
@@ -98,6 +101,30 @@ public class TaskController {
         }
     }
 
+    //根据作业/转换名获取作业/转换
+    @RequestMapping(value="/getJobOrTransByName")
+    @ResponseBody
+    protected void getJobOrTransByName(HttpServletResponse response,HttpServletRequest request){
+        try{
+            String type=request.getParameter("type");
+            String taskName=request.getParameter("taskName");
+            String result="";
+            if(type.equals("job")){
+                JobEntity job=jobService.getJobByName(taskName);
+                result=JSONObject.fromObject(job).toString();
+            }else if(type.equals("trans")){
+                TransformationEntity trans=transService.getTransByName(taskName);
+                result=JSONObject.fromObject(trans).toString();
+            }
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write(result);
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 
     //获取转换的详情列表
     @RequestMapping(value="/getTransDetail")
@@ -195,13 +222,13 @@ public class TaskController {
     @ResponseBody
     protected void deleteJobs(HttpServletResponse response,HttpServletRequest request) {
         try{
-            String[] pathArray=request.getParameterValues("path");
+            String path=request.getParameter("path");
             String flag=request.getParameter("flag");
             //判断是需要删除转换还是需要删除作业
             if (flag.equals("transformation")){
-                transService.deleteTransformation(pathArray,flag);
+                transService.deleteTransformation(path,flag);
             }else if(flag.equals("job")){
-                jobService.deleteJobs(pathArray,flag);
+                jobService.deleteJobs(path,flag);
             }
         }catch (Exception e){
             String errorMessage=e.getMessage();
@@ -308,4 +335,27 @@ public class TaskController {
         out.close();
     }
 
+    //获取结构图信息
+    @ResponseBody
+    @RequestMapping(method=RequestMethod.POST, value="/detail")
+    protected void detail(@RequestParam String taskName,@RequestParam String type) throws Exception {
+        org.flhy.ext.utils.JSONObject jsonObject = new org.flhy.ext.utils.JSONObject();
+        if(type.equals("trans")) {
+            TransMeta transMeta = RepositoryUtils.loadTransByPath(taskName);
+            jsonObject.put("GraphType", "TransGraph");
+            GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+            String graphXml = codec.encode(transMeta);
+
+            jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
+        } else if(type.equals("job")) {
+            JobMeta jobMeta = RepositoryUtils.loadJobbyPath(taskName);
+            jsonObject.put("GraphType", "JobGraph");
+
+            GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+            String graphXml = codec.encode(jobMeta);
+
+            jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
+        }
+        JsonUtils.response(jsonObject);
+    }
 }

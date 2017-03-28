@@ -1,4 +1,4 @@
-
+var testJSONString="";
 //生成执行功能弹窗
 function generateSlaveWindow(path,flag2){
     var executeWindow=new Ext.Window({
@@ -251,7 +251,6 @@ function quatoWindow(slaveGridPanel){
     });
     carteInfoWindow.show(slaveGridPanel);
     getQuatoInfo(carteInfoWindow,slaveGridPanel);
-
 }
 
 //获取某个时间段内所有节点的指标信息
@@ -416,7 +415,7 @@ function slaveTest(slaveGridPanel){
             url:"/slave/slaveTest.do",
             success:function(response,config){
                 Ext.MessageBox.updateProgress(1,"100%");
-                var testJSONString=response.responseText;
+                testJSONString=response.responseText;
                 setTimeout("showTestResultByWindow(testJSONString,slaveGridPanel)",600);
             },
             failure:function(){

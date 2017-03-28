@@ -17,6 +17,15 @@ public class JobEntity {
     private String createUser; //创建用户
     private Integer directoryId;// 作业所在的目录的id,与层级目录表的id对应,用于标识该作业是存放在哪个目录,根目录是/
     private String directoryName;   //作业的完整目录名
+    private String belongToTaskGroup;   //所属任务组 多个以逗号形式分隔
+
+    public String getBelongToTaskGroup() {
+        return belongToTaskGroup;
+    }
+
+    public void setBelongToTaskGroup(String belongToTaskGroup) {
+        this.belongToTaskGroup = belongToTaskGroup;
+    }
 
     public String getDirectoryName() {
         return directoryName;

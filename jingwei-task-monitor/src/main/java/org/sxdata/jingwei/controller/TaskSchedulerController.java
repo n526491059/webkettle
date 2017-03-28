@@ -67,7 +67,7 @@ public class TaskSchedulerController {
         try{
             String[] taskIdArray=request.getParameterValues("taskIdArray");
             schedulerService.deleteScheduler(taskIdArray);
-        }catch (Exception e){
+        }catch (org.quartz.SchedulerException e){
             String errorMessage=e.getMessage();
             e.printStackTrace();
         }
