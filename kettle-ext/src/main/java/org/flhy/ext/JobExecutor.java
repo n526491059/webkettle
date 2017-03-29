@@ -1,12 +1,7 @@
 package org.flhy.ext;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
@@ -28,7 +23,6 @@ import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.ui.spoon.job.JobEntryCopyResult;
 import org.pentaho.di.www.SlaveServerJobStatus;
-import org.pentaho.di.www.SlaveServerTransStatus;
 
 public class JobExecutor implements Runnable {
 
@@ -46,7 +40,9 @@ public class JobExecutor implements Runnable {
 	}
 	
 	private static Hashtable<String, JobExecutor> executors = new Hashtable<String, JobExecutor>();
-	
+	public static Hashtable<String, JobExecutor> getExecutors(){
+		return executors;
+	}
 	public static synchronized JobExecutor initExecutor(JobExecutionConfiguration executionConfiguration, JobMeta jobMeta) {
 		JobExecutor jobExecutor = new JobExecutor(executionConfiguration, jobMeta);
 		executors.put(jobExecutor.getExecutionId(), jobExecutor);

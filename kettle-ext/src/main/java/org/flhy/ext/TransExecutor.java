@@ -53,7 +53,9 @@ public class TransExecutor implements Runnable {
 	}
 	
 	private static Hashtable<String, TransExecutor> executors = new Hashtable<String, TransExecutor>();
-	
+	public static Hashtable<String, TransExecutor> getExecutors(){
+		return executors;
+	}
 	public static synchronized TransExecutor initExecutor(TransExecutionConfiguration transExecutionConfiguration, TransMeta transMeta) {
 		TransExecutor transExecutor = new TransExecutor(transExecutionConfiguration, transMeta);
 		executors.put(transExecutor.getExecutionId(), transExecutor);
