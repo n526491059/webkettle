@@ -77,8 +77,6 @@
 		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
         <property name="dataSource" ref="dataSource" />  
         <property name="mapperLocations" value="classpath:mappings/*.xml" />
-
-<!--         <property name="configLocation" value="classpath:mybatis.xml" />  -->
     </bean>  
 
 	<!-- 事务配置 -->

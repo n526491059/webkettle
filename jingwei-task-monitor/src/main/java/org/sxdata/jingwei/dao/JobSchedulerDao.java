@@ -27,4 +27,5 @@ public interface JobSchedulerDao {
     public void deleteSchedulerByJobName(String jobName);
 
     public List<JobTimeSchedulerEntity> getTimerJobByJobName(String jobName);
+
 }
