@@ -31,7 +31,6 @@ public class SlaveController {
     @ResponseBody
     protected void getJobs(HttpServletResponse response,HttpServletRequest request) {
         try{
-
             List<SlaveEntity> result=slaveService.getAllSlave();
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();

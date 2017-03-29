@@ -72,12 +72,11 @@ function showUserPanel(secondGuidePanel){
         })
     });
     grid.getColumnModel().setHidden(2,true);
-    //grid.getColumnModel().setHidden(3,true);
+    grid.getColumnModel().setHidden(3,true);
     secondGuidePanel.removeAll(true);
     secondGuidePanel.add(grid);
     secondGuidePanel.doLayout();
 }
-
 //修改用户
 function updateUser(){
     var grid=Ext.getCmp("usersPanel");
@@ -225,6 +224,7 @@ function generateUserForm(login,description,password,uri){
     return userInfoForm;
 }
 
+//删除用户
 function deleteUser(){
     var grid=Ext.getCmp("usersPanel");
     var secondGuidePanel=Ext.getCmp("secondGuidePanel");

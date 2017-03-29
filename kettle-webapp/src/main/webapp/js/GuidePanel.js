@@ -244,7 +244,6 @@ GuidePanel = Ext.extend(Ext.Panel, {
 						}
 					]
 				}),
-
 				enableDD:true,
 				ddGroup:'TreePanelDDGroup',
 				autoScroll: true,
@@ -300,7 +299,6 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				    	
 				    }
 				});
-				
 			} else if(node.text == "<font size = '2px'>作业管理</font>")
 			{
 				secondGuidePanel.removeAll(true);
@@ -330,6 +328,8 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				showTaskGroupPanel(secondGuidePanel);
 			}else if(node.text=="<font size = '2px'>用户管理</font>"){
 				showUserPanel(secondGuidePanel);
+			}else if(node.text=="<font size = '2px'>用户组管理</font>"){
+				showUserPanel(secondGuidePanel);
 			}
 		});
 		
@@ -337,6 +337,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 		GuidePanel.superclass.initComponent.call(this);
 	}
 });
+
 
 //  TransGuide = Ext.extend(Ext.Panel, {
 // //     activeTab: 0,
