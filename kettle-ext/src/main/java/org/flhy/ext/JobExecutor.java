@@ -52,11 +52,15 @@ public class JobExecutor implements Runnable {
 		executors.put(jobExecutor.getExecutionId(), jobExecutor);
 		return jobExecutor;
 	}
-
+	public static void remove(String executionId) {
+		executors.remove(executionId);
+	}
 	public String getExecutionId() {
 		return executionId;
 	}
-	
+	public static JobExecutor getExecutor(String executionId) {
+		return executors.get(executionId);
+	}
 	private boolean finished = false;
 	private long errCount = 0;
 

@@ -17,7 +17,7 @@ function generateTrans(transName,createDate,inputName){
         {header:"所属任务组",dataIndex:"belongToTaskGroup"},
         {header:"转换属性",width:280,dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
-                return "<input type='button' onclick='showOneTransDetail()' value='查看'>&nbsp;"+
+                return "<input type='button' onclick='showOneTransDetail()' value='查看转换属性'>&nbsp;"+
                     "<input type='button' onclick='deleteTransByTransPath()' value='删除'>&nbsp;"+
                     "<input type='button' onclick='editorTrans()' value='编辑'>&nbsp;"+
                     "<input type='button' onclick='transCompositionImg()' value='结构图'>&nbsp;"+
@@ -103,7 +103,8 @@ function generateTrans(transName,createDate,inputName){
                         secondGuidePanel.add(generateTrans(transValue,createDate,transValue));
                         secondGuidePanel.doLayout();
                     }
-                }/*,'-',
+                }
+                /*,'-',
                 {
                     text:"删除所选转换",
                     handler:function(){
@@ -144,7 +145,8 @@ function generateTrans(transName,createDate,inputName){
                             Ext.MessageBox.alert("提示","请先勾选需要删除的行再进行该操作!");
                         }
                     }
-                }*/,"-", {
+                }*/
+                ,"-", {
                     text:"执行转换",
                     handler:function(){
                        var path="";

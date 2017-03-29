@@ -19,7 +19,7 @@ function generateJobPanel(jobName,createDate,inputName){
         {header:"所属任务组",dataIndex:"belongToTaskGroup"},
         {header:"作业属性",width:280,dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
-                return "<input type='button' onclick='showOneJobDetail()' value='查看'>&nbsp;"+
+                return "<input type='button' onclick='showOneJobDetail()' value='查看作业属性'>&nbsp;"+
                     "<input type='button' onclick='deleteJobByJobPath()' value='删除'>&nbsp;"+
                     "<input type='button' onclick='editorJob()' value='编辑'>&nbsp;"+
                     "<input type='button' onclick='jobCompositionImg()' value='结构图'>&nbsp;"+
@@ -103,7 +103,8 @@ function generateJobPanel(jobName,createDate,inputName){
                         secondGuidePanel.add(generateJobPanel(transValue,createDate,transValue));
                         secondGuidePanel.doLayout();
                     }
-                }/*,'-',
+                }
+                /*,'-',
                 {
                     text:"删除所选行",
                     handler:function(){
@@ -143,8 +144,9 @@ function generateJobPanel(jobName,createDate,inputName){
                             Ext.MessageBox.alert("提示","请先选择所需要删除的行再进行该操作!")
                         }
                     }
-                }*/,"-",{
-                    text:"执行作业",
+                }*/
+                ,"-",{
+                    text:"执行作业配置",
                     handler:function(){
                         var path="";//被选中的任务路径
                         var view=grid.getView();
@@ -161,8 +163,31 @@ function generateJobPanel(jobName,createDate,inputName){
                             Ext.MessageBox.alert("请先选择一个(只能一个)作业再执行");
                             return;
                         }
-                        var executeWindow=generateSlaveWindow(path,"job");
-                        executeWindow.show(grid);
+                        // var executeWindow=generateSlaveWindow(path,"job");
+                        // executeWindow.show(grid);
+                        Ext.Ajax.request({
+                            url: GetUrl('task/detail.do'),
+                            method: 'POST',
+                            params: {taskName: path,type:'job'},
+                            success: function(response) {
+                                var resObj = Ext.decode(response.responseText);
+                                var graphPanel = Ext.create({border: false, Executable: true }, resObj.GraphType);
+                                var dialog = new LogDetailDialog({
+                                    items: graphPanel
+                                });
+                                activeGraph = graphPanel;
+                                dialog.show(null, function() {
+                                    var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
+                                    var decoder = new mxCodec(xmlDocument);
+                                    var node = xmlDocument.documentElement;
+
+                                    var graph = graphPanel.getGraph();
+                                    decoder.decode(node, graph.getModel());
+                                    graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
+
+                                });
+                            }
+                        });
                     }
                 },"-",
                 {
@@ -219,7 +244,6 @@ function jobPowerExecute(){
 
 //结构图
 function jobCompositionImg(){
-    var secondGuidePanle=Ext.getCmp("secondGuidePanel");
     var grid=Ext.getCmp("JobPanel");
     var taskName=grid.getSelectionModel().getSelected().get("directoryName");//被选中的任务路径
     Ext.Ajax.request({
@@ -232,6 +256,7 @@ function jobCompositionImg(){
             var dialog = new LogDetailDialog({
                 items: graphPanel
             });
+            activeGraph = graphPanel;
             dialog.show(null, function() {
                 var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
                 var decoder = new mxCodec(xmlDocument);
@@ -241,7 +266,7 @@ function jobCompositionImg(){
                 decoder.decode(node, graph.getModel());
                 graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
 
-                graphPanel.doResult(Ext.decode(resObj.executionLog));
+                //graphPanel.doResult(Ext.decode(resObj.executionLog));
             });
         }
     });

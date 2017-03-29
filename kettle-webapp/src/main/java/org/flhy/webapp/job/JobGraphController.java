@@ -505,7 +505,7 @@ public class JobGraphController {
 	    JobExecutor jobExecutor = JobExecutor.initExecutor(jobExecutionConfiguration, jobMeta);
 	    Thread tr = new Thread(jobExecutor, "JobExecutor_" + jobExecutor.getExecutionId());
 	    tr.start();
-        executions.put(jobExecutor.getExecutionId(), jobExecutor);
+        //executions.put(jobExecutor.getExecutionId(), jobExecutor);
 		
         JsonUtils.success(jobExecutor.getExecutionId());
 	}
@@ -521,10 +521,10 @@ public class JobGraphController {
 	protected void result(@RequestParam String executionId) throws Exception {
 		JSONObject jsonObject = new JSONObject();
 		
-		JobExecutor jobExecutor = executions.get(executionId);
+		JobExecutor jobExecutor = JobExecutor.getExecutor(executionId);
 		jsonObject.put("finished", jobExecutor.isFinished());
 		if(jobExecutor.isFinished()) {
-			executions.remove(executionId);
+			JobExecutor.remove(executionId);
 			
 			jsonObject.put("jobMeasure", jobExecutor.getJobMeasure());
 			jsonObject.put("log", StringEscapeHelper.encode(jobExecutor.getExecutionLog()));
@@ -540,32 +540,4 @@ public class JobGraphController {
 		JsonUtils.response(jsonObject);
 	}
 
-	//获取结构图信息
-	@ResponseBody
-	@RequestMapping(method=RequestMethod.POST, value="/detail")
-	protected void detail(@RequestParam String taskName,@RequestParam String type) throws Exception {
-		org.flhy.ext.utils.JSONObject jsonObject = new org.flhy.ext.utils.JSONObject();
-
-		if(type.equals("trans")) {
-			TransMeta transMeta = RepositoryUtils.loadTransByPath(taskName);
-			jsonObject.put("GraphType", "TransGraph");
-			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
-			String graphXml = codec.encode(transMeta);
-
-			jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
-		} else if(type.equals("job")) {
-			JobMeta jobMeta = RepositoryUtils.loadJobbyPath(taskName);
-			jsonObject.put("GraphType", "JobGraph");
-
-			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
-			String graphXml = codec.encode(jobMeta);
-
-			jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
-		}
-
-		//jsonObject.put("executionLog", executionTrace.getExecutionLog());
-		JsonUtils.response(jsonObject);
-	}
-
-	private static HashMap<String, JobExecutor> executions = new HashMap<String, JobExecutor>();
 }

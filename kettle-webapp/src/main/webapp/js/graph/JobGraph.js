@@ -70,7 +70,6 @@ JobGraph = Ext.extend(BaseGraph, {
 				iconCls: 'show-results', scope: this, handler: this.showResultPanel
 			}];
 		}else if(this.Executable===true&&this.readOnly === false){
-
 			var jobExecutor = this.jobExecutor = new JobExecutor();
 			jobExecutor.on('beforerun', function(executor, defaultExecutionConfig) {
 				var dialog = new JobExecutionConfigurationDialog();
