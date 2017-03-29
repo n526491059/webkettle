@@ -122,6 +122,7 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/GuidePanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initMain.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initStore.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/user.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/jobMonitor.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/transMonitor.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/slave.js"></script>

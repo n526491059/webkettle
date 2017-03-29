@@ -22,10 +22,12 @@ public class KettleEncr {
     }
 
 
+    //解码 解码成可阅读的字符串
     public static  final  String decryptPasswd(String encryptedFromKettle){
         return  decryptPassword(encryptedFromKettle.replace("Encrypted ",""));
     }
 
+    //编码
     public static final String encryptPassword(String password)
     {
         if (password==null) return "";

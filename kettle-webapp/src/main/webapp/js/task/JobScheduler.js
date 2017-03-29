@@ -330,35 +330,3 @@ function generateSlaveHostNameSelect(hostNameValue){
 }
 
 
-//生成作业调度信息页面所需要的表单 其中包含了 类型和ip的下拉列表 作业名的文本框
-/*function generateFormforSchedulerPanel(){
-    var typeSelect=generateSchedulerTypeSelect();
-    var hostNameSelect=generateSlaveHostNameSelect();
-    var inputJobName=new Ext.form.TextField({
-        name: "jobName",
-        fieldLabel:"作业名",
-        width: 100,
-        value:""
-    })
-
-    var f=new Ext.form.FormPanel({
-        id:"toolForm",
-        name:"toolForm",
-        width:750,
-        autoHeight:true,
-        frame:true,
-        labelWidth:50,
-        labelAlign:"right",
-        items:[
-            {
-                layout:"column",    //横向布局(列布局),左到右
-                items:[
-                    {layout:"form", items:[typeSelect]},     //每一个是单独的表单控件,单个使用纵向布局,上到下
-                    {layout:"form",items:[hostNameSelect]},
-                    {layout:"form",items:[inputJobName]}
-                ]
-            }
-        ]
-    })
-    return f;
-}*/

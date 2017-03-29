@@ -93,7 +93,7 @@ public class TaskSchedulerController {
         }
     }
 
-    //获取修改前所需要的数据展现
+    //修改
     @RequestMapping(value="/updateJobScheduler")
     @ResponseBody
     protected void updateJobScheduler(HttpServletResponse response,HttpServletRequest request) {

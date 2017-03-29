@@ -11,16 +11,16 @@ public class UserEntity {
     private String description;
     private char enabled;
 
-    public String getPassword() {
-        return password;
-    }
-
     public Integer getUserId() {
         return userId;
     }
 
     public String getLogin() {
         return login;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public String getName() {

@@ -6,6 +6,11 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerFactory;
+import org.quartz.TriggerKey;
+import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sxdata.jingwei.bean.PageforBean;
@@ -40,6 +45,8 @@ public class JobServiceImpl implements JobService {
     protected JobSchedulerDao jobSchedulerDao;
     @Autowired
     protected TaskGroupDao taskGroupDao;
+    @Autowired
+    protected  JobSchedulerDao schedulerDao;
 
     protected SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -151,6 +158,23 @@ public class JobServiceImpl implements JobService {
         Repository repository = App.getInstance().getRepository();
         String dir = jobPath.substring(0, jobPath.lastIndexOf("/"));
         String name = jobPath.substring(jobPath.lastIndexOf("/") + 1);
+
+        List<JobTimeSchedulerEntity> timers=schedulerDao.getTimerJobByJobName(name);
+
+        if(timers!=null && timers.size()>0){
+            //删除作业的定时记录
+            schedulerDao.deleteSchedulerByJobName(name);
+            SchedulerFactory factory=new StdSchedulerFactory();
+            Scheduler scheduler=factory.getScheduler();
+            //从trigger中移除该定时
+            for(JobTimeSchedulerEntity timer:timers){
+                String taskId=String.valueOf(timer.getIdJobtask());
+                TriggerKey triggerKey=TriggerKey.triggerKey(taskId + "trigger", CarteTaskManager.JOB_TIMER_TASK_GROUP);
+                scheduler.pauseTrigger(triggerKey); //停止触发器
+                scheduler.unscheduleJob(triggerKey);  //移除触发器
+                scheduler.deleteJob(JobKey.jobKey(taskId, CarteTaskManager.JOB_TIMER_TASK_GROUP));   //删除作业
+            }
+        }
         //删除作业在任务组明细表中的记录
         taskGroupDao.deleteTaskGroupAttributesByTaskName(name,"job");
         //删除作业
@@ -164,7 +188,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public void executeJob(String path,Integer slaveId) throws Exception {
         //获取用户信息
-        UserEntity loginUser=userDao.getUserbyName("admin");
+        UserEntity loginUser = userDao.getUserbyName("admin");
         loginUser.setPassword(KettleEncr.decryptPasswd("Encrypted " + loginUser.getPassword()));
         //构造Carte对象
         SlaveEntity slave=slaveDao.getSlaveById(slaveId);
@@ -313,7 +337,7 @@ public class JobServiceImpl implements JobService {
         String typeInfo=params.get("typeChoose").toString();
         int schedulerType=0;
         //如果是间隔执行则设置执行的时间间隔
-        if(typeInfo.trim().equals("")){
+        if(typeInfo.trim().equals("间隔重复")){
             schedulerType=1;
             jobTimeScheduler.setIntervalminutes(Integer.parseInt(params.get("intervalminute").toString()));
         }else if(typeInfo.trim().equals("每天执行")){
