@@ -103,51 +103,8 @@ function generateTrans(transName,createDate,inputName){
                         secondGuidePanel.add(generateTrans(transValue,createDate,transValue));
                         secondGuidePanel.doLayout();
                     }
-                }
-                /*,'-',
-                {
-                    text:"删除所选转换",
-                    handler:function(){
-                        var flag=false;
-                        var view=grid.getView();
-                        //数组用来存放用户选择的一至多行的转换的绝对目录名
-                        var pathArray=new Array();
-                        //获得行选择模型
-                        var rsm=grid.getSelectionModel();
-                        //遍历所有行
-                        for(var i= 0;i<view.getRows().length;i++){
-                            //判断是否被选中，参数i代表行号
-                            if(rsm.isSelected(i)){
-                                flag=true;
-                                //如果该行被选中则获取该行列名为transformationId的单元格的值,并且放入数组
-                                pathArray.push(grid.getStore().getAt(i).get("directoryName"));
-                            }
-                        }
-                        if(flag==true){
-                            Ext.MessageBox.confirm("确认","确认删除所选转换?",function(btn){
-                                if(btn=="yes"){
-                                    Ext.Ajax.request({
-                                        url:"/task/delete.do",
-                                        success:function(response,config){
-                                            secondGuidePanel.removeAll(true);
-                                            secondGuidePanel.add(generateTrans("","",undefined));
-                                            secondGuidePanel.doLayout();
-                                            Ext.MessageBox.alert("提示","删除转换记录成功~!")
-                                        },
-                                        failure:function(){
-                                            Ext.MessageBox.alert("result","内部错误,删除失败!")
-                                        },
-                                        params:{path:pathArray,flag:"transformation"}
-                                    })
-                                }
-                            });
-                        }else{
-                            Ext.MessageBox.alert("提示","请先勾选需要删除的行再进行该操作!");
-                        }
-                    }
-                }*/
-                ,"-", {
-                    text:"执行转换",
+                },"-", {
+                    text:"执行转换配置",
                     handler:function(){
                        var path="";
                         var num=0;
@@ -164,8 +121,29 @@ function generateTrans(transName,createDate,inputName){
                             Ext.MessageBox.alert("请先选择一个(只能一个)转换再执行");
                             return;
                         }
-                        var executeWindow=generateSlaveWindow(path,"transformation");
-                        executeWindow.show(grid);
+                       /* var executeWindow=generateSlaveWindow(path,"transformation");
+                        executeWindow.show(grid);*/
+                        Ext.Ajax.request({
+                            url: GetUrl('task/detail.do'),
+                            method: 'POST',
+                            params: {taskName: path,type:'trans'},
+                            success: function(response) {
+                                var resObj = Ext.decode(response.responseText);
+                                var graphPanel = Ext.create({border: false, Executable: true }, resObj.GraphType);
+                                var dialog = new LogDetailDialog({
+                                    items: graphPanel
+                                });
+                                activeGraph = graphPanel;
+                                dialog.show(null, function() {
+                                    var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
+                                    var decoder = new mxCodec(xmlDocument);
+                                    var node = xmlDocument.documentElement;
+                                    var graph = graphPanel.getGraph();
+                                    decoder.decode(node, graph.getModel());
+                                    graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
+                                });
+                            }
+                        });
                     }
                 },"-",{
                     text:"分配任务组",

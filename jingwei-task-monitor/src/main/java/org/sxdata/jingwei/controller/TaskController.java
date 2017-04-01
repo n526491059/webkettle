@@ -80,14 +80,14 @@ public class TaskController {
     @ResponseBody
     protected void stopTransOrJob(HttpServletResponse response,HttpServletRequest request){
         try{
+            String[] typeArray=request.getParameterValues("typeArray");
             String[] idArray=request.getParameterValues("idArray");
             String[] hostArray=request.getParameterValues("hostArray");
-            String[] typeArray=request.getParameterValues("typeArray");
             for(int i=0;i<typeArray.length;i++){
                 if(typeArray[i].trim().equals("作业")){
-                    controlService.stopJob(idArray[i],hostArray[i]);
+                    controlService.stopJob(hostArray[i],idArray[i]);
                 }else{
-                    controlService.stopTrans(idArray[i],hostArray[i]);
+                    controlService.stopTrans(hostArray[i],idArray[i]);
                 }
             }
             response.setContentType("text/html;charset=utf-8");
@@ -345,7 +345,6 @@ public class TaskController {
             jsonObject.put("GraphType", "TransGraph");
             GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
             String graphXml = codec.encode(transMeta);
-
             jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
         } else if(type.equals("job")) {
             JobMeta jobMeta = RepositoryUtils.loadJobbyPath(taskName);

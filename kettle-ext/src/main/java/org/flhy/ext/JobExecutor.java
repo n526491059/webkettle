@@ -3,8 +3,13 @@ package org.flhy.ext;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.flhy.ext.Task.ExecutionTraceDao;
+import org.flhy.ext.Task.ExecutionTraceDaoImpl;
+import org.flhy.ext.Task.ExecutionTraceEntity;
+import org.flhy.ext.utils.ExceptionUtils;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
+import org.flhy.ext.utils.StringEscapeHelper;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.Result;
@@ -21,35 +26,26 @@ import org.pentaho.di.job.JobEntryResult;
 import org.pentaho.di.job.JobExecutionConfiguration;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.ui.spoon.job.JobEntryCopyResult;
 import org.pentaho.di.www.SlaveServerJobStatus;
 
 public class JobExecutor implements Runnable {
-
 	private String executionId;
 	private JobExecutionConfiguration executionConfiguration;
 	private JobMeta jobMeta = null;
+	private String carteObjectId = null;
 	private Job job = null;
 	private static final Class PKG = JobEntryCopyResult.class;
-//	private Map<StepMeta, String> stepLogMap = new HashMap<StepMeta, String>();
-	
-	private JobExecutor(JobExecutionConfiguration executionConfiguration, JobMeta jobMeta) {
-		this.executionId = UUID.randomUUID().toString().replaceAll("-", "");
-		this.executionConfiguration = executionConfiguration;
-		this.jobMeta = jobMeta;
-	}
-	
+	private boolean finished = false;
+	private long errCount = 0;
 	private static Hashtable<String, JobExecutor> executors = new Hashtable<String, JobExecutor>();
-	public static Hashtable<String, JobExecutor> getExecutors(){
-		return executors;
+//	private Map<StepMeta, String> stepLogMap = new HashMap<StepMeta, String>();
+	public boolean isFinished() {
+		return finished;
 	}
-	public static synchronized JobExecutor initExecutor(JobExecutionConfiguration executionConfiguration, JobMeta jobMeta) {
-		JobExecutor jobExecutor = new JobExecutor(executionConfiguration, jobMeta);
-		executors.put(jobExecutor.getExecutionId(), jobExecutor);
-		return jobExecutor;
-	}
-	public static void remove(String executionId) {
-		executors.remove(executionId);
+	public Job getJob() {
+		return job;
 	}
 	public String getExecutionId() {
 		return executionId;
@@ -57,27 +53,68 @@ public class JobExecutor implements Runnable {
 	public static JobExecutor getExecutor(String executionId) {
 		return executors.get(executionId);
 	}
-	private boolean finished = false;
-	private long errCount = 0;
+	public void setJob(Job job) {
+		this.job = job;
+	}
+	public JobExecutionConfiguration getExecutionConfiguration() {
+		return executionConfiguration;
+	}
+	public void setExecutionConfiguration(JobExecutionConfiguration executionConfiguration) {
+		this.executionConfiguration = executionConfiguration;
+	}
+	public String getCarteObjectId() {
+		return carteObjectId;
+	}
+	public JobMeta getJobMeta() {
+		return jobMeta;
+	}
+	public void setJobMeta(JobMeta jobMeta) {
+		this.jobMeta = jobMeta;
+	}
+	public void setExecutionId(String executionId) {
+		this.executionId = executionId;
+	}
+	public long getErrCount() {
+		return errCount;
+	}
+	public static Hashtable<String, JobExecutor> getExecutors(){
+		return executors;
+	}
+	public static void remove(String executionId) {
+		executors.remove(executionId);
+	}
+	private JobExecutor(JobExecutionConfiguration executionConfiguration, JobMeta jobMeta) {
+		this.executionId = UUID.randomUUID().toString().replaceAll("-", "");
+		this.executionConfiguration = executionConfiguration;
+		this.jobMeta = jobMeta;
+	}
+
+
+	public static synchronized JobExecutor initExecutor(JobExecutionConfiguration executionConfiguration, JobMeta jobMeta) {
+		JobExecutor jobExecutor = new JobExecutor(executionConfiguration, jobMeta);
+		executors.put(jobExecutor.getExecutionId(), jobExecutor);
+		return jobExecutor;
+	}
 
 	@Override
 	public void run() {
+		ExecutionTraceEntity trace=new ExecutionTraceEntity();
 		try {
 			for (String varName : executionConfiguration.getVariables().keySet()) {
 				String varValue = executionConfiguration.getVariables().get(varName);
 				jobMeta.setVariable(varName, varValue);
 			}
-			
+
 			for (String paramName : executionConfiguration.getParams().keySet()) {
 				String paramValue = executionConfiguration.getParams().get(paramName);
 				jobMeta.setParameterValue(paramName, paramValue);
 			}
-			
+			trace.setStartTime(new Date());
 			if (executionConfiguration.isExecutingLocally()) {
 				 SimpleLoggingObject spoonLoggingObject = new SimpleLoggingObject( "SPOON", LoggingObjectType.SPOON, null );
 			     spoonLoggingObject.setContainerObjectId( executionId );
 			     spoonLoggingObject.setLogLevel( executionConfiguration.getLogLevel() );
-			     job = new Job( App.getInstance().getRepository(), jobMeta, spoonLoggingObject );
+				job = new Job( App.getInstance().getRepository(), jobMeta, spoonLoggingObject );
 				
 				job.setLogLevel(executionConfiguration.getLogLevel());
 				job.shareVariablesWith(jobMeta);
@@ -93,7 +130,6 @@ public class JobExecutor implements Runnable {
 	            	JobEntryCopy startJobEntryCopy = jobMeta.findJobEntry( executionConfiguration.getStartCopyName(), executionConfiguration.getStartCopyNr(), false );
 	            	job.setStartJobEntryCopy( startJobEntryCopy );
 	            }
-
 	            // Set the named parameters
 	            Map<String, String> paramMap = executionConfiguration.getParams();
 	            Set<String> keys = paramMap.keySet();
@@ -101,18 +137,14 @@ public class JobExecutor implements Runnable {
 					job.getJobMeta().setParameterValue(key, Const.NVL(paramMap.get(key), ""));
 				}
 	            job.getJobMeta().activateParameters();
-
 	            job.start();
-				
 				while(!job.isFinished()) {
 					Thread.sleep(500);
 				}
-				
 				errCount = job.getErrors();
 			} else if (executionConfiguration.isExecutingRemotely()) {
 				carteObjectId = Job.sendToSlaveServer( jobMeta, executionConfiguration, App.getInstance().getRepository(), App.getInstance().getMetaStore() );
 				SlaveServer remoteSlaveServer = executionConfiguration.getRemoteServer();
-				
 				boolean running = true;
 				while(running) {
 					SlaveServerJobStatus jobStatus = remoteSlaveServer.getJobStatus(jobMeta.getName(), carteObjectId, 0);
@@ -122,25 +154,56 @@ public class JobExecutor implements Runnable {
 					Thread.sleep(500);
 				}
 			}
-			
+			//记录日志
+			trace.setEndTime(new Date());
+			trace.setJobName(jobMeta.getName());
+			//运行结果
+			String status="成功";
+			if(errCount>0){
+				status="失败";
+			}
+			trace.setStatus(status);
+			//日志信息
+			net.sf.json.JSONObject logJSON=new net.sf.json.JSONObject();
+			logJSON.put("jobMeasure",this.getJobMeasure());
+			logJSON.put("finished",true);
+			logJSON.put("log", StringEscapeHelper.decode(this.getExecutionLog()));
+			trace.setExecutionLog(logJSON.toString());
+			//运行方式
+			String execMethod="";
+			if(executionConfiguration.isExecutingLocally()){
+				execMethod="本地";
+			}else{
+				execMethod="远程:"+executionConfiguration.getRemoteServer().getHostname();
+			}
+			trace.setExecMethod(execMethod);
+			//executionConfigration
+			System.out.println(net.sf.json.JSONObject.fromObject(executionConfiguration).toString());
 		} catch(Exception e) {
-			e.printStackTrace();
-			App.getInstance().getLog().logError("执行失败！", e);
+			try {
+				trace.setEndTime(new Date());
+				trace.setJobName(jobMeta.getName());
+				trace.setStatus("程序错误");
+				trace.setExecutionLog(ExceptionUtils.toString(e));
+				String execMethod="";
+				if(executionConfiguration.isExecutingLocally()){
+					execMethod="本地";
+				}else{
+					execMethod="远程:"+executionConfiguration.getRemoteServer().getHostname();
+				}
+				trace.setExecMethod(execMethod);
+				//executionConfigration
+				System.out.println(net.sf.json.JSONObject.fromObject(executionConfiguration).toString());
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 		} finally {
 			finished = true;
+			ExecutionTraceDao dao=new ExecutionTraceDaoImpl();
+			dao.addExecutionTrace(trace);
 		}
 	}
-	
-	public boolean isFinished() {
-		return finished;
-	}
-	
-	public long getErrCount() {
-		return errCount;
-	}
 
-	private String carteObjectId = null;
-	
 	public int previousNrItems;
 	public JSONArray getJobMeasure() throws Exception {
     	JSONArray jsonArray = new JSONArray();
@@ -228,8 +291,7 @@ public class JobExecutor implements Runnable {
 	    	  return null;
 		return jsonObject;
 	}
-	
-	
+
 	public String getExecutionLog() throws Exception {
 		if(executionConfiguration.isExecutingLocally()) {
 			StringBuffer sb = new StringBuffer();

@@ -180,7 +180,6 @@ function generateJobPanel(jobName,createDate,inputName){
                                     var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
                                     var decoder = new mxCodec(xmlDocument);
                                     var node = xmlDocument.documentElement;
-
                                     var graph = graphPanel.getGraph();
                                     decoder.decode(node, graph.getModel());
                                     graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
