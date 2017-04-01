@@ -224,8 +224,6 @@ function  transCompositionImg(){
                 var graph = graphPanel.getGraph();
                 decoder.decode(node, graph.getModel());
                 graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
-
-                graphPanel.doResult(Ext.decode(resObj.executionLog));
             });
         }
     });

@@ -256,7 +256,6 @@ function jobCompositionImg(){
             var dialog = new LogDetailDialog({
                 items: graphPanel
             });
-            activeGraph = graphPanel;
             dialog.show(null, function() {
                 var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
                 var decoder = new mxCodec(xmlDocument);
@@ -265,8 +264,6 @@ function jobCompositionImg(){
                 var graph = graphPanel.getGraph();
                 decoder.decode(node, graph.getModel());
                 graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
-
-                //graphPanel.doResult(Ext.decode(resObj.executionLog));
             });
         }
     });
