@@ -20,9 +20,9 @@ public interface ControlService {
 
     public List<StepStatus> getTransDetail(String id,String hostName) throws Exception;
 
-    public void stopTrans(String id,String hostName) throws Exception;
+    public void stopTrans(String hostName,String id) throws Exception;
 
-    public void stopJob(String id,String hostName) throws Exception;
+    public void stopJob(String hostName,String id) throws Exception;
 
     public void pauseOrStartTrans(String[] id,String[] hostName) throws Exception;
 }

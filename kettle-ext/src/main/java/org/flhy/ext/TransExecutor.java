@@ -1,16 +1,16 @@
 package org.flhy.ext;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
+import net.sf.json.JsonConfig;
+import net.sf.json.util.CycleDetectionStrategy;
+import org.flhy.ext.Task.ExecutionTraceDao;
+import org.flhy.ext.Task.ExecutionTraceDaoImpl;
+import org.flhy.ext.Task.ExecutionTraceEntity;
+import org.flhy.ext.utils.ExceptionUtils;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
+import org.flhy.ext.utils.StringEscapeHelper;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.Result;
@@ -37,53 +37,71 @@ import org.pentaho.di.www.SlaveServerTransStatus;
 import org.springframework.util.StringUtils;
 
 public class TransExecutor implements Runnable {
-
 	private String executionId;
 	private TransExecutionConfiguration executionConfiguration;
 	private TransMeta transMeta = null;
 	private Trans trans = null;
 	private Map<StepMeta, String> stepLogMap = new HashMap<StepMeta, String>();
-	
 	private TransSplitter transSplitter = null;
-	
+	private boolean finished = false;
+	private long errCount;
+	private static Hashtable<String, TransExecutor> executors = new Hashtable<String, TransExecutor>();
+	public static void remove(String executionId) {
+		executors.remove(executionId);
+	}
+	public String getExecutionId() {
+		return executionId;
+	}
+	public long getErrCount() {
+		return errCount;
+	}
+	public static TransExecutor getExecutor(String executionId) {
+		return executors.get(executionId);
+	}
+	public String getCarteObjectId() {
+		return carteObjectId;
+	}
+	public void setCarteObjectId(String carteObjectId) {
+		this.carteObjectId = carteObjectId;
+	}
+	public TransMeta getTransMeta() {
+		return transMeta;
+	}
+	public void setTransMeta(TransMeta transMeta) {
+		this.transMeta = transMeta;
+	}
+	public TransExecutionConfiguration getExecutionConfiguration() {
+		return executionConfiguration;
+	}
+	public void setExecutionConfiguration(TransExecutionConfiguration executionConfiguration) {
+		this.executionConfiguration = executionConfiguration;
+	}
+	public Trans getTrans() {
+		return trans;
+	}
+	public void setTrans(Trans trans) {
+		this.trans = trans;
+	}
+	public static Hashtable<String, TransExecutor> getExecutors(){
+		return executors;
+	}
 	private TransExecutor(TransExecutionConfiguration transExecutionConfiguration, TransMeta transMeta) {
 		this.executionId = UUID.randomUUID().toString().replaceAll("-", "");
 		this.executionConfiguration = transExecutionConfiguration;
 		this.transMeta = transMeta;
 	}
-	
-	private static Hashtable<String, TransExecutor> executors = new Hashtable<String, TransExecutor>();
-	public static Hashtable<String, TransExecutor> getExecutors(){
-		return executors;
-	}
+
 	public static synchronized TransExecutor initExecutor(TransExecutionConfiguration transExecutionConfiguration, TransMeta transMeta) {
 		TransExecutor transExecutor = new TransExecutor(transExecutionConfiguration, transMeta);
 		executors.put(transExecutor.getExecutionId(), transExecutor);
 		return transExecutor;
 	}
-	
-	public static TransExecutor getExecutor(String executionId) {
-		return executors.get(executionId);
-	}
-	
-	public static void remove(String executionId) {
-		executors.remove(executionId);
-	}
-
-	public String getExecutionId() {
-		return executionId;
-	}
-	
-	private boolean finished = false;
-	private long errCount;
-
-	public long getErrCount() {
-		return errCount;
-	}
 
 	@Override
 	public void run() {
+		ExecutionTraceEntity trace=new ExecutionTraceEntity();
 		try {
+			trace.setStartTime(new Date());
 			if (executionConfiguration.isExecutingLocally()) {
 				// Set the variables
 				transMeta.injectVariables( executionConfiguration.getVariables() );
@@ -94,7 +112,6 @@ public class TransExecutor implements Runnable {
 					transMeta.setParameterValue(key, Const.NVL(paramMap.get(key), ""));
 				}
 				transMeta.activateParameters();
-
 				// Set the arguments
 				Map<String, String> arguments = executionConfiguration.getArguments();
 		        String[] argumentNames = arguments.keySet().toArray( new String[arguments.size()] );
@@ -113,7 +130,6 @@ public class TransExecutor implements Runnable {
 		        trans.setLogLevel( executionConfiguration.getLogLevel() );
 		        trans.setReplayDate( executionConfiguration.getReplayDate() );
 		        trans.setRepository( executionConfiguration.getRepository() );
-		        
 		        try {
 		            trans.prepareExecution( args );
 					capturePreviewData(trans, transMeta.getSteps());
@@ -122,14 +138,12 @@ public class TransExecutor implements Runnable {
 		        	e.printStackTrace();
 		            checkErrorVisuals();
 		        }
-		        
 		        if ( trans.isReadyToStart() && initialized) {
 					trans.addTransListener(new TransAdapter() {
 						public void transFinished(Trans trans) {
 							checkErrorVisuals();
 						}
 					});
-		        	
 					trans.startThreads();
 					
 					while(!trans.isFinished())
@@ -142,12 +156,11 @@ public class TransExecutor implements Runnable {
 		        }
 			} else if (executionConfiguration.isExecutingRemotely()) {
 				carteObjectId = Trans.sendToSlaveServer( transMeta, executionConfiguration, App.getInstance().getRepository(), App.getInstance().getMetaStore() );
-				SlaveServer remoteSlaveServer = executionConfiguration.getRemoteServer();
-				
-				boolean running = true;
-				while(running) {
-					SlaveServerTransStatus transStatus = remoteSlaveServer.getTransStatus(transMeta.getName(), carteObjectId, 0);
-					running = transStatus.isRunning();
+					SlaveServer remoteSlaveServer = executionConfiguration.getRemoteServer();
+					boolean running = true;
+					while(running) {
+						SlaveServerTransStatus transStatus = remoteSlaveServer.getTransStatus(transMeta.getName(), carteObjectId, 0);
+						running = transStatus.isRunning();
 					if(!running) errCount = transStatus.getResult().getNrErrors();
 					Thread.sleep(500);
 				}
@@ -206,12 +219,59 @@ public class TransExecutor implements Runnable {
 				Result result = Trans.getClusteredTransformationResult(App.getInstance().getLog(), transSplitter, null);
 				errCount = result.getNrErrors();
 			}
-			
+			trace.setEndTime(new Date());
+			trace.setJobName(transMeta.getName());
+			//结果
+			String status="成功";
+			if(errCount>0){
+				status="失败";
+			}
+			trace.setStatus(status);
+			//LOG
+			net.sf.json.JSONObject transLog=new net.sf.json.JSONObject();
+			transLog.put("stepMeasure",this.getStepMeasure());
+			transLog.put("finished",true);
+			transLog.put("stepStatus", this.getStepStatus());
+			trace.setExecutionLog(transLog.toString());
+			//执行方式
+			String execMethod="";
+			if(executionConfiguration.isExecutingLocally()){
+				execMethod="本地";
+			}else{
+				execMethod="远程:"+executionConfiguration.getRemoteServer().getHostname();
+			}
+			trace.setExecMethod(execMethod);
+			//executionConfigration
+			JsonConfig jsonConfig = new JsonConfig();
+			jsonConfig.setCycleDetectionStrategy(CycleDetectionStrategy.LENIENT);
+			System.out.println(net.sf.json.JSONObject.fromObject(executionConfiguration,jsonConfig).toString());
 		} catch(Exception e) {
-			e.printStackTrace();
-			App.getInstance().getLog().logError("执行失败！", e);
+			try{
+				trace.setEndTime(new Date());
+				trace.setJobName(transMeta.getName());
+				trace.setStatus("程序错误");
+				trace.setExecutionLog(ExceptionUtils.toString(e));
+				//执行方式
+				String execMethod="";
+				if(executionConfiguration.isExecutingLocally()){
+					execMethod="本地";
+				}else{
+					execMethod="远程:"+executionConfiguration.getRemoteServer().getHostname();
+				}
+				trace.setExecMethod(execMethod);
+				JsonConfig jsonConfig = new JsonConfig();
+				jsonConfig.setCycleDetectionStrategy(CycleDetectionStrategy.LENIENT);
+				System.out.println(net.sf.json.JSONObject.fromObject(executionConfiguration, jsonConfig).toString());
+
+				e.printStackTrace();
+				App.getInstance().getLog().logError("执行失败！", e);
+			}catch (Exception e1){
+				e1.printStackTrace();
+			}
 		} finally {
 			finished = true;
+			ExecutionTraceDao dao=new ExecutionTraceDaoImpl();
+			dao.addExecutionTrace(trace);
 		}
 	}
 	
@@ -303,6 +363,27 @@ public class TransExecutor implements Runnable {
 
 	public boolean isFinished() {
 		return finished;
+	}
+
+	public List<StepStatus> getTransStepStatus() throws Exception{
+		List<StepStatus> items=new ArrayList<StepStatus>();
+		if(executionConfiguration.isExecutingLocally()) {
+			for (int i = 0; i < trans.nrSteps(); i++) {
+				StepInterface baseStep = trans.getRunThread(i);
+				StepStatus stepStatus = new StepStatus(baseStep);
+				items.add(stepStatus);
+			}
+		} else if(executionConfiguration.isExecutingRemotely()) {
+			SlaveServer remoteSlaveServer = executionConfiguration.getRemoteServer();
+			SlaveServerTransStatus transStatus = remoteSlaveServer.getTransStatus(transMeta.getName(), carteObjectId, 0);
+			items = transStatus.getStepStatusList();
+		} else if(executionConfiguration.isExecutingClustered()) {
+			SlaveServer masterServer = transSplitter.getMasterServer();
+			Map<TransMeta, String> carteMap = transSplitter.getCarteObjectMap();
+			SlaveServerTransStatus transStatus = masterServer.getTransStatus(transMeta.getName(), carteMap.get(transSplitter.getMaster()), 0);
+			items = transStatus.getStepStatusList();
+		}
+		return items;
 	}
 	
 	public JSONArray getStepMeasure() throws Exception {
@@ -517,6 +598,7 @@ public class TransExecutor implements Runnable {
 	}
 	
 	public void stop() {
+		System.out.println(trans);
 		trans.stopAll();
 	}
 	

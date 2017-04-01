@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.sf.json.JSON;
 import org.flhy.ext.App;
 import org.flhy.ext.PluginFactory;
 import org.flhy.ext.TransDebugExecutor;
@@ -24,11 +25,8 @@ import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.core.database.DatabaseCodec;
 import org.flhy.ext.trans.TransExecutionConfigurationCodec;
 import org.flhy.ext.trans.step.StepEncoder;
-import org.flhy.ext.utils.JSONArray;
-import org.flhy.ext.utils.JSONObject;
-import org.flhy.ext.utils.JsonUtils;
-import org.flhy.ext.utils.StringEscapeHelper;
-import org.flhy.ext.utils.SvgImageUrl;
+import org.flhy.ext.utils.*;
+import org.flhy.scheduler.beans.ExecutionTrace;
 import org.flhy.webapp.utils.GetSQLProgress;
 import org.flhy.webapp.utils.SearchFieldsProgress;
 import org.flhy.webapp.utils.TransPreviewProgress;
@@ -300,8 +298,6 @@ public class TransGraphController {
 			transExecutor.stop();
 			while(!transExecutor.isFinished())
 				Thread.sleep(500);
-			
-			
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("finished", transExecutor.isFinished());
 			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
@@ -465,24 +461,22 @@ public class TransGraphController {
 	@RequestMapping(method=RequestMethod.POST, value="/result")
 	protected void result(@RequestParam String executionId) throws Exception {
 		JSONObject jsonObject = new JSONObject();
-		
 		TransExecutor transExecutor = TransExecutor.getExecutor(executionId);
-		
-		jsonObject.put("finished", transExecutor.isFinished());
-		if(transExecutor.isFinished()) {
-			TransExecutor.remove(executionId);
-			
-			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
-			jsonObject.put("log", transExecutor.getExecutionLog());
-			jsonObject.put("stepStatus", transExecutor.getStepStatus());
-//			jsonObject.put("previewData", transExecutor.getPreviewData());
-		} else {
-			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
-			jsonObject.put("log", transExecutor.getExecutionLog());
-			jsonObject.put("stepStatus", transExecutor.getStepStatus());
-//			jsonObject.put("previewData", transExecutor.getPreviewData());
+		if (transExecutor!=null) {
+			jsonObject.put("finished", transExecutor.isFinished());
+			if(transExecutor.isFinished()) {
+                TransExecutor.remove(executionId);
+                jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
+                jsonObject.put("log", transExecutor.getExecutionLog());
+                jsonObject.put("stepStatus", transExecutor.getStepStatus());
+    //			jsonObject.put("previewData", transExecutor.getPreviewData());
+            } else {
+                jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
+                jsonObject.put("log", transExecutor.getExecutionLog());
+                jsonObject.put("stepStatus", transExecutor.getStepStatus());
+    //			jsonObject.put("previewData", transExecutor.getPreviewData());
+            }
 		}
-		
 		JsonUtils.response(jsonObject);
 	}
 	
@@ -511,7 +505,7 @@ public class TransGraphController {
 	    }
 
 		PluginRegistry registry = PluginRegistry.getInstance();
-		PluginInterface stepPlugin = registry.findPluginWithId( StepPluginType.class, pluginId );
+		PluginInterface stepPlugin = registry.findPluginWithId(StepPluginType.class, pluginId);
 		if (stepPlugin != null) {
 			StepMetaInterface info = (StepMetaInterface) registry.loadClass(stepPlugin);
 			info.setDefault();

@@ -505,6 +505,7 @@ public class JobGraphController {
 	    JobExecutor jobExecutor = JobExecutor.initExecutor(jobExecutionConfiguration, jobMeta);
 	    Thread tr = new Thread(jobExecutor, "JobExecutor_" + jobExecutor.getExecutionId());
 	    tr.start();
+
         //executions.put(jobExecutor.getExecutionId(), jobExecutor);
 		
         JsonUtils.success(jobExecutor.getExecutionId());

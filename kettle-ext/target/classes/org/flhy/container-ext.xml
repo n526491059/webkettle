@@ -15,5 +15,7 @@
 	<mvc:annotation-driven />  
 	
 	<bean class="org.flhy.ext.PluginFactory"/>
-	
+
+	<bean class="org.flhy.ext.Task.MybatisDaoSuppo"/>
+
 </beans>

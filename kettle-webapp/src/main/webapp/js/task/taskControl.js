@@ -19,7 +19,7 @@ function showTaskControlPanel(){
         {header:"任务名",dataIndex:"name"},
         {header:"运行节点",dataIndex:"hostName"},
         {header:"任务类型",dataIndex:"type"},
-        {header:"运行状态",dataIndex:"isStart"},
+        {header:"运行状态",dataIndex:"isStart"}
     ])
     //数据从后台获取
     var proxy=new Ext.data.HttpProxy({url:"/task/getRunningTask.do"});
@@ -150,18 +150,17 @@ function pauseOrStart(grid,secondGuidePanel){
 function stopJobOrTrans(grid,secondGuidePanel){
     var view=grid.getView();
     var rsm=grid.getSelectionModel();
-
-    var typeArray=new Array();
     var idArray=new Array();
-    var hostArray=new Array();
+    var typeArray=new Array();
+    var hostNameArray=new Array();
     for(var i= 0;i<view.getRows().length;i++){
         if(rsm.isSelected(i)){
-            idArray.push(grid.getStore().getAt(i).get("id"));
             typeArray.push(grid.getStore().getAt(i).get("type"));
-            hostArray.push(grid.getStore().getAt(i).get("hostName"));
+            idArray.push(grid.getStore().getAt(i).get("id"));
+            hostNameArray.push(grid.getStore().getAt(i).get("hostName"))
         }
     }
-    if(idArray.length<1){
+    if(typeArray.length<1){
         Ext.MessageBox.alert("请至少选择一个需要停止的任务");
     }else{
         Ext.Ajax.request({
@@ -175,7 +174,7 @@ function stopJobOrTrans(grid,secondGuidePanel){
             failure:function(){
                 Ext.MessageBox.alert("result","内部错误,删除失败!");
             },
-            params:{idArray:idArray,typeArray:typeArray,hostArray:hostArray}
+            params:{idArray:idArray,typeArray:typeArray,hostArray:hostNameArray}
         });
     }
 }

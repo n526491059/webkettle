@@ -9,6 +9,15 @@ public class TaskControlEntity {
     private String hostName;
     private String type;
     private String isStart;
+    private String carteObjectId;
+
+    public String getCarteObjectId() {
+        return carteObjectId;
+    }
+
+    public void setCarteObjectId(String carteObjectId) {
+        this.carteObjectId = carteObjectId;
+    }
 
     public String getIsStart() {
         return isStart;

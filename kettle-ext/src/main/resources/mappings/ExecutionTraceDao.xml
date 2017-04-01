@@ -1,0 +1,11 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ExecutionTraceDao">
+
+    <insert id="addExecutionTrace" parameterType="org.flhy.ext.Task.ExecutionTraceEntity">
+      INSERT INTO kettle_execution_log_new
+      (jobName,startTime,endTime,execMethod,status,executionConfiguration,executionLog)
+      VALUES (#{jobName},#{startTime},#{endTime},#{execMethod},#{status},#{executionConfiguration},#{executionLog})
+    </insert>
+
+
+</mapper>

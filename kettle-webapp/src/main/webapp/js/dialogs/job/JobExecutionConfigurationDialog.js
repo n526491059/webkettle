@@ -99,11 +99,9 @@ JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 		var startExec = function() {
 			var data = this.data;
 			data.exec_local = wExecLocal.getValue() ? "Y" : "N";
-			
 			data.exec_remote = wExecRemote.getValue() ? "Y" : "N";
 			data.remote_server = wRemoteHost.getValue();
 			data.pass_export = wPassExport.getValue() ? "Y" : "N";
-			
 			data.safe_mode = wSafeMode.getValue() ? "Y" : "N";
 			data.gather_metrics = wGatherMetrics.getValue() ? "Y" : "N";
 			data.log_level = wLogLevel.getValue();
