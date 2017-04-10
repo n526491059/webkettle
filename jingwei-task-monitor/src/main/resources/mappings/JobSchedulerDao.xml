@@ -15,7 +15,7 @@
             d.MINUTES as minutes,
             d.WEEKDAY as weekday,
             d.DAYOFMONTH as dayofmonth,
-            d.REPO_ID as repoId
+            d.executionConfig as executionConfig
           from d_timerscheduler d
     </select>
 
@@ -33,7 +33,7 @@
         d.MINUTES as minutes,
         d.WEEKDAY as weekday,
         d.DAYOFMONTH as dayofmonth,
-        d.REPO_ID as repoId
+        d.executionConfig as executionConfig
         from d_timerscheduler d where 1=1
         <if test='param3!=null and param3!=""'  >
             and  d.SCHEDULERTYPE = #{2}
@@ -52,7 +52,7 @@
 		insert into d_timerscheduler values(#{idJobtask},#{idJob},
 		#{slaves},#{jobName},#{isrepeat},#{schedulertype},
 		#{intervalminutes},#{hour},
-		#{minutes},#{weekday},#{dayofmonth},#{repoId}
+		#{minutes},#{weekday},#{dayofmonth},#{executionConfig}
 		)
     </insert>
 
@@ -78,7 +78,7 @@
         d.MINUTES as minutes,
         d.WEEKDAY as weekday,
         d.DAYOFMONTH as dayofmonth,
-        d.REPO_ID as repoId
+        d.executionConfig as executionConfig
         from d_timerscheduler d where d.ID_JOBTASK=#{taskId}
     </select>
 
@@ -114,7 +114,7 @@
         d.MINUTES as minutes,
         d.WEEKDAY as weekday,
         d.DAYOFMONTH as dayofmonth,
-        d.REPO_ID as repoId
+        d.executionConfig as executionConfig
         from d_timerscheduler d where d.JOB_NAME=#{0}
     </select>
 </mapper>

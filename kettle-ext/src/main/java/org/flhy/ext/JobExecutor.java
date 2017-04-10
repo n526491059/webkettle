@@ -3,9 +3,10 @@ package org.flhy.ext;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import org.flhy.ext.Task.ExecutionTraceDao;
-import org.flhy.ext.Task.ExecutionTraceDaoImpl;
+import com.mxgraph.util.mxUtils;
+import org.apache.ibatis.session.SqlSession;
 import org.flhy.ext.Task.ExecutionTraceEntity;
+import org.flhy.ext.Task.MybatisDaoSuppo;
 import org.flhy.ext.utils.ExceptionUtils;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
@@ -26,9 +27,12 @@ import org.pentaho.di.job.JobEntryResult;
 import org.pentaho.di.job.JobExecutionConfiguration;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
-import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.ui.spoon.job.JobEntryCopyResult;
 import org.pentaho.di.www.SlaveServerJobStatus;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class JobExecutor implements Runnable {
 	private String executionId;
@@ -115,7 +119,6 @@ public class JobExecutor implements Runnable {
 			     spoonLoggingObject.setContainerObjectId( executionId );
 			     spoonLoggingObject.setLogLevel( executionConfiguration.getLogLevel() );
 				job = new Job( App.getInstance().getRepository(), jobMeta, spoonLoggingObject );
-				
 				job.setLogLevel(executionConfiguration.getLogLevel());
 				job.shareVariablesWith(jobMeta);
 				job.setInteractive(true);
@@ -178,7 +181,34 @@ public class JobExecutor implements Runnable {
 			}
 			trace.setExecMethod(execMethod);
 			//executionConfigration
-			System.out.println(net.sf.json.JSONObject.fromObject(executionConfiguration).toString());
+			net.sf.json.JSONObject json=new net.sf.json.JSONObject();
+			String xml=executionConfiguration.getXML();
+			//解析xml
+			Document doc = mxUtils.parseXml(xml);
+			Element root = doc.getDocumentElement();
+			NodeList items1=root.getChildNodes();
+			for(int i=0;i<items1.getLength();i++){
+				Node node1=items1.item(i);
+				if(node1.getNodeType()!=3){
+					//判断一级节点下是否还存在子节点
+					NodeList items2=node1.getChildNodes();
+					if(items2.getLength()>1){
+						net.sf.json.JSONArray array=new net.sf.json.JSONArray();
+						for(int j=0;j<items2.getLength();j++){
+							Node node2=items2.item(j);
+							if(node2.getNodeType()!=3){
+								net.sf.json.JSONObject obj=new net.sf.json.JSONObject();
+								obj.put(node2.getNodeName(),node2.getTextContent().replaceAll("\n","").trim());
+								array.add(obj);
+							}
+						}
+						json.put(node1.getNodeName(),array);
+					}else{
+						json.put(node1.getNodeName(),node1.getTextContent().replaceAll("\n","").trim());
+					}
+				}
+			}
+			trace.setExecutionConfiguration(json.toString());
 		} catch(Exception e) {
 			try {
 				trace.setEndTime(new Date());
@@ -193,14 +223,41 @@ public class JobExecutor implements Runnable {
 				}
 				trace.setExecMethod(execMethod);
 				//executionConfigration
-				System.out.println(net.sf.json.JSONObject.fromObject(executionConfiguration).toString());
+				net.sf.json.JSONObject json=new net.sf.json.JSONObject();
+				String xml=executionConfiguration.getXML();
+				//解析xml
+				Document doc = mxUtils.parseXml(xml);
+				Element root = doc.getDocumentElement();
+				NodeList items1=root.getChildNodes();
+				for(int i=0;i<items1.getLength();i++){
+					Node node1=items1.item(i);
+					if(node1.getNodeType()!=3){
+						//判断一级节点下是否还存在子节点
+						NodeList items2=node1.getChildNodes();
+						if(items2.getLength()>1){
+							net.sf.json.JSONArray array=new net.sf.json.JSONArray();
+							for(int j=0;j<items2.getLength();j++){
+								Node node2=items2.item(j);
+								if(node2.getNodeType()!=3){
+									net.sf.json.JSONObject obj=new net.sf.json.JSONObject();
+									obj.put(node2.getNodeName(),node2.getTextContent().replaceAll("\n","").trim());
+									array.add(obj);
+								}
+							}
+							json.put(node1.getNodeName(),array);
+						}else{
+							json.put(node1.getNodeName(),node1.getTextContent().replaceAll("\n","").trim());
+						}
+					}
+				}
+				trace.setExecutionConfiguration(json.toString());
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
 		} finally {
 			finished = true;
-			ExecutionTraceDao dao=new ExecutionTraceDaoImpl();
-			dao.addExecutionTrace(trace);
+			SqlSession session=MybatisDaoSuppo.sessionFactory.openSession();
+			session.insert("org.sxdata.jingwei.dao.ExecutionTraceDao.addExecutionTrace",trace);
 		}
 	}
 
@@ -311,5 +368,6 @@ public class JobExecutor implements Runnable {
     	}
 		
 	}
-	
+
+
 }

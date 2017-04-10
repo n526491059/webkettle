@@ -143,6 +143,7 @@ function showSelectTaskGroupWindow(taskGroupPanel,taskGroupName){
         title:taskGroupName,
         bodyStyle:"background-color:white",
         width:610,
+        modal:true,
         height:520,
         items:[
             taskGroupAttributesPanel
@@ -242,6 +243,7 @@ function showUpdateWindow(taskGroupPanel,taskGroupId,taskGroupName,taskGroupDesc
         width:500,
         height:220,
         frame:true,
+        modal:true,
         labelWidth:130,
         labelAlign:"right",
         items:[
@@ -256,6 +258,7 @@ function showUpdateWindow(taskGroupPanel,taskGroupId,taskGroupName,taskGroupDesc
         title:"修改任务组",
         bodyStyle:"background-color:white",
         width:500,
+        modal:true,
         height:220,
         items:[
             updateTaskGroupForm
@@ -350,6 +353,7 @@ function addTaksGroupWindow(taskGroupPanel){
         title:"新增任务组",
         bodyStyle:"background-color:white",
         width:500,
+        modal:true,
         height:220,
         items:[
             addTaskGroupForm
@@ -398,6 +402,7 @@ function chooseTaskByTaskGroup(addTaskGroupWindow,taskGroupPanel){
     var chooseTaskWindow=new Ext.Window({
         id:"chooseTaskWindow",
         title:"选择需要分配的任务",
+        modal:true,
         bodyStyle:"background-color:white",
         width:600,
         height:520,

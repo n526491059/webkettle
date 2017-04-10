@@ -1,16 +1,19 @@
 package org.flhy.ext;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import com.mxgraph.util.mxUtils;
 import net.sf.json.JsonConfig;
 import net.sf.json.util.CycleDetectionStrategy;
-import org.flhy.ext.Task.ExecutionTraceDao;
-import org.flhy.ext.Task.ExecutionTraceDaoImpl;
+import org.apache.ibatis.session.SqlSession;
 import org.flhy.ext.Task.ExecutionTraceEntity;
+import org.flhy.ext.Task.MybatisDaoSuppo;
+import org.flhy.ext.trans.steps.SystemInfo;
 import org.flhy.ext.utils.ExceptionUtils;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
-import org.flhy.ext.utils.StringEscapeHelper;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.Result;
@@ -35,6 +38,10 @@ import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.di.trans.step.StepStatus;
 import org.pentaho.di.www.SlaveServerTransStatus;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class TransExecutor implements Runnable {
 	private String executionId;
@@ -231,7 +238,7 @@ public class TransExecutor implements Runnable {
 			net.sf.json.JSONObject transLog=new net.sf.json.JSONObject();
 			transLog.put("stepMeasure",this.getStepMeasure());
 			transLog.put("finished",true);
-			transLog.put("stepStatus", this.getStepStatus());
+			transLog.put("log", this.getExecutionLog());
 			trace.setExecutionLog(transLog.toString());
 			//执行方式
 			String execMethod="";
@@ -241,10 +248,35 @@ public class TransExecutor implements Runnable {
 				execMethod="远程:"+executionConfiguration.getRemoteServer().getHostname();
 			}
 			trace.setExecMethod(execMethod);
-			//executionConfigration
-			JsonConfig jsonConfig = new JsonConfig();
-			jsonConfig.setCycleDetectionStrategy(CycleDetectionStrategy.LENIENT);
-			System.out.println(net.sf.json.JSONObject.fromObject(executionConfiguration,jsonConfig).toString());
+			//executionConfigration  获取执行时的配置信息
+			net.sf.json.JSONObject json=new net.sf.json.JSONObject();
+			String xml=executionConfiguration.getXML();
+			//解析xml
+			Document doc = mxUtils.parseXml(xml);
+			Element root = doc.getDocumentElement();
+			NodeList items1=root.getChildNodes();
+			for(int i=0;i<items1.getLength();i++){
+				Node node1=items1.item(i);
+				if(node1.getNodeType()!=3){
+					//判断一级节点下是否还存在子节点
+					NodeList items2=node1.getChildNodes();
+					if(items2.getLength()>1){
+						net.sf.json.JSONArray array=new net.sf.json.JSONArray();
+						for(int j=0;j<items2.getLength();j++){
+							Node node2=items2.item(j);
+							if(node2.getNodeType()!=3){
+								net.sf.json.JSONObject obj=new net.sf.json.JSONObject();
+								obj.put(node2.getNodeName(),node2.getTextContent().replaceAll("\n","").trim());
+								array.add(obj);
+							}
+						}
+						json.put(node1.getNodeName(),array);
+					}else{
+						json.put(node1.getNodeName(),node1.getTextContent().replaceAll("\n","").trim());
+					}
+				}
+			}
+			trace.setExecutionConfiguration(json.toString());
 		} catch(Exception e) {
 			try{
 				trace.setEndTime(new Date());
@@ -259,10 +291,35 @@ public class TransExecutor implements Runnable {
 					execMethod="远程:"+executionConfiguration.getRemoteServer().getHostname();
 				}
 				trace.setExecMethod(execMethod);
-				JsonConfig jsonConfig = new JsonConfig();
-				jsonConfig.setCycleDetectionStrategy(CycleDetectionStrategy.LENIENT);
-				System.out.println(net.sf.json.JSONObject.fromObject(executionConfiguration, jsonConfig).toString());
-
+				//executionConfigration  获取执行时的配置信息
+				net.sf.json.JSONObject json=new net.sf.json.JSONObject();
+				String xml=executionConfiguration.getXML();
+				//解析xml
+				Document doc = mxUtils.parseXml(xml);
+				Element root = doc.getDocumentElement();
+				NodeList items1=root.getChildNodes();
+				for(int i=0;i<items1.getLength();i++){
+					Node node1=items1.item(i);
+					if(node1.getNodeType()!=3){
+						//判断一级节点下是否还存在子节点
+						NodeList items2=node1.getChildNodes();
+						if(items2.getLength()>1){
+							net.sf.json.JSONArray array=new net.sf.json.JSONArray();
+							for(int j=0;j<items2.getLength();j++){
+								Node node2=items2.item(j);
+								if(node2.getNodeType()!=3){
+									net.sf.json.JSONObject obj=new net.sf.json.JSONObject();
+									obj.put(node2.getNodeName(),node2.getTextContent().replaceAll("\n","").trim());
+									array.add(obj);
+								}
+							}
+							json.put(node1.getNodeName(),array);
+						}else{
+							json.put(node1.getNodeName(),node1.getTextContent().replaceAll("\n","").trim());
+						}
+					}
+				}
+				trace.setExecutionConfiguration(json.toString());
 				e.printStackTrace();
 				App.getInstance().getLog().logError("执行失败！", e);
 			}catch (Exception e1){
@@ -270,8 +327,8 @@ public class TransExecutor implements Runnable {
 			}
 		} finally {
 			finished = true;
-			ExecutionTraceDao dao=new ExecutionTraceDaoImpl();
-			dao.addExecutionTrace(trace);
+			SqlSession session= MybatisDaoSuppo.sessionFactory.openSession();
+			session.insert("org.sxdata.jingwei.dao.ExecutionTraceDao.addExecutionTrace",trace);
 		}
 	}
 	

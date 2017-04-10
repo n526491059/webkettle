@@ -1,4 +1,4 @@
-var testJSONString="";
+
 //生成执行功能弹窗
 function generateSlaveWindow(path,flag2){
     var executeWindow=new Ext.Window({
@@ -247,7 +247,8 @@ function quatoWindow(slaveGridPanel){
         autoScroll: true,
         id:"executeWindow",
         html:windowHTML,
-        bodyStyle:"background-color:white"
+        bodyStyle:"background-color:white",
+        modal:true
     });
     carteInfoWindow.show(slaveGridPanel);
     getQuatoInfo(carteInfoWindow,slaveGridPanel);
@@ -447,6 +448,7 @@ function showTestResultByWindow(jsonString,slaveGridPanel){
         width:580,
         height:190,
         id:"executeWindow",
+        modal:true,
         html:tableHTML
     });
     testResultWindow.show(slaveGridPanel);

@@ -496,15 +496,16 @@ public class JobGraphController {
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/run")
 	protected void run(@RequestParam String graphXml, @RequestParam String executionConfiguration) throws Exception {
+
 		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
 		JobMeta jobMeta = (JobMeta) codec.decode(graphXml);
-		
+
 		JSONObject jsonObject = JSONObject.fromObject(executionConfiguration);
 		JobExecutionConfiguration jobExecutionConfiguration = JobExecutionConfigurationCodec.decode(jsonObject, jobMeta);
-		
-	    JobExecutor jobExecutor = JobExecutor.initExecutor(jobExecutionConfiguration, jobMeta);
-	    Thread tr = new Thread(jobExecutor, "JobExecutor_" + jobExecutor.getExecutionId());
-	    tr.start();
+
+		JobExecutor jobExecutor = JobExecutor.initExecutor(jobExecutionConfiguration, jobMeta);
+		Thread tr = new Thread(jobExecutor, "JobExecutor_" + jobExecutor.getExecutionId());
+		tr.start();
 
         //executions.put(jobExecutor.getExecutionId(), jobExecutor);
 		

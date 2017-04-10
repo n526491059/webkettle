@@ -16,4 +16,12 @@
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="basePackage" value="org.sxdata.jingwei.dao"></property>
     </bean>
+
+    <!-- 初始化资源库-->
+    <bean class="org.flhy.ext.App" factory-method="getInstance" />
+
+    <!--实现applicationContextAware接口 获取更多的bean容器信息-->
+    <bean id="carteClient" class="org.sxdata.jingwei.util.TaskUtil.CarteClient">
+    </bean>
+
 </beans>

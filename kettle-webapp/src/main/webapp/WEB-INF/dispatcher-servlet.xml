@@ -57,6 +57,7 @@
 
 	<import resource="classpath*:org/flhy/container-*.xml"/>
 	<import resource="classpath*:org/sxdata/jingwei/container-*.xml"/>
+
 	   
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 
@@ -67,9 +68,7 @@
 		<property name="password" value="hadoop"/>
 	</bean>
 
-	<!--实现applicationContextAware接口 获取更多的bean容器信息-->
-	<bean id="carteClient" class="org.sxdata.jingwei.util.TaskUtil.CarteClient">
-	</bean>
+
 
 
 	<!-- spring集成MyBatis3 -->
@@ -99,9 +98,7 @@
     	<aop:advisor advice-ref="tx" pointcut-ref="pc"/>
     </aop:config>
 	<!-- 结束事务配置 -->
-	
-	<!-- 初始化资源库 -->
-	<bean class="org.flhy.ext.App" factory-method="getInstance" />
+
 
 <!--     <mvc:interceptors> -->
 <!--     	<mvc:interceptor> -->

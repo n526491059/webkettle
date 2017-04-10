@@ -1,6 +1,7 @@
 package org.sxdata.jingwei.service;
 
 import net.sf.json.JSONObject;
+import org.flhy.ext.JobExecutor;
 import org.sxdata.jingwei.entity.DirectoryEntity;
 import org.sxdata.jingwei.entity.JobEntity;
 import org.sxdata.jingwei.entity.JobTimeSchedulerEntity;
@@ -19,7 +20,11 @@ public interface JobService {
 
     public void executeJob(String path,Integer slaveId) throws Exception;
 
-    public boolean timeExecuteJob(Map<String,Object> params) throws Exception;
+    public boolean judgeJobIsAlike(JobTimeSchedulerEntity willAddJobTimer);
+
+    public void timeExecuteJob(String graphXml,String executionConfiguration) throws Exception;
+
+    public boolean beforeTimeExecuteJob(Map<String, Object> params) throws Exception;
 
     public List<JobTimeSchedulerEntity> getAllTimerJob();
 

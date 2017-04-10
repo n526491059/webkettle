@@ -16,8 +16,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.sxdata.jingwei.entity.SlaveEntity;
-import org.sxdata.jingwei.util.quartzUtil.SlaveQuota;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,8 +31,6 @@ public class CarteClient implements ApplicationContextAware {
     public static String databaseName;  //数据库名
     public static String hostName;  //资源库ip
     public static DefaultSqlSessionFactory sessionFactory;
-
-
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -202,14 +198,10 @@ public class CarteClient implements ApplicationContextAware {
         return doGet(urlString);
     }
 
-
-
     public String getStatus() throws Exception {
         String urlString = httpUrl + CARTE_STATUS + URL_SUF;
         return doGet(urlString);
     }
-
-
 
     public CarteClient() {
 

@@ -32,6 +32,8 @@ import org.sxdata.jingwei.service.JobService;
 import org.sxdata.jingwei.service.SlaveService;
 import org.sxdata.jingwei.service.TransService;
 import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
+import org.sxdata.jingwei.util.TaskUtil.CarteTaskManager;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -314,12 +316,12 @@ public class TaskController {
 
     //定时执行作业
     @ResponseBody
-    @RequestMapping(value="/fiexdExecute")
-    protected void fiexdExecute(HttpServletResponse response,HttpServletRequest request) throws Exception{
+    @RequestMapping(value="/beforeFiexdExecute")
+    protected void beforeFiexdExecute(HttpServletResponse response,HttpServletRequest request) throws Exception{
         boolean isSuccess=false;
         String json="";
         try{
-            isSuccess=jobService.timeExecuteJob(StringDateUtil.getMapByRequest(request));
+            isSuccess=jobService.beforeTimeExecuteJob(StringDateUtil.getMapByRequest(request));
             if(isSuccess){
                 json="{'success':true,'isSuccess':true}";
             }else{
@@ -333,6 +335,17 @@ public class TaskController {
         out.write(json);
         out.flush();
         out.close();
+    }
+
+    //定时执行作业
+    @ResponseBody
+    @RequestMapping(value="/fiexdExecute")
+    protected void fiexdExecute(HttpServletResponse response,HttpServletRequest request,@RequestParam String graphXml, @RequestParam String executionConfiguration) throws Exception{
+        try{
+            jobService.timeExecuteJob(graphXml,executionConfiguration);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     //获取结构图信息

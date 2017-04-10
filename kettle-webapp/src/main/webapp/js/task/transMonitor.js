@@ -312,6 +312,7 @@ function showOneTransDetail(){
         title:thisName,
         bodyStyle:"background-color:white",
         width:455,
+        modal:true,
         height:450,
         html:htmlInfo
     });
@@ -345,6 +346,7 @@ function showWindowForAssigned(transId,transPath,transName,grid,secondGuidePanel
     var taskGroupAssignedWindow=new Ext.Window({
         id:"assignedWindow",
         title:"任务组分配",
+        modal:true,
         bodyStyle:"background-color:white",
         width:455,
         height:570,
