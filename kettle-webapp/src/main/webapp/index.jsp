@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+'<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -132,6 +132,6 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/taskControl.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/slaveMonitor.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/taskGroupMonitor.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/taskHistoryLog.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/taskHistoryLogs.js"></script>
 	</body>
 </html>
