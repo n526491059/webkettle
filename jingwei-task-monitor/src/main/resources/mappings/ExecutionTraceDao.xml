@@ -3,7 +3,7 @@
 <mapper namespace="org.sxdata.jingwei.dao.ExecutionTraceDao">
 
     <insert id="addExecutionTrace" parameterType="org.flhy.ext.Task.ExecutionTraceEntity">
-      INSERT INTO task_executor_log
+      INSERT INTO task_execution_log
       (jobName,startTime,endTime,execMethod,status,executionConfiguration,executionLog)
       VALUES (#{jobName},#{startTime},#{endTime},#{execMethod},#{status},#{executionConfiguration},#{executionLog})
     </insert>
@@ -18,11 +18,11 @@
         e.`status` as status,
         e.executionConfiguration as executionConfiguration,
         e.executionLog as executionLog
-      from task_executor_log e limit #{0},#{1}
+      from task_execution_log e limit #{0},#{1}
     </select>
 
     <select id="getAllLogCount" resultType="java.lang.Integer">
-      SELECT  COUNT(1) FROM task_executor_log e
+      SELECT  COUNT(1) FROM task_execution_log e
     </select>
 
     <select id="getTraceById" resultType="org.flhy.ext.Task.ExecutionTraceEntity">
@@ -35,7 +35,7 @@
         e.`status` as status,
         e.executionConfiguration as executionConfiguration,
         e.executionLog as executionLog
-        from task_executor_log e WHERE e.fireId=#{id}
+        from task_execution_log e WHERE e.fireId=#{id}
     </select>
 
 </mapper>
