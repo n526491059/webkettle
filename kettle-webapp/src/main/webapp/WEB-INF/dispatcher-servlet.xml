@@ -57,7 +57,8 @@
 
 	<import resource="classpath*:org/flhy/container-*.xml"/>
 	<import resource="classpath*:org/sxdata/jingwei/container-*.xml"/>
-	   
+
+
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 
 		<!--192.168.1.201:3306   hadoop-->

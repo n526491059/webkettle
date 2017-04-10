@@ -1,9 +1,6 @@
 package org.flhy.ext.Task;
 
 import org.apache.ibatis.session.SqlSession;
-import org.flhy.ext.Task.MybatisDaoSuppo;
-import org.flhy.ext.Task.ExecutionTraceEntity;
-import org.springframework.stereotype.Repository;
 
 /**
  * Created by cRAZY on 2017/3/31.
