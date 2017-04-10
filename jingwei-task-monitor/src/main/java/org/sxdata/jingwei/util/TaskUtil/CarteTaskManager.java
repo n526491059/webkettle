@@ -3,6 +3,13 @@ package org.sxdata.jingwei.util.TaskUtil;
 
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
+import org.flhy.ext.JobExecutor;
+import org.flhy.ext.PluginFactory;
+import org.flhy.ext.base.GraphCodec;
+import org.flhy.ext.job.JobExecutionConfigurationCodec;
+import org.flhy.ext.utils.RepositoryUtils;
+import org.pentaho.di.job.JobExecutionConfiguration;
+import org.pentaho.di.job.JobMeta;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.sxdata.jingwei.entity.*;
@@ -20,6 +27,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 
 public class CarteTaskManager {
+	public static Map<String,JobTimeSchedulerEntity> jobTimerMap=new HashMap<>();
 	public static LinkedBlockingDeque<Task> queue = new LinkedBlockingDeque<Task>(30000);
 	private static SchedulerFactory sf = new StdSchedulerFactory();
 	private static Scheduler sched = null;
@@ -40,8 +48,8 @@ public class CarteTaskManager {
 		queue.add(new CarteTask(carteClient, type, url));
 	}
 
-	public static void addTimerTask(Set<String> slaveIds, String jobFullPath, String loglevel, JobTimeSchedulerEntity dTimerschedulerEntity,SlaveEntity slave,UserEntity user) {
-		queue.add(new JobTimerTask(slaveIds, jobFullPath, loglevel, dTimerschedulerEntity,slave,user));
+	public static void addTimerTask(JobExecutor jobExecutor, String loglevel, JobTimeSchedulerEntity dTimerschedulerEntity,UserEntity user) {
+		queue.add(new JobTimerTask(jobExecutor, loglevel, dTimerschedulerEntity,user));
 	}
 
 	private static abstract class Task{
@@ -73,19 +81,15 @@ public class CarteTaskManager {
 	}
 
 	private static class JobTimerTask extends Task {
-		Set<String> slaveIds;
-		String jobFullPath;
+		JobExecutor jobExecutor;
 		String loglevel;
 		JobTimeSchedulerEntity dTimerschedulerEntity;
-		SlaveEntity slave;
 		UserEntity loginUser;
 
-		public JobTimerTask(Set<String> slaveIds, String jobFullPath, String loglevel,JobTimeSchedulerEntity dTimerschedulerEntity,SlaveEntity slave,UserEntity user) {
-			this.slaveIds = slaveIds;
-			this.jobFullPath = jobFullPath;
+		public JobTimerTask(JobExecutor jobExecutor,String loglevel,JobTimeSchedulerEntity dTimerschedulerEntity,UserEntity user) {
+			this.jobExecutor = jobExecutor;
 			this.loglevel = loglevel;
 			this.dTimerschedulerEntity = dTimerschedulerEntity;
-			this.slave=slave;
 			this.loginUser=user;
 		}
 
@@ -113,11 +117,7 @@ public class CarteTaskManager {
 				//设置定时信息
 				long idJobTask = dTimerschedulerEntity.getIdJobtask();
 				job = newJob(org.sxdata.jingwei.util.quartzUtil.JobTimerTask.class).withIdentity(idJobTask+"",JOB_TIMER_TASK_GROUP).build();
-
-				//job.getJobDataMap().put("slaveIds", slaveIds);
-				job.getJobDataMap().put("jobFullPath", jobFullPath);
-				//job.getJobDataMap().put("dTimerschedulerEntity", dTimerschedulerEntity);
-				job.getJobDataMap().put("slave", slave);
+				job.getJobDataMap().put("jobExecutor", jobExecutor);
 				job.getJobDataMap().put("loginUser",loginUser);
 
 				if (isRepeat == "Y"||"Y".equals(isRepeat)) {
@@ -202,19 +202,17 @@ public class CarteTaskManager {
 		}
 	}
 
-	//服务器启动后执行该方法 获取数据库中所有定时作业 开始执行
+	//服务器启动后执行该方法 获取数据库中所有定时作业 加入定时计划
 	public static void startJobTimeTask(DefaultSqlSessionFactory bean) throws Exception{
 		JobServiceImpl js=new JobServiceImpl();
 		//获取session对象查询所有定时作业
 		SqlSession session=bean.openSession();
 		List<JobTimeSchedulerEntity> jobsTimer=session.selectList("org.sxdata.jingwei.dao.JobSchedulerDao.getAllTimerJob");
-		SchedulerFactory factory=new StdSchedulerFactory();
 		if(jobsTimer==null || jobsTimer.size()<1){
 			System.out.println("当前暂无定时作业");
 		}else{
 			for(JobTimeSchedulerEntity timerJob:jobsTimer){
 				//获取定时作业的参数
-				String isRepeat = timerJob.getIsrepeat();
 				Integer schedulertype = timerJob.getSchedulertype();
 				Integer intervalminutes = timerJob.getIntervalminutes();
 				Integer minutes = timerJob.getMinutes();
@@ -222,9 +220,8 @@ public class CarteTaskManager {
 				Integer weekday = timerJob.getWeekday();
 				Integer dayOfMonth = timerJob.getDayofmonth();
 				long idJobTask = timerJob.getIdJobtask();
-				String slaves=timerJob.getSlaves();
 				Integer jobId = timerJob.getIdJob();
-				String repoName = timerJob.getRepoId();
+				String executionConfiguration=timerJob.getExecutionConfig();
 				//根据id获取当前作业
 				JobEntity thisJob=session.selectOne("org.sxdata.jingwei.dao.JobDao.getJobById",jobId);
 				System.out.println("定时作业 →"+thisJob.getName()+"已加入定时执行");
@@ -234,20 +231,16 @@ public class CarteTaskManager {
 				jobs=js.getJobPath(jobs);
 				thisJob=jobs.get(0);
 				String jobPath=thisJob.getDirectoryName();
-
+				//封装executor对象
+				JobMeta jobMeta = RepositoryUtils.loadJobbyPath(jobPath);
+				org.flhy.ext.utils.JSONObject jsonObject = org.flhy.ext.utils.JSONObject.fromObject(executionConfiguration);
+				JobExecutionConfiguration jobExecutionConfiguration = JobExecutionConfigurationCodec.decode(jsonObject, jobMeta);
+				JobExecutor jobExecutor = JobExecutor.initExecutor(jobExecutionConfiguration, jobMeta);
+				//TODO		把执行需要的参数添加到dataMap	添加定时任务
 				JobDetail job = newJob(org.sxdata.jingwei.util.quartzUtil.JobTimerTask.class).withIdentity(idJobTask + "", JOB_TIMER_TASK_GROUP).build();
-				//获取当前作业定时所用到的所有节点 封装在map中 当前暂不支持集群
-				HashMap<String, String> thisIdIpMap = new HashMap<String,String>();
-				String[] id_ip=slaves.split("_");
-				thisIdIpMap.put(id_ip[0], id_ip[1]);
-				List<SlaveEntity> slaveList=session.selectList("org.sxdata.jingwei.dao.SlaveDao.getSlaveById",Integer.valueOf(id_ip[0]));
-				//TODO
 				List<UserEntity> userEntityList=session.selectList("org.sxdata.jingwei.dao.UserDao.getUserbyName","admin");
-
-				job.getJobDataMap().put("slave",slaveList.get(0));
-				job.getJobDataMap().put("jobFullPath", jobPath);
+				job.getJobDataMap().put("jobExecutor", jobExecutor);
 				job.getJobDataMap().put("loginUser", userEntityList.get(0));
-				job.getJobDataMap().put("dTimerschedulerEntity", timerJob);
 				//设置定时规则
 				Trigger trigger =null;
 				if (schedulertype == 1) {

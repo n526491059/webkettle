@@ -2,7 +2,13 @@ package org.sxdata.jingwei.service.Impl;
 
 import net.sf.json.JSONObject;
 import org.flhy.ext.App;
+import org.flhy.ext.JobExecutor;
+import org.flhy.ext.PluginFactory;
+import org.flhy.ext.base.GraphCodec;
+import org.flhy.ext.job.JobExecutionConfigurationCodec;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.job.JobExecutionConfiguration;
+import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
@@ -32,7 +38,7 @@ import java.util.Map;
  * Created by cRAZY on 2017/2/22.
  */
 @Service
-public class JobServiceImpl implements JobService {
+public class JobServiceImpl implements JobService{
     @Autowired
     protected JobDao jobDao;
     @Autowired
@@ -323,16 +329,13 @@ public class JobServiceImpl implements JobService {
 
     @Override
     //定时作业
-    public boolean timeExecuteJob(Map<String, Object> params) throws Exception {
+    public boolean beforeTimeExecuteJob(Map<String, Object> params) throws Exception {
         boolean isSuccess=false;
-        SlaveEntity slave=slaveDao.getSlaveById(Integer.parseInt(params.get("slaveId").toString()));
         JobTimeSchedulerEntity jobTimeScheduler=new JobTimeSchedulerEntity();
         jobTimeScheduler.setIdJobtask(System.nanoTime());   //定时的ID 唯一标识
         jobTimeScheduler.setIdJob(Integer.parseInt(params.get("jobId").toString()));    //所需定时的作业ID
         jobTimeScheduler.setJobName(params.get("jobName").toString());                  //作业名
-        jobTimeScheduler.setSlaves(slave.getSlaveId() + "_" + slave.getHostName());         //节点信息
         jobTimeScheduler.setIsrepeat("Y");                                       //是否重复执行 暂时默认重复执行Y
-        jobTimeScheduler.setRepoId(slave.getHostName()+"_"+CarteClient.databaseName);
         //设置定时类型
         String typeInfo=params.get("typeChoose").toString();
         int schedulerType=0;
@@ -357,22 +360,42 @@ public class JobServiceImpl implements JobService {
             jobTimeScheduler.setHour(Integer.parseInt(params.get("hour").toString()));
             jobTimeScheduler.setMinutes(Integer.parseInt(params.get("minute").toString()));
         }
-        //如果库中不存在该作业的相同定时 则加入定时操作
+        //如果库中不存在相同的定时作业则放入内存
         if(!this.judgeJobIsAlike(jobTimeScheduler)){
-            isSuccess=true;
-            //封装定时任务需要的参数 作业全路径名 所有节点组成的map集合(暂时不支持集群,集合只有一个元素) 日志等级
-            String jobPath=params.get("jobPath").toString();
-            HashMap<String,String> thisIdIpMap=new HashMap<String,String>();
-            thisIdIpMap.put(slave.getSlaveId().toString(),slave.getHostName());
             //TODO 登录功能暂未实现 暂时使用默认用户admin
-            UserEntity loginUser=userDao.getUserbyName("admin");
-            loginUser.setPassword(KettleEncr.decryptPasswd("Encrypted " + loginUser.getPassword()));
-            //执行定时任务
-            CarteTaskManager.addTimerTask(thisIdIpMap.keySet(),jobPath,null,jobTimeScheduler,slave,loginUser);
-            //把该定时信息更新到数据库
-            jobSchedulerDao.addTimerJob(jobTimeScheduler);
+            isSuccess=true;
+            if(CarteTaskManager.jobTimerMap.containsKey("admin"))
+                CarteTaskManager.jobTimerMap.remove("admin");
+            CarteTaskManager.jobTimerMap.put("admin", jobTimeScheduler);
         }
         return isSuccess;
+    }
+
+    @Override
+    //定时作业
+        public void timeExecuteJob(String graphXml,String executionConfiguration) throws Exception {
+        // JobMeta jobMeta = RepositoryUtils.loadJobbyPath(taskName);
+        GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+
+        JobMeta jobMeta = (JobMeta) codec.decode(graphXml);
+        org.flhy.ext.utils.JSONObject jsonObject = org.flhy.ext.utils.JSONObject.fromObject(executionConfiguration);
+        JobExecutionConfiguration jobExecutionConfiguration = JobExecutionConfigurationCodec.decode(jsonObject, jobMeta);
+        JobExecutor jobExecutor = JobExecutor.initExecutor(jobExecutionConfiguration, jobMeta);
+        //TODO 登录功能暂未实现 暂时使用默认用户admin
+        JobTimeSchedulerEntity jobTimeScheduler=CarteTaskManager.jobTimerMap.get("admin");
+        jobTimeScheduler.setExecutionConfig(executionConfiguration);
+        if(jobExecutor.getExecutionConfiguration().isExecutingLocally()){
+            jobTimeScheduler.setSlaves("本地执行");
+        }else{
+            jobTimeScheduler.setSlaves(jobExecutor.getExecutionConfiguration().getRemoteServer().getHostname());
+        }
+        UserEntity loginUser=userDao.getUserbyName("admin");
+        loginUser.setPassword(KettleEncr.decryptPasswd("Encrypted " + loginUser.getPassword()));
+        //执行定时任务
+        CarteTaskManager.addTimerTask(jobExecutor, null, jobTimeScheduler, loginUser);
+        //把该定时信息更新到数据库
+        jobSchedulerDao.addTimerJob(jobTimeScheduler);
+        CarteTaskManager.jobTimerMap.remove("admin");
     }
 
     @Override

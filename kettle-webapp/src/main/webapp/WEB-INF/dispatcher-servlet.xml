@@ -57,8 +57,7 @@
 
 	<import resource="classpath*:org/flhy/container-*.xml"/>
 	<import resource="classpath*:org/sxdata/jingwei/container-*.xml"/>
-
-
+	   
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 
 		<!--192.168.1.201:3306   hadoop-->
@@ -66,10 +65,6 @@
 		<property name="url" value="jdbc:mysql://192.168.1.201:3306/kettle?characterEncoding=gbk" />
 		<property name="username" value="root" />
 		<property name="password" value="hadoop"/>
-	</bean>
-
-	<!--实现applicationContextAware接口 获取更多的bean容器信息-->
-	<bean id="carteClient" class="org.sxdata.jingwei.util.TaskUtil.CarteClient">
 	</bean>
 
 
@@ -100,9 +95,7 @@
     	<aop:advisor advice-ref="tx" pointcut-ref="pc"/>
     </aop:config>
 	<!-- 结束事务配置 -->
-	
-	<!-- 初始化资源库 -->
-	<bean class="org.flhy.ext.App" factory-method="getInstance" />
+
 
 <!--     <mvc:interceptors> -->
 <!--     	<mvc:interceptor> -->

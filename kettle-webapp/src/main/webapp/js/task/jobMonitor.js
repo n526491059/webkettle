@@ -19,7 +19,7 @@ function generateJobPanel(jobName,createDate,inputName){
         {header:"所属任务组",dataIndex:"belongToTaskGroup"},
         {header:"作业属性",width:280,dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
-                return "<input type='button' onclick='showOneJobDetail()' value='查看作业属性'>&nbsp;"+
+                return "<input type='button' onclick='showOneJobDetail()' value='作业属性'>&nbsp;"+
                     "<input type='button' onclick='deleteJobByJobPath()' value='删除'>&nbsp;"+
                     "<input type='button' onclick='editorJob()' value='编辑'>&nbsp;"+
                     "<input type='button' onclick='jobCompositionImg()' value='结构图'>&nbsp;"+
@@ -103,49 +103,7 @@ function generateJobPanel(jobName,createDate,inputName){
                         secondGuidePanel.add(generateJobPanel(transValue,createDate,transValue));
                         secondGuidePanel.doLayout();
                     }
-                }
-                /*,'-',
-                {
-                    text:"删除所选行",
-                    handler:function(){
-                        var flag=false;
-                        var view=grid.getView();
-                        //获得行选择模型
-                        var rsm=grid.getSelectionModel();
-                        //定义存放所选行的一至多个作业的id
-                        var pathArray=new Array();
-                        for(var i= 0;i<view.getRows().length;i++){
-                            //判断是否被选中
-                            if(rsm.isSelected(i)){
-                                flag=true;
-                                //获得第i行中 列名为jodId的那一列的值 并且添加的数组中
-                                pathArray.push(grid.getStore().getAt(i).get("directoryName"));
-                            }
-                        }
-                        if(flag==true){
-                            Ext.MessageBox.confirm("确认","确认删除所选行?",function(btn){
-                                if(btn=="yes"){
-                                    Ext.Ajax.request({
-                                        url:"/task/delete.do",
-                                        success:function(response,config){
-                                            secondGuidePanel.removeAll(true);
-                                            secondGuidePanel.add(generateJobPanel("","",undefined));
-                                            secondGuidePanel.doLayout();
-                                            Ext.MessageBox.alert("提示","删除作业成功~!");
-                                        },
-                                        failure:function(){
-                                            Ext.MessageBox.alert("result","内部错误,删除失败!")
-                                        },
-                                        params:{path:pathArray,flag:"job"}
-                                    })
-                                }
-                            })
-                        }else{
-                            Ext.MessageBox.alert("提示","请先选择所需要删除的行再进行该操作!")
-                        }
-                    }
-                }*/
-                ,"-",{
+                },"-",{
                     text:"执行作业配置",
                     handler:function(){
                         var path="";//被选中的任务路径
@@ -204,7 +162,7 @@ function generateJobPanel(jobName,createDate,inputName){
                             Ext.MessageBox.alert("请先选择一个(只能一个)作业再进行定时设置");
                             return;
                         }
-                        var fiexdWindow=fixedExecuteWindow("添加",new Array(),"/task/fiexdExecute.do");
+                        var fiexdWindow=fixedExecuteWindow("添加",new Array(),"/task/beforeFiexdExecute.do");
                         fiexdWindow.show(grid);
                     }
                 },"-",
@@ -375,6 +333,7 @@ function showOneJobDetail(){
         title:thisName,
         bodyStyle:"background-color:white",
         width:455,
+        modal:true,
         height:450,
         html:htmlInfo
     });
@@ -435,6 +394,7 @@ function showWindowByAssigned(jobId,jobPath,jobName,grid,secondGuidePanel){
         bodyStyle:"background-color:white",
         width:455,
         height:570,
+        modal:true,
         items:[
             panelByAssigned
         ]

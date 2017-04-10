@@ -197,6 +197,7 @@ function showTransDetailWindow(grid){
             id:"transDetail",
             title:"转换详情",
             width:1010,
+            modal:true,
             height:200,
             items:[transDetailPanel],
             listeners:{
@@ -315,6 +316,7 @@ function showWindow(grid){
         bodyStyle:"background-color:white",
         width:370,
         height:500,
+        modal:true,
         html:"",
         autoScroll:true,
         listeners:{

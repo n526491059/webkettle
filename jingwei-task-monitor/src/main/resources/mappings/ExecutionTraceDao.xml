@@ -1,0 +1,41 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.sxdata.jingwei.dao.ExecutionTraceDao">
+
+    <insert id="addExecutionTrace" parameterType="org.flhy.ext.Task.ExecutionTraceEntity">
+      INSERT INTO task_executor_log
+      (jobName,startTime,endTime,execMethod,status,executionConfiguration,executionLog)
+      VALUES (#{jobName},#{startTime},#{endTime},#{execMethod},#{status},#{executionConfiguration},#{executionLog})
+    </insert>
+
+    <select id="getAllLogByPage" resultType="org.flhy.ext.Task.ExecutionTraceEntity">
+      select
+        e.fireId as fireId,
+        e.jobName as jobName,
+        e.startTime as startTime,
+        e.endTime as endTime,
+        e.execMethod as execMethod,
+        e.`status` as status,
+        e.executionConfiguration as executionConfiguration,
+        e.executionLog as executionLog
+      from task_executor_log e limit #{0},#{1}
+    </select>
+
+    <select id="getAllLogCount" resultType="java.lang.Integer">
+      SELECT  COUNT(1) FROM task_executor_log e
+    </select>
+
+    <select id="getTraceById" resultType="org.flhy.ext.Task.ExecutionTraceEntity">
+        select
+        e.fireId as fireId,
+        e.jobName as jobName,
+        e.startTime as startTime,
+        e.endTime as endTime,
+        e.execMethod as execMethod,
+        e.`status` as status,
+        e.executionConfiguration as executionConfiguration,
+        e.executionLog as executionLog
+        from task_executor_log e WHERE e.fireId=#{id}
+    </select>
+
+</mapper>

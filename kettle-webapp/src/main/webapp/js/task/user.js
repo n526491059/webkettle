@@ -90,6 +90,7 @@ function updateUser(){
     var updateUserWindow=new Ext.Window({
         id:"updateUserWindow",
         title:"修改用户",
+        modal:true,
         bodyStyle:"background-color:white",
         width:500,
         height:250,
@@ -138,6 +139,7 @@ function addUser(secondGuidePanel,grid){
         title:"新增用户",
         bodyStyle:"background-color:white",
         width:500,
+        modal:true,
         height:250,
         items:[
             addUserForm

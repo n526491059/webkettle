@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public class MybatisDaoSuppo implements ApplicationContextAware {
-	protected static DefaultSqlSessionFactory sessionFactory;
+	public static DefaultSqlSessionFactory sessionFactory;
 	@Override
 	public void setApplicationContext(ApplicationContext context) throws BeansException {
 		BasicDataSource dataSource=(BasicDataSource)context.getBean("dataSource");

@@ -329,7 +329,9 @@ GuidePanel = Ext.extend(Ext.Panel, {
 			}else if(node.text=="<font size = '2px'>用户管理</font>"){
 				showUserPanel(secondGuidePanel);
 			}else if(node.text=="<font size = '2px'>用户组管理</font>"){
-				showUserPanel(secondGuidePanel);
+
+			}else if(node.text=="<font size = '2px'>任务历史日志</font>"){
+				showHistoryLogPanel(secondGuidePanel);
 			}
 		});
 		
