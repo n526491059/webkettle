@@ -126,6 +126,7 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
         return result;
     }
 
+
     public String transToStatusDesc(SlaveServerTransStatus realTransStatus) {
         String running_status = null;
         if(realTransStatus.isRunning()) {

@@ -14,6 +14,7 @@ public class ExecutionTraceEntity {
     private String status;
     private String executionConfiguration;
     private String executionLog;
+    private String type;
 
     public String getJobName() {
         return jobName;
@@ -77,5 +78,13 @@ public class ExecutionTraceEntity {
 
     public void setFireId(Integer fireId) {
         this.fireId = fireId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

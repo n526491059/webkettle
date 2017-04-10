@@ -234,6 +234,8 @@ public class TransExecutor implements Runnable {
 				status="失败";
 			}
 			trace.setStatus(status);
+			//任务类型
+			trace.setType("trans");
 			//LOG
 			net.sf.json.JSONObject transLog=new net.sf.json.JSONObject();
 			transLog.put("stepMeasure",this.getStepMeasure());
@@ -283,6 +285,7 @@ public class TransExecutor implements Runnable {
 				trace.setJobName(transMeta.getName());
 				trace.setStatus("程序错误");
 				trace.setExecutionLog(ExceptionUtils.toString(e));
+				trace.setType("trans");
 				//执行方式
 				String execMethod="";
 				if(executionConfiguration.isExecutingLocally()){

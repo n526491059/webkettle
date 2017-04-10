@@ -166,6 +166,8 @@ public class JobExecutor implements Runnable {
 				status="失败";
 			}
 			trace.setStatus(status);
+			//任务类型
+			trace.setType("job");
 			//日志信息
 			net.sf.json.JSONObject logJSON=new net.sf.json.JSONObject();
 			logJSON.put("jobMeasure",this.getJobMeasure());
@@ -215,6 +217,8 @@ public class JobExecutor implements Runnable {
 				trace.setJobName(jobMeta.getName());
 				trace.setStatus("程序错误");
 				trace.setExecutionLog(ExceptionUtils.toString(e));
+				//任务类型
+				trace.setType("trans");
 				String execMethod="";
 				if(executionConfiguration.isExecutingLocally()){
 					execMethod="本地";
