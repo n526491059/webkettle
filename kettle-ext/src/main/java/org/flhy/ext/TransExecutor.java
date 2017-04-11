@@ -342,6 +342,8 @@ public class TransExecutor implements Runnable {
 			finished = true;
 			SqlSession session= MybatisDaoSuppo.sessionFactory.openSession();
 			session.insert("org.sxdata.jingwei.dao.ExecutionTraceDao.addExecutionTrace",trace);
+			session.commit();
+			session.close();
 		}
 	}
 	
@@ -668,8 +670,9 @@ public class TransExecutor implements Runnable {
 	}
 	
 	public void stop() {
-		System.out.println(trans);
-		trans.stopAll();
+		if(trans!=null){
+			trans.stopAll();
+		}
 	}
 	
 	public void pause() {

@@ -312,7 +312,6 @@ public class TransGraphController {
 			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
 			jsonObject.put("log", transExecutor.getExecutionLog());
 			jsonObject.put("stepStatus", transExecutor.getStepStatus());
-			jsonObject.put("11","test");
 			TransExecutor.remove(executionId);
 			return jsonObject;
 		}
