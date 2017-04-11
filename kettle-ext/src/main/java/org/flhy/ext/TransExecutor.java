@@ -44,6 +44,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class TransExecutor implements Runnable {
+	private boolean isClickStop=false;
 	private String executionId;
 	private TransExecutionConfiguration executionConfiguration;
 	private TransMeta transMeta = null;
@@ -89,6 +90,15 @@ public class TransExecutor implements Runnable {
 	public void setTrans(Trans trans) {
 		this.trans = trans;
 	}
+
+	public boolean isClickStop() {
+		return isClickStop;
+	}
+
+	public void setIsClickStop(boolean isClickStop) {
+		this.isClickStop = isClickStop;
+	}
+
 	public static Hashtable<String, TransExecutor> getExecutors(){
 		return executors;
 	}
@@ -662,8 +672,11 @@ public class TransExecutor implements Runnable {
 		trans.stopAll();
 	}
 	
-	public void resume() {
-		trans.resumeRunning();
+	public void pause() {
+		if(!trans.isPaused())
+			trans.pauseRunning();
+		else
+			trans.resumeRunning();
 	}
 	
 	public JSONObject getPreviewData() {

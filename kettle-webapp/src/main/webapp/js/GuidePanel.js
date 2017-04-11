@@ -1,3 +1,4 @@
+var timeIntervalByTaskControl="";
 
 //给新创建的任务/转换分配任务组
 function assignedTaskGroupByCreate(taskName,type,secondGuidePanel){
@@ -260,7 +261,10 @@ GuidePanel = Ext.extend(Ext.Panel, {
 		});
 
 		fristGuidePanel.on('click', function(node, e) {
-
+			if(timeIntervalByTaskControl!=""){
+				clearInterval(timeIntervalByTaskControl);
+				timeIntervalByTaskControl="";
+			}
 			if(node.text == "<font size = '2px'>新建转换</font>")
 			{
 				secondGuidePanel.removeAll(true);
@@ -316,6 +320,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				secondGuidePanel.removeAll(true);
 				secondGuidePanel.add(showTaskControlPanel());
 				secondGuidePanel.doLayout();
+				timeIntervalByTaskControl=setInterval("refreshControlPanel()",5000);
 			}else if(node.text=="<font size = '2px'>节点管理</font>"){
 				secondGuidePanel.removeAll(true);
 				secondGuidePanel.add(slaveManager());

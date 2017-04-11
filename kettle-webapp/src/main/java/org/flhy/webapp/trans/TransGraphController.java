@@ -3,6 +3,7 @@ package org.flhy.webapp.trans;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Toolkit;
+import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
@@ -194,7 +195,7 @@ public class TransGraphController {
 			transPreviewMetaMap.put(transMeta, transDebugMeta);
 		}
 		
-		transDebugMeta.getTransMeta().setRepository( App.getInstance().getRepository() );
+		transDebugMeta.getTransMeta().setRepository(App.getInstance().getRepository());
 		
 		JSONArray jsonArray = new JSONArray();
 		for (int i = 0; i < transDebugMeta.getTransMeta().getSteps().size(); i++) {
@@ -292,9 +293,17 @@ public class TransGraphController {
 	
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/stop")
-	protected JSONObject stop(@RequestParam String executionId) throws Exception {
+	protected JSONObject stop(@RequestParam String executionId,HttpServletResponse response) throws Exception {
 		TransExecutor transExecutor = TransExecutor.getExecutor(executionId);
-		if(transExecutor != null) {
+		if(transExecutor!=null && transExecutor.getTrans()==null){
+			response.setContentType("text/html;charset=utf-8");
+			PrintWriter out=response.getWriter();
+			out.write("faile");
+			out.flush();
+			out.close();
+			return null;
+		}
+		if(transExecutor != null || transExecutor.getTrans()!=null) {
 			transExecutor.stop();
 			while(!transExecutor.isFinished())
 				Thread.sleep(500);
@@ -303,7 +312,7 @@ public class TransGraphController {
 			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
 			jsonObject.put("log", transExecutor.getExecutionLog());
 			jsonObject.put("stepStatus", transExecutor.getStepStatus());
-			
+			jsonObject.put("11","test");
 			TransExecutor.remove(executionId);
 			return jsonObject;
 		}
@@ -313,7 +322,6 @@ public class TransGraphController {
 			transDebugExecutor.stop();
 			while(!transDebugExecutor.isFinished())
 				Thread.sleep(500);
-			
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("finished", transDebugExecutor.isFinished());
 			jsonObject.put("stepMeasure", transDebugExecutor.getStepMeasure());
@@ -324,13 +332,31 @@ public class TransGraphController {
 			TransDebugExecutor.remove(executionId);
 			return jsonObject;
 		}
-		
 		return null;
+	}
+
+	//暂停 or 开始
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/pause")
+	protected void pause(@RequestParam String executionId,HttpServletResponse response) throws Exception {
+		TransExecutor transExecutor = TransExecutor.getExecutor(executionId);
+		String result="";
+		if(transExecutor != null && null!=transExecutor.getTrans()) {
+			transExecutor.pause();
+			result="success";
+		}else{
+			result="faile";
+		}
+		response.setContentType("text/html;charset=utf-8");
+		PrintWriter out=response.getWriter();
+		out.write(result);
+		out.flush();
+		out.close();
 	}
 	
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/previewResult")
-	protected void previewResult(@RequestParam String executionId, @RequestParam(required=false) String action) throws Exception {
+	protected void previewResult(@RequestParam String executionId, @RequestParam(required=false) String action,HttpServletResponse response) throws Exception {
 		TransDebugExecutor transExecutor = TransDebugExecutor.getExecutor(executionId);
 		if(transExecutor == null)
 			return;
@@ -347,7 +373,7 @@ public class TransGraphController {
 //			jsonObject.put("stepStatus", transExecutor.getStepStatus());
 //			jsonObject.put("previewData", transExecutor.getPreviewData());
 //			TransDebugExecutor.remove(executionId);
-			JsonUtils.response(stop(executionId));
+			JsonUtils.response(stop(executionId,response));
 			return;
 		} else if("askformore".equalsIgnoreCase(action)) {
 			while(!transExecutor.isPreviewed() && !transExecutor.isFinished())

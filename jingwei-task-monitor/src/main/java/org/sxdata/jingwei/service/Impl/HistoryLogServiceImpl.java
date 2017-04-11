@@ -63,7 +63,7 @@ public class HistoryLogServiceImpl implements HistoryLogService{
             json.put("group","暂未分配任务组");
         }
         trace.setExecutionConfiguration(json.toString());
-
+        trace.setExecutionLog(trace.getExecutionLog().replaceAll("\\\\n","<br/>"));
         return JSONObject.fromObject(trace).toString();
     }
 }

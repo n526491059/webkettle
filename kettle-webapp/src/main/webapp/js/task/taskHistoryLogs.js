@@ -65,7 +65,7 @@ function showHistoryLogPanel(secondGuidePanel){
             emptyMsg:"没有记录"
         })
     });
-    grid.getColumnModel().setHidden(2,true);
+    grid.getColumnModel().setHidden(1,true);
     secondGuidePanel.removeAll(true);
     secondGuidePanel.add(grid);
     secondGuidePanel.doLayout();

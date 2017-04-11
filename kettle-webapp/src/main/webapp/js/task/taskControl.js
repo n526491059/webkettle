@@ -7,6 +7,13 @@ var transDetailId;
 var transDetailHostName;
 var transAndJobGrid;
 
+function refreshControlPanel(){
+    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+    secondGuidePanel.removeAll(true);
+    secondGuidePanel.add(showTaskControlPanel());
+    secondGuidePanel.doLayout();
+}
+
 //显示正在运行中的任务列表
 function showTaskControlPanel(){
     var secondGuidePanel=Ext.getCmp("secondGuidePanel");
@@ -204,10 +211,17 @@ function showTransDetailWindow(grid){
                 "close":function(){
                     if(transDetailInterval!=""){
                         clearInterval(transDetailInterval);
+                        if(timeIntervalByTaskControl==""){
+                            timeIntervalByTaskControl=setInterval("refreshControlPanel()",5000);
+                        }
                     }
                 }
             }
         });
+        if(timeIntervalByTaskControl!=""){
+            clearInterval(timeIntervalByTaskControl);
+            timeIntervalByTaskControl="";
+        }
         transDetailWindow.show(grid);
         transDetailInterval=setInterval("refreshTransDetailWindow(transDetailWindow,transAndJobGrid)",2000);
     }else{
@@ -310,6 +324,10 @@ function collectData(grid){
 
 //日志信息以window形式展现
 function showWindow(grid){
+    if(timeIntervalByTaskControl!=""){
+        clearInterval(timeIntervalByTaskControl);
+        timeIntervalByTaskControl="";
+    }
     logWindow=new Ext.Window({
         id:"logWindow",
         title:"日志详情",
@@ -323,6 +341,9 @@ function showWindow(grid){
             "close":function(){
                 if(timeInterval!=""){
                     clearInterval(timeInterval);
+                }
+                if(timeIntervalByTaskControl==""){
+                    timeIntervalByTaskControl=setInterval("refreshControlPanel()",5000);
                 }
             }
         },

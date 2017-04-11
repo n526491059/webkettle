@@ -35,6 +35,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class JobExecutor implements Runnable {
+	private boolean isClickStop=false;
 	private String executionId;
 	private JobExecutionConfiguration executionConfiguration;
 	private JobMeta jobMeta = null;
@@ -66,6 +67,15 @@ public class JobExecutor implements Runnable {
 	public void setExecutionConfiguration(JobExecutionConfiguration executionConfiguration) {
 		this.executionConfiguration = executionConfiguration;
 	}
+
+	public boolean isClickStop() {
+		return isClickStop;
+	}
+
+	public void setIsClickStop(boolean isClickStop) {
+		this.isClickStop = isClickStop;
+	}
+
 	public String getCarteObjectId() {
 		return carteObjectId;
 	}
