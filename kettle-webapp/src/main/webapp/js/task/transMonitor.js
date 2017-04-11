@@ -21,7 +21,7 @@ function generateTrans(transName,createDate,inputName){
                     "<input type='button' onclick='deleteTransByTransPath()' value='删除'>&nbsp;"+
                     "<input type='button' onclick='editorTrans()' value='编辑'>&nbsp;"+
                     "<input type='button' onclick='transCompositionImg()' value='结构图'>&nbsp;"+
-                    "<input type='button' onclick='transPowerExecute()' value='智能执行'>&nbsp;";;
+                    "<input type='button' onclick='transPowerExecute()' value='智能执行'>&nbsp;";
             }
         }
     ]);

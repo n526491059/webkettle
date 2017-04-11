@@ -310,9 +310,8 @@ TransGraph = Ext.extend(BaseGraph, {
 	iconCls: 'trans',
 	initComponent: function() {
 		var resultPanel = new TransResult({hidden: !this.showResult});
-		this.items = [resultPanel];
-		
-		if(this.readOnly === false) {
+
+		if(this.readOnly === false && this.Executable===false ) {
 			var transExecutor = this.transExecutor = new TransExecutor();
 			transExecutor.on('beforerun', function(executor, defaultExecutionConfig) {
 				var dialog = new TransExecutionConfigurationDialog();
@@ -388,8 +387,25 @@ TransGraph = Ext.extend(BaseGraph, {
 			}, '-', {
 				iconCls: 'show-results', scope: this, handler: this.showResultPanel
 			}];
+		}else if(this.Executable===true&&this.readOnly === false){
+			var transExecutor = this.jobExecutor = new JobExecutor();
+			transExecutor.on('beforerun', function(executor,defaultExecutionConfig) {
+				var dialog = new JobExecutionConfigurationDialog();
+				dialog.show(null, function() {
+					dialog.initData(defaultExecutionConfig);
+				});
+			});
+			transExecutor.on('result', this.doResult, this);
+			this.tbar = [{
+				iconCls: 'run', scope: this, tooltip: '运行这个转换', handler: this.run
+			},{
+				iconCls: 'pause', scope: this, disabled: true, tooltip: '恢复/暂停这个转换', handler: this.pause
+			}, {
+				iconCls: 'stop', scope: this, disabled: true, tooltip: '停止这个转换', handler: this.stop
+			}];
 		}
-		
+		this.items = [resultPanel];
+
 		TransGraph.superclass.initComponent.call(this);
 		
 		this.on('load', function() {
