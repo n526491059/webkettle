@@ -4,8 +4,8 @@
 
     <insert id="addExecutionTrace" parameterType="org.flhy.ext.Task.ExecutionTraceEntity">
       INSERT INTO task_execution_log
-      (jobName,startTime,endTime,execMethod,status,executionConfiguration,executionLog)
-      VALUES (#{jobName},#{startTime},#{endTime},#{execMethod},#{status},#{executionConfiguration},#{executionLog})
+      (jobName,startTime,endTime,execMethod,status,executionConfiguration,executionLog,type)
+      VALUES (#{jobName},#{startTime},#{endTime},#{execMethod},#{status},#{executionConfiguration},#{executionLog},#{type})
     </insert>
 
     <select id="getAllLogByPage" resultType="org.flhy.ext.Task.ExecutionTraceEntity">
@@ -17,7 +17,8 @@
         e.execMethod as execMethod,
         e.`status` as status,
         e.executionConfiguration as executionConfiguration,
-        e.executionLog as executionLog
+        e.executionLog as executionLog,
+         e.type as type
       from task_execution_log e limit #{0},#{1}
     </select>
 
@@ -34,7 +35,8 @@
         e.execMethod as execMethod,
         e.`status` as status,
         e.executionConfiguration as executionConfiguration,
-        e.executionLog as executionLog
+        e.executionLog as executionLog,
+        e.type as type
         from task_execution_log e WHERE e.fireId=#{id}
     </select>
 

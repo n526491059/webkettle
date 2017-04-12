@@ -35,6 +35,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class JobExecutor implements Runnable {
+	private boolean isClickStop=false;
 	private String executionId;
 	private JobExecutionConfiguration executionConfiguration;
 	private JobMeta jobMeta = null;
@@ -66,6 +67,15 @@ public class JobExecutor implements Runnable {
 	public void setExecutionConfiguration(JobExecutionConfiguration executionConfiguration) {
 		this.executionConfiguration = executionConfiguration;
 	}
+
+	public boolean isClickStop() {
+		return isClickStop;
+	}
+
+	public void setIsClickStop(boolean isClickStop) {
+		this.isClickStop = isClickStop;
+	}
+
 	public String getCarteObjectId() {
 		return carteObjectId;
 	}
@@ -166,6 +176,8 @@ public class JobExecutor implements Runnable {
 				status="失败";
 			}
 			trace.setStatus(status);
+			//任务类型
+			trace.setType("job");
 			//日志信息
 			net.sf.json.JSONObject logJSON=new net.sf.json.JSONObject();
 			logJSON.put("jobMeasure",this.getJobMeasure());
@@ -215,6 +227,8 @@ public class JobExecutor implements Runnable {
 				trace.setJobName(jobMeta.getName());
 				trace.setStatus("程序错误");
 				trace.setExecutionLog(ExceptionUtils.toString(e));
+				//任务类型
+				trace.setType("trans");
 				String execMethod="";
 				if(executionConfiguration.isExecutingLocally()){
 					execMethod="本地";
@@ -258,6 +272,8 @@ public class JobExecutor implements Runnable {
 			finished = true;
 			SqlSession session=MybatisDaoSuppo.sessionFactory.openSession();
 			session.insert("org.sxdata.jingwei.dao.ExecutionTraceDao.addExecutionTrace",trace);
+			session.commit();
+			session.close();
 		}
 	}
 

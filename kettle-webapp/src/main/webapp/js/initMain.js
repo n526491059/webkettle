@@ -1,5 +1,6 @@
 var activeGraph = null;
 
+
 Ext.onReady(function() {
 
 	Ext.QuickTips.init();
@@ -99,7 +100,6 @@ Ext.onReady(function() {
 		 Ext.get('loading-mask').fadeOut();
 	 }, 250);
 
-    
 });
 
 // function treeClick(node,e) {

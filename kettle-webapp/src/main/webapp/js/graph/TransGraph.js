@@ -232,13 +232,35 @@ TransExecutor = Ext.extend(Ext.util.Observable, {
 			method: 'POST',
 			params: {executionId: this.executionId},
 			success: function(response) {
-				var resObj = Ext.decode(response.responseText);
-				me.fireEvent('stop', resObj);
+				if(response.responseText=="faile"){
+					Ext.MessageBox.alert("该转换为远程执行,请在任务监控模块进行停止!");
+				}else{
+					var resObj = Ext.decode(response.responseText);
+					me.fireEvent('stop', resObj);
+				}
+			},
+			failure: failureResponse
+		});
+	},
+
+	pause: function() {
+		var me = this;
+		if(this.executionId == null)
+			return;
+
+		Ext.Ajax.request({
+			url: GetUrl('trans/pause.do'),
+			method: 'POST',
+			params: {executionId: this.executionId},
+			success: function(response) {
+				var result=response.responseText;
+				if(result!="success"){
+					Ext.MessageBox.alert("该转换为远程执行,请在任务监控模块进行暂停/开始操作");
+				}
 			},
 			failure: failureResponse
 		});
 	}
-
 });
 
 StatusPanel = Ext.extend(Ext.BoxComponent, {
@@ -528,7 +550,7 @@ TransGraph = Ext.extend(BaseGraph, {
 	},
 	
 	pause: function() {
-		
+		this.transExecutor.pause();
 	},
 	
 	stop: function() {

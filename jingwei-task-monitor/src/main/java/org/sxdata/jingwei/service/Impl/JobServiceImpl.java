@@ -194,7 +194,7 @@ public class JobServiceImpl implements JobService{
     @Override
     public void executeJob(String path,Integer slaveId) throws Exception {
         //获取用户信息
-        UserEntity loginUser = userDao.getUserbyName("admin");
+        UserEntity loginUser = userDao.getUserbyName("admin").get(0);
         loginUser.setPassword(KettleEncr.decryptPasswd("Encrypted " + loginUser.getPassword()));
         //构造Carte对象
         SlaveEntity slave=slaveDao.getSlaveById(slaveId);
@@ -389,7 +389,7 @@ public class JobServiceImpl implements JobService{
         }else{
             jobTimeScheduler.setSlaves(jobExecutor.getExecutionConfiguration().getRemoteServer().getHostname());
         }
-        UserEntity loginUser=userDao.getUserbyName("admin");
+        UserEntity loginUser=userDao.getUserbyName("admin").get(0);
         loginUser.setPassword(KettleEncr.decryptPasswd("Encrypted " + loginUser.getPassword()));
         //执行定时任务
         CarteTaskManager.addTimerTask(jobExecutor, null, jobTimeScheduler, loginUser);

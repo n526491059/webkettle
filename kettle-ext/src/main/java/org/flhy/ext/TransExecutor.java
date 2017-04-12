@@ -44,6 +44,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class TransExecutor implements Runnable {
+	private boolean isClickStop=false;
 	private String executionId;
 	private TransExecutionConfiguration executionConfiguration;
 	private TransMeta transMeta = null;
@@ -89,6 +90,15 @@ public class TransExecutor implements Runnable {
 	public void setTrans(Trans trans) {
 		this.trans = trans;
 	}
+
+	public boolean isClickStop() {
+		return isClickStop;
+	}
+
+	public void setIsClickStop(boolean isClickStop) {
+		this.isClickStop = isClickStop;
+	}
+
 	public static Hashtable<String, TransExecutor> getExecutors(){
 		return executors;
 	}
@@ -234,6 +244,8 @@ public class TransExecutor implements Runnable {
 				status="失败";
 			}
 			trace.setStatus(status);
+			//任务类型
+			trace.setType("trans");
 			//LOG
 			net.sf.json.JSONObject transLog=new net.sf.json.JSONObject();
 			transLog.put("stepMeasure",this.getStepMeasure());
@@ -283,6 +295,7 @@ public class TransExecutor implements Runnable {
 				trace.setJobName(transMeta.getName());
 				trace.setStatus("程序错误");
 				trace.setExecutionLog(ExceptionUtils.toString(e));
+				trace.setType("trans");
 				//执行方式
 				String execMethod="";
 				if(executionConfiguration.isExecutingLocally()){
@@ -329,6 +342,8 @@ public class TransExecutor implements Runnable {
 			finished = true;
 			SqlSession session= MybatisDaoSuppo.sessionFactory.openSession();
 			session.insert("org.sxdata.jingwei.dao.ExecutionTraceDao.addExecutionTrace",trace);
+			session.commit();
+			session.close();
 		}
 	}
 	
@@ -655,12 +670,16 @@ public class TransExecutor implements Runnable {
 	}
 	
 	public void stop() {
-		System.out.println(trans);
-		trans.stopAll();
+		if(trans!=null){
+			trans.stopAll();
+		}
 	}
 	
-	public void resume() {
-		trans.resumeRunning();
+	public void pause() {
+		if(!trans.isPaused())
+			trans.pauseRunning();
+		else
+			trans.resumeRunning();
 	}
 	
 	public JSONObject getPreviewData() {

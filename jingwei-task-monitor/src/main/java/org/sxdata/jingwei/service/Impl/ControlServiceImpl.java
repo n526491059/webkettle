@@ -126,6 +126,7 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
         return result;
     }
 
+
     public String transToStatusDesc(SlaveServerTransStatus realTransStatus) {
         String running_status = null;
         if(realTransStatus.isRunning()) {
@@ -164,9 +165,6 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
                 cc.pauseTrans(id[i]);
             }
         }
-
-
-
     }
 
     //获取所有运行中的转换
@@ -182,7 +180,7 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
             SlaveServer slaveServer =executionConfiguration.getRemoteServer();
             Trans trans=transExecutor.getTrans();
             //转换未完成并且是在本地执行
-            if(!transExecutor.isFinished() && executionConfiguration.isExecutingLocally()){
+            if(!transExecutor.isFinished() && executionConfiguration.isExecutingLocally() && !transExecutor.isClickStop()){
                 //本地执行
                 TaskControlEntity taskControl=new TaskControlEntity();
                 taskControl.setName(transExecutor.getTransMeta().getName());
@@ -240,7 +238,7 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
             JobExecutor jobExecutor=table.get(jobExecutorId);
             JobExecutionConfiguration executionConfiguration=jobExecutor.getExecutionConfiguration();
             //作业未完成 而且是本地运行
-            if(!jobExecutor.isFinished() && executionConfiguration.isExecutingLocally()){
+            if(!jobExecutor.isFinished() && executionConfiguration.isExecutingLocally() && !jobExecutor.isClickStop()){
                     TaskControlEntity taskControl=new TaskControlEntity();
                     taskControl.setName(jobExecutor.getJobMeta().getName());
                     taskControl.setId(jobExecutor.getExecutionId());
@@ -287,6 +285,7 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
                 TransExecutor transExecutor = table.get(transExecutorId);
                 if(transExecutor.getExecutionId().equals(id) && !transExecutor.isFinished()){
                     transExecutor.stop();
+                    transExecutor.setIsClickStop(true);
                     return;
                 }
             }
@@ -309,6 +308,7 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
                 if(jobExecutor.getExecutionId().equals(id)){
                     if(hostName.trim().equals("本地执行")){
                         jobExecutor.getJob().stopAll();
+                        jobExecutor.setIsClickStop(true);
                     }
                 }
             }

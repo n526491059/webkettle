@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.sxdata.jingwei.bean.PageforBean;
 import org.sxdata.jingwei.dao.ExecutionTraceDao;
+import org.sxdata.jingwei.dao.TaskGroupDao;
+import org.sxdata.jingwei.entity.TaskGroupAttributeEntity;
+import org.sxdata.jingwei.entity.TaskGroupEntity;
 import org.sxdata.jingwei.service.HistoryLogService;
 import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 
@@ -21,9 +24,19 @@ public class HistoryLogServiceImpl implements HistoryLogService{
     @Qualifier("taskExecutionTraceDao")
     private ExecutionTraceDao executionTraceDao;
 
+    @Autowired
+    private TaskGroupDao groupDao;
+
     @Override
     public String getAllHistoryLog(int start, int limit) {
         List<ExecutionTraceEntity> traces=executionTraceDao.getAllLogByPage(start,limit);
+        for(ExecutionTraceEntity trace:traces){
+            if(trace.getStatus().equals("成功")){
+                trace.setStatus("<font color='green'>"+trace.getStatus()+"</font>");
+            }else{
+                trace.setStatus("<font color='red'>"+trace.getStatus()+"</font>");
+            }
+        }
 
         PageforBean json=new PageforBean();
         json.setTotalProperty(executionTraceDao.getAllLogCount());
@@ -35,6 +48,22 @@ public class HistoryLogServiceImpl implements HistoryLogService{
     @Override
     public String getExecutionTraceById(Integer id) {
         ExecutionTraceEntity trace=executionTraceDao.getTraceById(id);
+        //增加所属任务组属性
+        String config=trace.getExecutionConfiguration();
+        JSONObject json=JSONObject.fromObject(config);
+        List<TaskGroupAttributeEntity> groups=groupDao.getTaskGroupByTaskName(trace.getJobName(),trace.getType());
+        if(null!=groups && groups.size()>0){
+            String[] groupNames=new String[groups.size()];
+            for(int i=0;i<groups.size();i++){
+                TaskGroupAttributeEntity group=groups.get(i);
+                groupNames[i]=group.getTaskGroupName();
+            }
+            json.put("group",groupNames);
+        }else{
+            json.put("group","暂未分配任务组");
+        }
+        trace.setExecutionConfiguration(json.toString());
+        trace.setExecutionLog(trace.getExecutionLog().replaceAll("\\\\n","<br/>"));
         return JSONObject.fromObject(trace).toString();
     }
 }

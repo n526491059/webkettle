@@ -9,6 +9,7 @@ import org.sxdata.jingwei.entity.UserEntity;
 import org.sxdata.jingwei.service.UserService;
 import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -55,7 +56,27 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void getUserByName(String login) {
+    public List<UserEntity> getUserByName(String login) {
+        return userDao.getUserbyName(login);
+    }
 
+    public String login(String userName, String password,HttpServletRequest request) {
+        String result="success";
+        List<UserEntity> users=this.getUserByName(userName);
+        if(users.size()==0){
+            result="该用户名不存在,请再次确认";
+        }else{
+            UserEntity user=users.get(0);
+            String realPassword=KettleEncr.decryptPasswd(user.getPassword());
+            if(!realPassword.equals(password)){
+                result="密码输入错误,请再次确认";
+            }else{
+                if(null==request.getSession().getAttribute("login")){
+                    request.getSession().setAttribute("login",user);
+                    request.getSession().setAttribute("username",user.getLogin());
+                }
+            }
+        }
+        return result;
     }
 }

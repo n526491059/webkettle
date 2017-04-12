@@ -1,29 +1,24 @@
 
 function showHistoryLogPanel(secondGuidePanel){
 
-    //为表格添加一行复选框用于选择行
-    var sm=new Ext.grid.CheckboxSelectionModel();
-
     //列模型
     var cm=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
-        sm,
         {header:"id",dataIndex:"fireId"},
         {header:"任务名",dataIndex:"jobName"},
+        {header:"任务类型",dataIndex:"type"},
         {header:"开始时间",dataIndex:"startTime",format:"y-M-d H:m:s"},
         {header:"结束时间",dataIndex:"endTime",format:"y-M-d H:m:s"},
         {header:"执行方式",dataIndex:"execMethod"},
         {header:"状态",dataIndex:"status",align:"center"},
         {header:"参数信息",dataIndex:"executionConfiguration",
             renderer:function(v){
-                return "exec_lo..."+
-                    "<input type='button' onclick='showConfigInfo()' value='view'>&nbsp;";
+                return "<input type='button' onclick='showConfigInfo()' value='详情'>&nbsp;";
             }
         },
         {header:"日志详情",dataIndex:"executionLog",
             renderer:function(v){
-                return "finis..."+
-                    "<input type='button' onclick='showLogInfo()' value='view'>&nbsp;";
+                return "<input type='button' onclick='showLogInfo()' value='详情'>&nbsp;";
             }
         },
 
@@ -36,6 +31,7 @@ function showHistoryLogPanel(secondGuidePanel){
     var human=Ext.data.Record.create([
         {name:"fireId",type:"string",mapping:"fireId"},
         {name:"jobName",type:"string",mapping:"jobName"},
+        {name:"type",type:"string",mapping:"type"},
         {name:"startTime",type:"string",mapping:"startTime"},
         {name:"endTime",type:"string",mapping:"endTime"},
         {name:"execMethod",type:"string",mapping:"execMethod"},
@@ -56,22 +52,11 @@ function showHistoryLogPanel(secondGuidePanel){
         title:"历史日志",
         height:470,
         cm:cm,      //列模型
-        sm:sm,
         store:store,
         viewConfig : {
             forceFit : true //让grid的列自动填满grid的整个宽度，不用一列一列的设定宽度
         },
         closable:true,
-        tbar:new Ext.Toolbar({
-            buttons:[
-                {
-                    text:"定时执行",
-                    handler:function(){
-
-                    }
-                }
-            ]
-        }),
         bbar:new Ext.PagingToolbar({
             store:store,
             pageSize:15,
@@ -80,7 +65,7 @@ function showHistoryLogPanel(secondGuidePanel){
             emptyMsg:"没有记录"
         })
     });
-    grid.getColumnModel().setHidden(2,true);
+    grid.getColumnModel().setHidden(1,true);
     secondGuidePanel.removeAll(true);
     secondGuidePanel.add(grid);
     secondGuidePanel.doLayout();
@@ -97,44 +82,7 @@ function showLogInfo(){
             var logJSON=eval("("+executionLog+")");
             var windowHTML="";
             for(var item in logJSON){
-                if(item=="jobMeasure"){
-                    var array=logJSON[item];
-                    var twoInfo="";
-                    for(var i=0;i<array.length;i++){
-                        var attr=array[i];
-                        for(var item2 in attr){
-                            if(item2=="children"){
-                                var array2=attr[item2];
-                                var threeInfo="";
-                                for(var i=0;i<array2.length;i++){
-                                    var attr2=array2[i];
-                                    for(var item3 in attr2){
-                                        threeInfo+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+item3+":"+attr2[item3]+"<br/>"
-                                    }
-                                    if(i!=array2.length-1){
-                                        threeInfo+="<br/>";
-                                    }
-                                }
-                                twoInfo+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+item2+"<br/>"+threeInfo;
-                            }else{
-                                twoInfo+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+item2+":"+attr[item2]+"<br/>";
-                            }
-                        }
-                    }
-                    windowHTML+=item+"<br/>"+twoInfo+"<br/>"
-                }else if(item=="stepMeasure"){
-                    var array=logJSON[item];
-                    var twoInfo="";
-                    for(var i=0;i<array.length;i++){
-                        var array2=array[i];
-                        twoInfo+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                        for(var j=0;j<array2.length;j++){
-                            twoInfo+=array2[j]+"&nbsp;&nbsp;";
-                        }
-                        twoInfo+="<br/>";
-                    }
-                    windowHTML+=item+"<br/>"+twoInfo+"<br/>"
-                }else{
+                if(item=="log"){
                     windowHTML+=item+":"+"<br/>"+logJSON[item]+"<br/><br/>";
                 }
             }
@@ -169,7 +117,7 @@ function showConfigInfo(){
             var configJSON=eval("("+executionConfiguration+")");
             var windowHTML="";
             for(var item in configJSON){
-                if(item=="slaveserver" || item=="variables"){
+                if(item=="parameters" || item=="variables" || item=="arguments"){
                     var array=configJSON[item];
                     var twoInfo="";
                     for(var i=0;i<array.length;i++){
@@ -178,9 +126,29 @@ function showConfigInfo(){
                             twoInfo+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+item2+":"+attr[item2]+"<br/>"
                         }
                     }
-                    windowHTML+=item+"<br/>"+twoInfo+"<br/>";
-                }else{
-                    windowHTML+=item+":"+"<br/>"+configJSON[item]+"<br/><br/>";
+                    if(item=="parameters"){
+                        windowHTML+="命名参数:"+"<br/>"+twoInfo+"<br/>";
+                    }else if(item=="variables"){
+                        windowHTML+="变量:"+"<br/>"+twoInfo+"<br/>";
+                    }else if(item=="arguments"){
+                        windowHTML+="位置参数:"+"<br/>"+twoInfo+"<br/>";
+                    }
+                }else if(item=="safe_mode"){
+                    windowHTML+="是否使用安全模式"+":"+"<br/>"+configJSON[item]+"<br/><br/>";
+                }else if(item=="log_level"){
+                    windowHTML+="日志级别"+":"+"<br/>"+configJSON[item]+"<br/><br/>";
+                }else if(item=="group"){
+                    var array=configJSON[item];
+                    if(array=="暂未分配任务组"){
+                        windowHTML+="所属任务组"+":"+"<br/>"+array+"<br/><br/>";
+                    }else{
+                        var twoInfo="";
+                        for(var i=0;i<array.length;i++){
+                            var attr=array[i];
+                            twoInfo+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+(i+1)+":"+attr+"<br/>";
+                        }
+                        windowHTML+="所属任务组:"+"<br/>"+twoInfo+"<br/>";
+                    }
                 }
             }
             var configDetailWindow=new Ext.Window({
