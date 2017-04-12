@@ -150,8 +150,8 @@ public class JobGraphController {
 			jobMeta.setObjectId(existingId);
 		jobMeta.setModifiedDate(new Date());
 		
-		 boolean versioningEnabled = true;
-         boolean versionCommentsEnabled = true;
+		boolean versioningEnabled = true;
+		boolean versionCommentsEnabled = true;
          String fullPath = jobMeta.getRepositoryDirectory() + "/" + jobMeta.getName() + jobMeta.getRepositoryElementType().getExtension(); 
          RepositorySecurityProvider repositorySecurityProvider = repository.getSecurityProvider() != null ? repository.getSecurityProvider() : null;
          if ( repositorySecurityProvider != null ) {
