@@ -460,6 +460,8 @@ public class TransGraphController {
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/run")
 	protected void run(@RequestParam String graphXml, @RequestParam String executionConfiguration) throws Exception {
+		System.out.println(graphXml);
+		System.out.println(executionConfiguration);
 		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
 		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
 		

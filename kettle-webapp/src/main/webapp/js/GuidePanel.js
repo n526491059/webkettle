@@ -194,7 +194,10 @@ function repositryOpenTrans(secondGuidePanel,path,text){
 GuidePanel = Ext.extend(Ext.Panel, {
 	border:false,
 	initComponent: function() {
-		var fristGuidePanel = new Ext.tree.TreePanel({
+		var fristGuidePanel="";
+		var username=document.getElementById("loginUsername").value;
+		if(username=="admin"){
+			fristGuidePanel = new Ext.tree.TreePanel({
 				useArrows: true,
 				region: 'west',
 				width: 200,
@@ -251,7 +254,59 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				animate: false,
 				rootVisible: false
 			});
-
+		}else{
+			fristGuidePanel = new Ext.tree.TreePanel({
+				useArrows: true,
+				region: 'west',
+				width: 200,
+				split: true,
+				loader : new Ext.tree.TreeLoader(),
+				root : new Ext.tree.AsyncTreeNode({
+					id:'fristGuidePanel',
+					children:[
+						{
+							id:'task',
+							cls:'nav-node',
+							icon:'ui/images/folder.svg?scale=32',
+							text : "<font size = '3px'>模型</font>",
+							children:[
+								{id:"newTrans",text:"<font size = '2px'>新建转换</font>",cls:"nav",leaf:true},
+								{id:"newJob",text:"<font size = '2px'>新建作业</font>",cls:"nav",leaf:true}
+							]
+						},{
+							text : "<font size = '3px'>任务</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
+							children:[
+								{id:"jobMonitor",text:"<font size = '2px'>作业管理</font>",cls:"nav",leaf:true},
+								{id:"transMonitor",text:"<font size = '2px'>转换管理</font>",cls:"nav",leaf:true},
+								{id:"taskGroupMonitor",text:"<font size = '2px'>任务组管理</font>",cls:"nav",leaf:true},
+								{id:"taskMonitoring",text:"<font size = '2px'>任务监控</font>",cls:"nav",leaf:true}
+							]
+						},{
+							text : "<font size = '3px'>日志</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
+							children:[
+								{id:"taskLog",text:"<font size = '2px'>任务历史日志</font>",cls:"nav",leaf:true},
+							]
+						},{
+							text : "<font size = '3px'>节点</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
+							children:[
+								{id:"slaveMonitor",text:"<font size = '2px'>节点管理</font>",cls:"nav",leaf:true},
+								{id:"slaveMonitoring",text:"<font size = '2px'>节点监控</font>",cls:"nav",leaf:true},
+							]
+						},{
+							text : "<font size = '3px'>调度</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
+							children:[
+								{id:"schedulerMonitor",text:"<font size = '2px'>调度管理</font>",cls:"nav",leaf:true},
+							]
+						}
+					]
+				}),
+				enableDD:true,
+				ddGroup:'TreePanelDDGroup',
+				autoScroll: true,
+				animate: false,
+				rootVisible: false
+			});
+		};
 		var secondGuidePanel = new Ext.Panel({
 			region:'center',
 			layout:'fit',
@@ -300,7 +355,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 							},
 							failure: failureResponse
 					   });
-				    	
+
 				    }
 				});
 			} else if(node.text == "<font size = '2px'>作业管理</font>")
@@ -339,7 +394,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				showHistoryLogPanel(secondGuidePanel);
 			}
 		});
-		
+
 		this.items = [fristGuidePanel, secondGuidePanel];
 		GuidePanel.superclass.initComponent.call(this);
 	}

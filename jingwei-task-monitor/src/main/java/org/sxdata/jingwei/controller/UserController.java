@@ -1,10 +1,10 @@
 package org.sxdata.jingwei.controller;
 
 import net.sf.json.JSONObject;
-import org.flhy.ext.utils.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.sxdata.jingwei.entity.UserEntity;
 import org.sxdata.jingwei.service.UserService;
@@ -108,4 +108,39 @@ public class UserController {
     }
 
 
+    //登陆
+    @RequestMapping(value="/doLogin")
+    @ResponseBody
+    protected void doLogin(HttpServletResponse response,HttpServletRequest request,@RequestParam String username,@RequestParam String password){
+        try{
+            UserEntity loginUser=(UserEntity)request.getSession().getAttribute("login");
+            String result="success";
+            if(null==loginUser){
+                result=userService.login(username,password,request);
+            }
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write(result);
+            out.flush();
+            out.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    //获取当前登录的用户
+    //登陆
+    @RequestMapping(value="/getLoginUser")
+    @ResponseBody
+    protected void getLoginUser(HttpServletResponse response,HttpServletRequest request){
+        try{
+            UserEntity loginUser=(UserEntity)request.getSession().getAttribute("login");
+            PrintWriter out=response.getWriter();
+            out.write(JSONObject.fromObject(loginUser).toString());
+            out.flush();
+            out.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 }

@@ -10,7 +10,7 @@ import java.util.List;
  */
 @Repository
 public interface UserDao {
-    public UserEntity getUserbyName(String name);
+    public List<UserEntity> getUserbyName(String name);
 
     public List<UserEntity> getUsersLimit(int start,int limit);
 

@@ -5,8 +5,10 @@ import net.sf.json.JSONObject;
 import org.flhy.ext.App;
 import org.flhy.ext.JobExecutor;
 import org.flhy.ext.PluginFactory;
+import org.flhy.ext.TransExecutor;
 import org.flhy.ext.base.GraphCodec;
 import org.flhy.ext.job.JobExecutionConfigurationCodec;
+import org.flhy.ext.trans.TransExecutionConfigurationCodec;
 import org.flhy.ext.utils.JsonUtils;
 import org.flhy.ext.utils.RepositoryUtils;
 import org.flhy.ext.utils.StringEscapeHelper;
@@ -15,6 +17,7 @@ import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.pentaho.di.repository.RepositoryObjectType;
+import org.pentaho.di.trans.TransExecutionConfiguration;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -297,13 +300,31 @@ public class TaskController {
             String flag=request.getParameter("powerFlag");
             //在所有节点中获取负载最低的节点
             SlaveEntity minSlave=slaveService.getSlaveByLoadAvg(slaveService.getAllSlave());
+            String config="{\"exec_local\":\"N\",\"exec_remote\":\"Y\",\"pass_export\":\"N\","
+                +"\"exec_cluster\":\"N\",\"cluster_post\":\"Y\",\"cluster_prepare\":\"Y\",\"cluster_start\":\"Y\","
+                +"\"cluster_show_trans\":\"N\",\"parameters\":[],"
+                +"\"variables\":[{\"name\":\"Internal.Entry.Current.Directory\",\"value\":\"/\"},{\"name\":\"Internal.Job.Filename.Directory\",\"value\":\"Parent Job File Directory\"},{\"name\":\"Internal.Job.Filename.Name\",\"value\":\"Parent Job Filename\"},{\"name\":\"Internal.Job.Name\",\"value\":\"Parent Job Name\"},{\"name\":\"Internal.Job.Repository.Directory\",\"value\":\"Parent Job Repository Directory\"}],"
+                +"\"arguments\":[],\"safe_mode\":\"N\",\"log_level\":\"Basic\",\"clear_log\":\"Y\",\"gather_metrics\":\"Y\",\"log_file\":\"N\",\"log_file_append\":\"N\",\"show_subcomponents\":\"Y\""
+                +",\"create_parent_folder\":\"N\",\"remote_server\":\"192.168.1.201\",\"replay_date\":\"\"}";
+            JSONObject json=JSONObject.fromObject(config);
+            json.put("remote_server",minSlave.getHostName());
             if(minSlave==null){
                 throw new Exception("当前无可用的正常节点!");
             }else{
                 if(flag.equals("job")){
-                    jobService.executeJob(path,minSlave.getSlaveId());
+                    JobMeta jobMeta=RepositoryUtils.loadJobbyPath(path);
+                    org.flhy.ext.utils.JSONObject jsonObject = org.flhy.ext.utils.JSONObject.fromObject(json.toString());
+                    JobExecutionConfiguration jobExecutionConfiguration = JobExecutionConfigurationCodec.decode(jsonObject, jobMeta);
+                    JobExecutor jobExecutor = JobExecutor.initExecutor(jobExecutionConfiguration, jobMeta);
+                    Thread tr = new Thread(jobExecutor, "JobExecutor_" + jobExecutor.getExecutionId());
+                    tr.start();
                 }else if(flag.equals("transformation")){
-                    transService.executeTransformation(path,minSlave.getSlaveId());
+                    TransMeta transMeta=RepositoryUtils.loadTransByPath(path);
+                    org.flhy.ext.utils.JSONObject jsonObject = org.flhy.ext.utils.JSONObject.fromObject(json.toString());
+                    TransExecutionConfiguration transExecutionConfiguration = TransExecutionConfigurationCodec.decode(jsonObject, transMeta);
+                    TransExecutor transExecutor = TransExecutor.initExecutor(transExecutionConfiguration, transMeta);
+                    Thread tr = new Thread(transExecutor, "TransExecutor_" + transExecutor.getExecutionId());
+                    tr.start();
                 }
                 //输出结果返回给客户端
                 response.setContentType("text/html;charset=utf-8");

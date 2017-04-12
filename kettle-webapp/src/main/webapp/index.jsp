@@ -7,6 +7,7 @@
 	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ui/css/public.css" />
 	</head>
 	<body>
+
 		<div id="loading-mask">
 			<input type="hidden" id="context-path" value="${pageContext.request.contextPath}" />
 			<script type="text/javascript" src="${pageContext.request.contextPath}/js/other/init.js"></script>
@@ -15,6 +16,7 @@
 		    <div class="loading-indicator">
 		        <img src="ui/resources/extanim32.gif" width="32" height="32" style="margin-right:8px;" align="absmiddle" />
 				系统加载中，请稍后...
+				<input type="hidden" id="loginUsername"  value="${sessionScope.username}"/>
 		    </div>
 		</div>
 		
@@ -29,7 +31,6 @@
 	    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ext3/ux/treegrid/treegrid.css" />
 	    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ui/css/system.css2" />
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/mxgraph2/js/mxClient3.js"></script>
-	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/ext3/adapter/ext/ext-base.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/ext3/ext-all-debug.js"></script>
 	    
