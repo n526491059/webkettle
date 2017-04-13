@@ -358,19 +358,12 @@ GuidePanel = Ext.extend(Ext.Panel, {
 
 				    }
 				});
-			} else if(node.text == "<font size = '2px'>作业管理</font>")
-			{
-				secondGuidePanel.removeAll(true);
-				secondGuidePanel.add(generateJobPanel("","",undefined));
-				secondGuidePanel.doLayout();
+			} else if(node.text == "<font size = '2px'>作业管理</font>") {
+				generateJobPanel(secondGuidePanel);
 			}else if(node.text == "<font size = '2px'>转换管理</font>") {
-				secondGuidePanel.removeAll(true);
-				secondGuidePanel.add(generateTrans("","",undefined));
-				secondGuidePanel.doLayout();
+				generateTrans(secondGuidePanel);
 			}else if(node.text == "<font size = '2px'>调度管理</font>") {
-				secondGuidePanel.removeAll(true);
-				secondGuidePanel.add(generateSchedulerMonitorPanel("","",""));
-				secondGuidePanel.doLayout();
+				generateSchedulerMonitorPanel(secondGuidePanel);
 			}else if(node.text=="<font size = '2px'>任务监控</font>"){
 				secondGuidePanel.removeAll(true);
 				secondGuidePanel.add(showTaskControlPanel());

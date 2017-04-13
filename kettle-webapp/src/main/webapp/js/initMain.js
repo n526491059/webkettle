@@ -1,5 +1,9 @@
 var activeGraph = null;
 
+//退出登录
+function loginOut(){
+	window.location.href = 'user/loginOut.do';
+}
 
 Ext.onReady(function() {
 
@@ -17,12 +21,15 @@ Ext.onReady(function() {
 //			collapsible:true
 //		});
 
-
+		var username=document.getElementById("loginUsername").value;
+		var loginInfo="<div style='margin-left: 1100px;margin-top: 10px'>欢迎您：<h3 style='display: inline-block;'>"
+			+username+"</h3>&nbsp;&nbsp;<input type='button' value='登 出' onclick='loginOut();'></div>";
 		var navigationPanel = new Ext.Panel({
 			id: 'navigationPanel',
 			region: 'north',
 			height: 50,
 			border: false,
+			html:loginInfo,
 			margin: '0,0,0,0',
 			bodyStyle: {
 				background: '#3992D4'

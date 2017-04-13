@@ -28,8 +28,8 @@ public class HistoryLogServiceImpl implements HistoryLogService{
     private TaskGroupDao groupDao;
 
     @Override
-    public String getAllHistoryLog(int start, int limit) {
-        List<ExecutionTraceEntity> traces=executionTraceDao.getAllLogByPage(start,limit);
+    public String getAllHistoryLog(int start, int limit,String statu,String type,String startDate,String taskName) {
+        List<ExecutionTraceEntity> traces=executionTraceDao.getAllLogByPage(start,limit,statu,type,startDate,taskName);
         for(ExecutionTraceEntity trace:traces){
             if(trace.getStatus().equals("成功")){
                 trace.setStatus("<font color='green'>"+trace.getStatus()+"</font>");
