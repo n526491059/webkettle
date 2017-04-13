@@ -143,7 +143,9 @@ public class JobGraphController {
 		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
 		JobMeta jobMeta = (JobMeta) codec.decode(StringEscapeHelper.decode(graphXml));
 		Repository repository = App.getInstance().getRepository();
-		ObjectId existingId = repository.getTransformationID( jobMeta.getName(), jobMeta.getRepositoryDirectory() );
+		ObjectId existingId = repository.getJobId(jobMeta.getName(), jobMeta.getRepositoryDirectory());
+				//repository.getTransformationID( jobMeta.getName(), jobMeta.getRepositoryDirectory());
+
 		if(jobMeta.getCreatedDate() == null)
 			jobMeta.setCreatedDate(new Date());
 		if(jobMeta.getObjectId() == null)
