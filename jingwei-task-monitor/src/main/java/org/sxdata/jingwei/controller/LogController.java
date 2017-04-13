@@ -1,5 +1,6 @@
 package org.sxdata.jingwei.controller;
 
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +28,21 @@ public class LogController {
         try{
             Integer start=Integer.valueOf(request.getParameter("start"));
             Integer limit=Integer.valueOf(request.getParameter("limit"));
-            String result=logService.getAllHistoryLog(start,limit);
+            String statu="";
+            String type="";
+            String startTime="";
+            String taskName="";
+            //获取查询参数
+            String search=request.getParameter("search");
+            if(null!=search && !search.equals("")){
+                JSONObject json=JSONObject.fromObject(search);
+                statu=(String)json.get("statu");
+                type=(String)json.get("type");
+                startTime=(String)json.get("startDate");
+                taskName=(String)json.get("taskName");
+                startTime+=" 00:00:00";
+            }
+            String result=logService.getAllHistoryLog(start,limit,statu,type,startTime,taskName);
             result=result.replaceAll("\n","<br/>");
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();

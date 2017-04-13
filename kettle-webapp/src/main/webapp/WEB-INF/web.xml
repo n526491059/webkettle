@@ -89,6 +89,10 @@
 		<url-pattern>/login.jsp</url-pattern>
 	</filter-mapping>
 
+	<session-config>
+		<session-timeout>10</session-timeout>
+	</session-config>
+
 	<welcome-file-list>
 		<welcome-file>login.jsp</welcome-file>
 	</welcome-file-list>

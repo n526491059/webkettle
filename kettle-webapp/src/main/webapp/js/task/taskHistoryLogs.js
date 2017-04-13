@@ -1,6 +1,11 @@
+logSearch=function(statu,type,startDate,taskName){
+    this.statu=statu;
+    this.type=type;
+    this.startDate=startDate;
+    this.taskName=taskName;
+}
 
 function showHistoryLogPanel(secondGuidePanel){
-
     //列模型
     var cm=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
@@ -43,10 +48,19 @@ function showHistoryLogPanel(secondGuidePanel){
 
     var store=new Ext.data.Store({
         proxy:proxy,
-        reader:reader
-    })
-    store.load({params:{start:0,limit:15}});
+        reader:reader,
+        listeners: {
+            "beforeload": function(store) {
+                store.baseParams = {
+                    search:JSON.stringify(getSearchParam())
+                }
+            }
+        }
+    });
+    store.load({params:{start:0,limit:10}});
 
+    var search=getSearchParam();
+    var logTbar=getTbarForHistoryLog(search.statu,search.type,search.taskName);
     var grid=new Ext.grid.GridPanel({
         id:"historyLogPanel",
         title:"历史日志",
@@ -57,6 +71,7 @@ function showHistoryLogPanel(secondGuidePanel){
             forceFit : true //让grid的列自动填满grid的整个宽度，不用一列一列的设定宽度
         },
         closable:true,
+        tbar:logTbar,
         bbar:new Ext.PagingToolbar({
             store:store,
             pageSize:15,
@@ -170,4 +185,160 @@ function showConfigInfo(){
     });
 
 
+}
+
+//日志列表顶部的控件 用作查询
+function getTbarForHistoryLog(statu,type,taskName){
+    var taskNameField=new Ext.form.TextField({
+        name: "taskName",
+        id:"taskName",
+        fieldLabel: "任务名",
+        width:150,
+        value:taskName
+    });
+    var dateField=new Ext.form.DateField({
+        name: "startDate",
+        id:"startDate",
+        fieldLabel: "开始时间",
+        width:100,
+        format: "Y-m-d"
+    });
+    var searchButton=new Ext.Button({
+        text:'查找',
+        width:50,
+        style:'margin:1px 5px 1px 5px;',
+        handler:function(){
+            var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+            showHistoryLogPanel(secondGuidePanel);
+        }
+    });
+    f=new Ext.form.FormPanel({
+        width:445,
+        height:42,
+        frame:true,
+        labelWidth:50,
+        labelAlign:"right",
+        items:[
+            {
+                layout:"column",    //横向布局(列布局),左到右
+                items:[
+                    {layout:"form", items:[taskNameField]},     //每一个是单独的表单控件,单个使用纵向布局,上到下
+                    {layout:"form",items:[dateField]},
+                    {layout:"form",items:[searchButton]},
+                ]
+            }
+        ]
+    });
+    var logStatu=logStatuSelect();
+    var taskType=taskTypeSelect();
+    if(statu!=""){
+        logStatu.setRawValue(statu);
+        logStatu.setValue(statu);
+    }
+
+    if(type!=""){
+        taskType.setRawValue(type);
+        taskType.setValue(type);
+    }
+
+    var toolBar=new Ext.Toolbar({
+        buttons:[
+            logStatu,"-",taskType,"-",f
+        ]
+    });
+    return toolBar;
+}
+
+//状态下拉选择选择框
+function logStatuSelect(){
+    var logStatuData=[
+        ["成功","成功"],
+        ["失败","失败"]
+    ];
+    var proxy=new Ext.data.MemoryProxy(logStatuData);
+    var reader=new Ext.data.ArrayReader({},[
+        {name:"statuId",type:"string",mapping:0},
+        {name:"statuName",type:"string",mapping:1}
+    ]);
+    var store=new Ext.data.Store({
+        proxy:proxy,
+        reader:reader,
+        autoLoad:true
+    });
+    var logStatuCombobox=new Ext.form.ComboBox({
+        id:"logStatuCombobox",
+        triggerAction:"all",
+        store:store,
+        displayField:"statuName",
+        valueField:"statuId",
+        mode:"local",
+        emptyText:"执行结果",
+        listeners:{
+            //index是被选中的下拉项在整个列表中的下标 从0开始
+            'select':function(combo,record,index){
+                var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+                showHistoryLogPanel(secondGuidePanel);
+            }
+        }
+    });
+    return logStatuCombobox;
+}
+
+//任务类型下拉选择框
+function taskTypeSelect(){
+    var taskTypeData=[
+        ["job","job"],
+        ["trans","trans"]
+    ];
+    var proxy=new Ext.data.MemoryProxy(taskTypeData);
+    var reader=new Ext.data.ArrayReader({},[
+        {name:"taksTypeId",type:"string",mapping:0},
+        {name:"taskTypeName",type:"string",mapping:1}
+    ]);
+    var store=new Ext.data.Store({
+        proxy:proxy,
+        reader:reader,
+        autoLoad:true
+    });
+    var taskTypeCombobox=new Ext.form.ComboBox({
+        id:"taskTypeCombobox",
+        triggerAction:"all",
+        store:store,
+        displayField:"taskTypeName",
+        valueField:"taksTypeId",
+        emptyText:"任务类型",
+        mode:"local",
+        listeners:{
+            //index是被选中的下拉项在整个列表中的下标 从0开始
+            'select':function(combo,record,index){
+                var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+                showHistoryLogPanel(secondGuidePanel);
+            }
+        }
+    });
+    return taskTypeCombobox;
+}
+
+//收集查询参数
+function getSearchParam(){
+    var statu="";
+    var type="";
+    var startDate="";
+    var taskName="";
+    if(Ext.getCmp("logStatuCombobox")!=undefined){
+        statu=Ext.getCmp("logStatuCombobox").getValue();
+    }
+    if(Ext.getCmp("taskTypeCombobox")!=undefined){
+        type=Ext.getCmp("taskTypeCombobox").getValue();
+    }
+    if(Ext.getCmp("startDate")!=undefined){
+        startDate=Ext.getCmp("startDate").getRawValue();
+    }
+    if(Ext.getCmp("taskName")!=undefined){
+        taskName=Ext.getCmp("taskName").getValue();
+    }
+
+
+    var entity=new logSearch(statu,type,startDate,taskName);
+    return entity;
 }

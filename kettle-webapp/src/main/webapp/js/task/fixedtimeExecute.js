@@ -348,16 +348,8 @@ function generateToolButton(flag){
                                         Ext.MessageBox.alert("成功","修改定时成功!");
                                         var thisWindow=Ext.getCmp("fiexdWindow");
                                         thisWindow.close();
-                                        //执行类型被选中的Id    转换成对应的type数值
-                                        var typeId=Ext.getCmp("typeChooseBySelect").getValue();
-                                        //获取节点IP下拉列表被选中的值
-                                        var hostName=Ext.getCmp("hostNameId").getValue();
-                                        //获取作业名框输入的值
-                                        var jobName=Ext.getCmp("inputJobName").getValue();
                                         var secondGuidePanel=Ext.getCmp("secondGuidePanel");
-                                        secondGuidePanel.removeAll(true);
-                                        secondGuidePanel.add(generateSchedulerMonitorPanel(typeId,hostName,jobName));
-                                        secondGuidePanel.doLayout();
+                                        generateSchedulerMonitorPanel(secondGuidePanel);
                                     }
                                 },
                                 failure:function(){
@@ -384,9 +376,8 @@ function generateToolButton(flag){
             handler:function(){
                 //判断是否选择了定时类型
                 var chooseType=Ext.getCmp("typeChoose").getValue();
-                if(chooseType==undefined || chooseType==""){oracle
+                if(chooseType==undefined || chooseType==""){
                     Ext.MessageBox.alert("提交失败","请先选择定时类型");
-                    Ext.MessageBox.alert("提交失败","please choose timer type.it's not null");
                     return;
                 }else{
                     var targetForm=Ext.getCmp("fiexdForm");

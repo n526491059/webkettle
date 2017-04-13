@@ -32507,8 +32507,6 @@ Ext.PagingToolbar = Ext.extend(Ext.Toolbar, {
 
     
 
-    
-
     initComponent : function(){
         var pagingItems = [this.first = new T.Button({
             tooltip: this.firstText,

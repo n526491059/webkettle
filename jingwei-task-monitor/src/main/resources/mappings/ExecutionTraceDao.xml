@@ -19,7 +19,20 @@
         e.executionConfiguration as executionConfiguration,
         e.executionLog as executionLog,
          e.type as type
-      from task_execution_log e limit #{0},#{1}
+      from task_execution_log e WHERE 1=1
+        <if test='param3!=null and param3!=""'>
+            and e.status = #{2}
+        </if>
+        <if test='param4!=null and param4!=""'>
+            and e.type = #{3}
+        </if>
+        <if test='param5!=null and param5!=""'  >
+            and e.startTime >= #{4}
+        </if>
+        <if test='param6!=null and param6!=""'>
+            and e.jobName = #{5}
+        </if>
+      limit #{0},#{1}
     </select>
 
     <select id="getAllLogCount" resultType="java.lang.Integer">

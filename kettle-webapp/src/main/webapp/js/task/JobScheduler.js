@@ -1,5 +1,4 @@
-function generateSchedulerMonitorPanel(typeId,hostName,jobName){
-    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+function generateSchedulerMonitorPanel(secondGuidePanel){
 
     var sm=new Ext.grid.CheckboxSelectionModel();
     //定时作业列模型
@@ -27,16 +26,49 @@ function generateSchedulerMonitorPanel(typeId,hostName,jobName){
 
     var store=new Ext.data.Store({
         proxy:proxy,
-        reader:reader
+        reader:reader,
+        listeners: {
+            "beforeload": function(store) {
+                var typeId="";
+                var hostName="";
+                var jobName="";
+                if(Ext.getCmp("typeChooseBySelect")!=undefined){
+                    typeId=Ext.getCmp("typeChooseBySelect").getValue();
+                }
+                if(Ext.getCmp("hostNameId")!=undefined){
+                    hostName=Ext.getCmp("hostNameId").getValue();
+                }
+                if(Ext.getCmp("inputJobName")!=undefined){
+                    jobName=Ext.getCmp("inputJobName").getValue();
+                }
+                store.baseParams = {
+                    typeId:typeId,
+                    hostName:hostName,
+                    jobName:jobName
+                }
+            }
+        }
     })
-    store.load({params:{start:0,limit:15,typeId:typeId,hostName:hostName,jobName:jobName}});
+    store.load({params:{start:0,limit:15}});
+    var inputTypeId="";
+    var inputHostName="";
+    var inputJobName="";
+    if(Ext.getCmp("typeChooseBySelect")!=undefined){
+        inputTypeId=Ext.getCmp("typeChooseBySelect").getValue();
+    }
+    if(Ext.getCmp("hostNameId")!=undefined){
+        inputHostName=Ext.getCmp("hostNameId").getValue();
+    }
+    if(Ext.getCmp("inputJobName")!=undefined){
+        inputJobName=Ext.getCmp("inputJobName").getValue();
+    }
 
-    var typeSelect=generateSchedulerTypeSelect(typeId);
-    var hostNameSelect=generateSlaveHostNameSelect(hostName);
+    var typeSelect=generateSchedulerTypeSelect(inputTypeId);
+    var hostNameSelect=generateSlaveHostNameSelect(inputHostName);
     var JobNameField=new Ext.form.TextField({
         id:"inputJobName",
         width: 150,
-        value:jobName
+        value:inputJobName
     })
 
     jobSchedulerGrid=new Ext.grid.GridPanel({
@@ -54,26 +86,12 @@ function generateSchedulerMonitorPanel(typeId,hostName,jobName){
                 {
                     text:"查询",
                     handler:function(){
-                        //执行类型被选中的Id    转换成对应的type数值
-                        var typeId=Ext.getCmp("typeChooseBySelect").getValue();
-                        //获取节点IP下拉列表被选中的值
-                        var hostName=Ext.getCmp("hostNameId").getValue();
-                        //获取作业名框输入的值
-                        var jobName=Ext.getCmp("inputJobName").getValue();
-
-                        var secondGuidePanel=Ext.getCmp("secondGuidePanel");
-                        secondGuidePanel.removeAll(true);
-                        secondGuidePanel.add(generateSchedulerMonitorPanel(typeId,hostName,jobName));
-                        secondGuidePanel.doLayout();
+                        generateSchedulerMonitorPanel(secondGuidePanel);
                     }
                 },'-',
                 {
                     text:"删除",
                     handler:function(){
-                        var typeId=Ext.getCmp("typeChooseBySelect").getValue();
-                        var hostName=Ext.getCmp("hostNameId").getValue();
-                        var jobName=Ext.getCmp("inputJobName").getValue();
-
                         var view=jobSchedulerGrid.getView();
                         //获得行选择模型
                         var rsm=jobSchedulerGrid.getSelectionModel();
@@ -90,9 +108,7 @@ function generateSchedulerMonitorPanel(typeId,hostName,jobName){
                                     Ext.Ajax.request({
                                         url:"/scheduler/deleteScheduler.do",
                                         success:function(response,config){
-                                            secondGuidePanel.removeAll(true);
-                                            secondGuidePanel.add(generateSchedulerMonitorPanel(typeId,hostName,jobName));
-                                            secondGuidePanel.doLayout();
+                                            generateSchedulerMonitorPanel(secondGuidePanel);
                                             Ext.MessageBox.alert("提示","移除定时作业成功~!");
                                         },
                                         failure:function(){
@@ -213,7 +229,9 @@ function generateSchedulerMonitorPanel(typeId,hostName,jobName){
         })
     })
     jobSchedulerGrid.getColumnModel().setHidden(2,true);
-    return jobSchedulerGrid;
+    secondGuidePanel.removeAll(true);
+    secondGuidePanel.add(jobSchedulerGrid);
+    secondGuidePanel.doLayout();
 }
 
 //生成定时类型的下拉列表
@@ -259,9 +277,7 @@ function generateSchedulerTypeSelect(typeId){
                 var jobName=Ext.getCmp("inputJobName").getValue();
 
                 var secondGuidePanel=Ext.getCmp("secondGuidePanel");
-                secondGuidePanel.removeAll(true);
-                secondGuidePanel.add(generateSchedulerMonitorPanel(typeId,hostName,jobName));
-                secondGuidePanel.doLayout();
+                generateSchedulerMonitorPanel(secondGuidePanel);
             }
         }
     })
@@ -308,17 +324,9 @@ function generateSlaveHostNameSelect(hostNameValue){
         listeners:{
             //index是被选中的下拉项在整个列表中的下标 从0开始
             'select':function(combo,record,index){
-                //获取当前执行类型被选中的Id    转换成对应的type数值
-                var typeId=Ext.getCmp("typeChooseBySelect").getValue();
-                //获取节点IP下拉列表被选中的值
-                var hostName=Ext.getCmp("hostNameId").getValue();
-                //获取作业名框输入的值
-                var jobName=Ext.getCmp("inputJobName").getValue();
-
                 var secondGuidePanel=Ext.getCmp("secondGuidePanel");
-                secondGuidePanel.removeAll(true);
-                secondGuidePanel.add(generateSchedulerMonitorPanel(typeId,hostName,jobName));
-                secondGuidePanel.doLayout();
+                generateSchedulerMonitorPanel(secondGuidePanel);
+
             }
         }
     })

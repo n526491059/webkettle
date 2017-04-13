@@ -1,6 +1,5 @@
 //转换
-function generateTrans(transName,createDate,inputName){
-    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+function generateTrans(secondGuidePanel){
     //为表格添加一行复选框用于选择需要操作 的记录
     var sm=new Ext.grid.CheckboxSelectionModel();
     //列模型
@@ -44,16 +43,34 @@ function generateTrans(transName,createDate,inputName){
 
     var store=new Ext.data.Store({
         proxy:proxy,
-        reader:reader
+        reader:reader,
+        listeners: {
+            "beforeload": function(store) {
+                var transName="";
+                var createDate="";
+                if(Ext.getCmp("transMonitorForm")!=undefined){
+                    transName=Ext.getCmp("transMonitorForm").getForm().findField("name").getValue();
+                    createDate=Ext.getCmp("transMonitorForm").getForm().findField("createDate").getValue();
+                }
+                store.baseParams = {
+                    name:transName,
+                    date:createDate
+                }
+            }
+        }
     })
-    store.load({params:{start:0,limit:15,name:transName,date:createDate}});
+    store.load({params:{start:0,limit:15}});
 
 
+    var inputTransName="";
+    if(Ext.getCmp("transMonitorForm")!=undefined){
+        inputTransName=Ext.getCmp("transMonitorForm").getForm().findField("name").getValue();
+    }
     var nameField=new Ext.form.TextField({
         name: "name",
         fieldLabel: "转换名",
         width:100,
-        value:inputName
+        value:inputTransName
     })
     var dateField=new Ext.form.DateField({
         name: "createDate",
@@ -64,6 +81,7 @@ function generateTrans(transName,createDate,inputName){
 
 
     f=new Ext.form.FormPanel({
+        id:"transMonitorForm",
         width:350,
         autoHeight:true,
         frame:true,
@@ -97,11 +115,7 @@ function generateTrans(transName,createDate,inputName){
                 {
                     text:"查询",
                     handler:function(){
-                        var transValue= f.getForm().findField("name").getValue();
-                        var createDate= f.getForm().findField("createDate").getRawValue();
-                        secondGuidePanel.removeAll(true);
-                        secondGuidePanel.add(generateTrans(transValue,createDate,transValue));
-                        secondGuidePanel.doLayout();
+                        generateTrans(secondGuidePanel);
                     }
                 },"-", {
                     text:"执行转换配置",
@@ -163,7 +177,9 @@ function generateTrans(transName,createDate,inputName){
     });
     grid.getColumnModel().setHidden(2,true);
     grid.getColumnModel().setHidden(9,true);
-    return grid;
+    secondGuidePanel.removeAll(true);
+    secondGuidePanel.add(grid);
+    secondGuidePanel.doLayout();
 }
 
 function transPowerExecute(){
@@ -275,9 +291,7 @@ function deleteTransByTransPath(){
             Ext.Ajax.request({
                 url:"/task/delete.do",
                 success:function(response,config){
-                    secondGuidePanel.removeAll(true);
-                    secondGuidePanel.add(generateTrans("","",undefined));
-                    secondGuidePanel.doLayout();
+                    generateTrans(secondGuidePanel);
                     Ext.MessageBox.alert("提示","删除转换成功~!");
                 },
                 failure:function(){
@@ -447,9 +461,7 @@ function assignedGroupTask(transId,transPath,transName,taskGroupPanelByAssigned,
                     var secondGuidePanel=Ext.getCmp("secondGuidePanel");
                     if(flag!="create"){
                         Ext.getCmp("assignedWindow").close();
-                        secondGuidePanel.removeAll(true);
-                        secondGuidePanel.add(generateTrans("","",undefined));
-                        secondGuidePanel.doLayout();
+                        generateTrans(secondGuidePanel);
                     }else{
                         Ext.getCmp("assignedWindowByCreate").close();
                         Ext.getCmp("bodyPanelForTrans").enable();

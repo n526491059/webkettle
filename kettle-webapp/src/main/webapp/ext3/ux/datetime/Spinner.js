@@ -441,3 +441,4 @@ Ext.Spinner = Ext.extend(Ext.util.Observable, {
 
 //backwards compat
 Ext.form.Spinner = Ext.Spinner;
+

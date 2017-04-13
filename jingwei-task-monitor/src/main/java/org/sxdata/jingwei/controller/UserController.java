@@ -143,4 +143,17 @@ public class UserController {
             e.printStackTrace();
         }
     }
+
+    //获取当前登录的用户
+    //登陆
+    @RequestMapping(value="/loginOut")
+    @ResponseBody
+    protected void loginOut(HttpServletResponse response,HttpServletRequest request){
+        try{
+           request.getSession().invalidate();
+            response.sendRedirect(request.getContextPath()+"/login.jsp");
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 }

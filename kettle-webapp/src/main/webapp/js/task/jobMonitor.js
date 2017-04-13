@@ -1,6 +1,5 @@
 //作业面板
-function generateJobPanel(jobName,createDate,inputName){
-    var secondGuidePanel=Ext.getCmp("secondGuidePanel");//二级菜单
+function generateJobPanel(secondGuidePanel){
 
     //为表格添加一行复选框用于选择行
     var sm=new Ext.grid.CheckboxSelectionModel();
@@ -46,15 +45,33 @@ function generateJobPanel(jobName,createDate,inputName){
 
     var store=new Ext.data.Store({
         proxy:proxy,
-        reader:reader
+        reader:reader,
+        listeners: {
+            "beforeload": function(store) {
+                var jobName="";
+                var createDate="";
+                if(Ext.getCmp("jobMonitorForm")!=undefined){
+                    jobName=Ext.getCmp("jobMonitorForm").getForm().findField("name").getValue();
+                    createDate=Ext.getCmp("jobMonitorForm").getForm().findField("createDate").getValue();
+                }
+                store.baseParams = {
+                    name:jobName,
+                    date:createDate
+                }
+            }
+        }
     })
-    store.load({params:{start:0,limit:15,name:jobName,date:createDate}});
+    store.load({params:{start:0,limit:15}});
 
+    var inputJobName="";
+    if(Ext.getCmp("jobMonitorForm")!=undefined){
+        inputJobName=Ext.getCmp("jobMonitorForm").getForm().findField("name").getValue();
+    }
     var nameField=new Ext.form.TextField({
         name: "name",
         fieldLabel: "作业名",
         width:100,
-        value:inputName
+        value:inputJobName
     })
 
     var dateField=new Ext.form.DateField({
@@ -65,6 +82,7 @@ function generateJobPanel(jobName,createDate,inputName){
     })
 
     f=new Ext.form.FormPanel({
+        id:"jobMonitorForm",
         width:350,
         autoHeight:true,
         frame:true,
@@ -97,11 +115,12 @@ function generateJobPanel(jobName,createDate,inputName){
                 {
                     text:"查询",
                     handler:function(){
-                        var transValue= f.getForm().findField("name").getValue();
+                        /*var transValue= f.getForm().findField("name").getValue();
                         var createDate= f.getForm().findField("createDate").getRawValue();
                         secondGuidePanel.removeAll(true);
                         secondGuidePanel.add(generateJobPanel(transValue,createDate,transValue));
-                        secondGuidePanel.doLayout();
+                        secondGuidePanel.doLayout();*/
+                        generateJobPanel(secondGuidePanel);
                     }
                 },"-",{
                     text:"执行作业配置",
@@ -184,7 +203,9 @@ function generateJobPanel(jobName,createDate,inputName){
     });
     grid.getColumnModel().setHidden(2,true);
     grid.getColumnModel().setHidden(9,true);
-    return grid;
+    secondGuidePanel.removeAll(true);
+    secondGuidePanel.add(grid);
+    secondGuidePanel.doLayout();
 }
 
 function jobPowerExecute(){
@@ -296,9 +317,7 @@ function deleteJobByJobPath(){
             Ext.Ajax.request({
                 url:"/task/delete.do",
                 success:function(response,config){
-                    secondGuidePanel.removeAll(true);
-                    secondGuidePanel.add(generateJobPanel("","",undefined));
-                    secondGuidePanel.doLayout();
+                    generateJobPanel(secondGuidePanel);
                     Ext.MessageBox.alert("提示","删除作业成功~!");
                 },
                 failure:function(){
@@ -493,9 +512,7 @@ function assignedTaskGroup(jobId,jobName,jobPath,taskGroupPanelByAssigned,flag){
                     var secondGuidePanel=Ext.getCmp("secondGuidePanel");
                     if(flag!="create"){
                         Ext.getCmp("taskGroupAssignedWindow").close();
-                        secondGuidePanel.removeAll(true);
-                        secondGuidePanel.add(generateJobPanel("","",undefined));
-                        secondGuidePanel.doLayout();
+                        generateJobPanel(secondGuidePanel);
                     }else{
                         Ext.getCmp("assignedWindowByCreate").close();
                         Ext.getCmp("jobBodyPanel").enable();
