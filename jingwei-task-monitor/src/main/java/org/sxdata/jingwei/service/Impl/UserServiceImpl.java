@@ -72,7 +72,8 @@ public class UserServiceImpl implements UserService{
                 result="密码输入错误,请再次确认";
             }else{
                 if(null==request.getSession().getAttribute("login")){
-                    request.getSession().setAttribute("login",user);
+                    users.get(0).setPassword(KettleEncr.decryptPasswd(users.get(0).getPassword()));
+                    request.getSession().setAttribute("login", user);
                     request.getSession().setAttribute("username",user.getLogin());
                 }
             }

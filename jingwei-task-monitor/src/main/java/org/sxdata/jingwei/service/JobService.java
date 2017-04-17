@@ -22,7 +22,7 @@ public interface JobService {
 
     public boolean judgeJobIsAlike(JobTimeSchedulerEntity willAddJobTimer);
 
-    public void timeExecuteJob(String graphXml,String executionConfiguration) throws Exception;
+    public void addTimeExecuteJob(String graphXml,String executionConfiguration) throws Exception;
 
     public boolean beforeTimeExecuteJob(Map<String, Object> params) throws Exception;
 

@@ -39,7 +39,7 @@ public class HistoryLogServiceImpl implements HistoryLogService{
         }
 
         PageforBean json=new PageforBean();
-        json.setTotalProperty(executionTraceDao.getAllLogCount());
+        json.setTotalProperty(executionTraceDao.getAllLogCount(statu,type,startDate,taskName));
         json.setRoot(traces);
 
         return JSONObject.fromObject(json, StringDateUtil.configJson("yyyy-MM-dd HH:mm:ss")).toString();

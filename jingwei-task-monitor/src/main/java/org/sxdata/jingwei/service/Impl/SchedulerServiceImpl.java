@@ -206,7 +206,7 @@ public class SchedulerServiceImpl implements SchedulerService {
         PageforBean bean=new PageforBean();
         //查询总条数
         bean.setRoot(jobs);
-        bean.setTotalProperty(schedulerDao.getTotalCount());
+        bean.setTotalProperty(schedulerDao.getTotalCount(typeId,hostName,jobName));
         return bean;
     }
 

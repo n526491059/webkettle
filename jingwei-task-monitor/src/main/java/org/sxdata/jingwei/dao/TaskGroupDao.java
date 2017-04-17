@@ -13,7 +13,6 @@ import java.util.List;
  */
 @Repository
 public interface TaskGroupDao {
-    //TODO 获取当前用户下所有的任务组信息 分页形式获取 暂无用户模块
     public List<TaskGroupEntity> getAllTaskGroup(int start,int limit);
 
     public Integer getTotalCountTaskGroup();
@@ -45,5 +44,8 @@ public interface TaskGroupDao {
     public List<TaskGroupAttributeEntity> getTaskGroupByTaskName(String taskName,String type);
 
     public TaskGroupEntity getTaskGroupById(Integer id);
+
+    //修改用户组-任务组关系表中的任务组名
+    public void updateTaskGroupForTaskRelation(String oldName,String newName);
 
 }

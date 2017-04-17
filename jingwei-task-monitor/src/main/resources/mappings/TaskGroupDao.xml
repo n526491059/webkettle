@@ -9,6 +9,7 @@
         from d_task_group d limit #{0},#{1}
     </select>
 
+
     <!--获取该用户下所有的任务组 不分页形式获取-->
     <select id="getAllTaskGroupNoLimit" resultType="org.sxdata.jingwei.entity.TaskGroupEntity">
         select
@@ -128,4 +129,13 @@
       select  d.TASK_GROUP_NAME as taskGroupName from d_task_group_member_attribute d
       where d.TASK_NAME=#{0} and d.TYPE=#{1}
     </select>
+
+    <!--修改用户组-任务组关系表中的任务组名   不会单独调用,多用于与修改任务组的语句一起调用 -->
+    <update id="updateTaskGroupForTaskRelation">
+        UPDATE d_user_group_tasks_relation
+        <trim prefix="set" suffixOverrides=",">
+            TASK_GROUP_NAME=#{1}
+        </trim>
+        WHERE TASK_GROUP_NAME=#{0}
+    </update>
 </mapper>

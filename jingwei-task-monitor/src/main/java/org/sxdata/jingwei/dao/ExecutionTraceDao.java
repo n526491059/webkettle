@@ -14,7 +14,7 @@ public interface ExecutionTraceDao {
 
     public List<ExecutionTraceEntity> getAllLogByPage(int start,int limit,String statu,String type,String startDate,String taskName);
 
-    public Integer getAllLogCount();
+    public Integer getAllLogCount(String statu,String type,String startDate,String taskName);
 
     public ExecutionTraceEntity getTraceById(Integer id);
 }

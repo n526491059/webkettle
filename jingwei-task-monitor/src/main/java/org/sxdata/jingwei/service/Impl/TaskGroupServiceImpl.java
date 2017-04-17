@@ -99,7 +99,11 @@ public class TaskGroupServiceImpl implements TaskGroupService{
     public void updateTaskGroup(TaskGroupEntity taskGroup){
         TaskGroupEntity item=taskGroupDao.getTaskGroupById(taskGroup.getTaskGroupId());
         taskGroupDao.updateTaskGroup(taskGroup);
-        taskGroupDao.updateTaskGroupAttributes(item.getTaskGroupName(),taskGroup.getTaskGroupName());
+        if(!taskGroup.getTaskGroupName().equals(item.getTaskGroupName())){
+            taskGroupDao.updateTaskGroupAttributes(item.getTaskGroupName(),taskGroup.getTaskGroupName());
+            taskGroupDao.updateTaskGroupForTaskRelation(item.getTaskGroupName(),taskGroup.getTaskGroupName());
+        }
+
     }
 
     @Override
@@ -143,5 +147,11 @@ public class TaskGroupServiceImpl implements TaskGroupService{
                 this.addTaskGroupAttribute(item);
             }
         }
+    }
+
+    @Override
+    public String getAllTaskGroupNoPage() {
+        String result=JSONArray.fromObject(taskGroupDao.getAllTaskGroupNoLimit()).toString();
+        return result;
     }
 }
