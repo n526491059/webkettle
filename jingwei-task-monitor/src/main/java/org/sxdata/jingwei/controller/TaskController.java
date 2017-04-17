@@ -363,7 +363,7 @@ public class TaskController {
     @RequestMapping(value="/fiexdExecute")
     protected void fiexdExecute(HttpServletResponse response,HttpServletRequest request,@RequestParam String graphXml, @RequestParam String executionConfiguration) throws Exception{
         try{
-            jobService.timeExecuteJob(graphXml,executionConfiguration);
+            jobService.addTimeExecuteJob(graphXml,executionConfiguration);
         }catch(Exception e){
             e.printStackTrace();
         }

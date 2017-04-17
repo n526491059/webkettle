@@ -22,7 +22,7 @@ Ext.onReady(function() {
 //		});
 
 		var username=document.getElementById("loginUsername").value;
-		var loginInfo="<div style='margin-left: 1100px;margin-top: 10px'>欢迎您：<h3 style='display: inline-block;'>"
+		var loginInfo="<div style='margin-left: 85%;margin-top: 1%'>欢迎您：<h3 style='display: inline-block;'>"
 			+username+"</h3>&nbsp;&nbsp;<input type='button' value='登 出' onclick='loginOut();'></div>";
 		var navigationPanel = new Ext.Panel({
 			id: 'navigationPanel',

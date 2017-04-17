@@ -89,6 +89,7 @@
     		<tx:method name="update*" propagation="REQUIRED" isolation="DEFAULT"/>
     		<tx:method name="delete*" propagation="REQUIRED" isolation="DEFAULT"/>
     		<tx:method name="remove*" propagation="REQUIRED" isolation="DEFAULT"/>
+			<tx:method name="assigned*" propagation="REQUIRED" isolation="DEFAULT"/>
     	</tx:attributes>
     </tx:advice>
     
@@ -96,7 +97,7 @@
     	<aop:pointcut expression="(execution(* org.flhy..ServiceImpl*.*(..))) or (execution(* org.sxdata.jingwei.service.Impl..*(..)))" id="pc"/>
     	<aop:advisor advice-ref="tx" pointcut-ref="pc"/>
     </aop:config>
-	<!-- 结束事务配置 -->
+	<!-- 结束事务配置-->
 
 
 <!--     <mvc:interceptors> -->

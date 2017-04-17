@@ -29,4 +29,6 @@ public interface TaskGroupService {
     public List<TaskGroupEntity> isContainsTask(String taskName,String type);
 
     public void assignedTaskGroup(List<TaskGroupAttributeEntity> items,String taskName,String type);
+
+    public String getAllTaskGroupNoPage();
 }

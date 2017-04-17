@@ -374,15 +374,13 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				secondGuidePanel.add(slaveManager());
 				secondGuidePanel.doLayout();
 			}else if(node.text=="<font size = '2px'>节点监控</font>"){
-				secondGuidePanel.removeAll(true);
 				showSlaveMonitorPanel(secondGuidePanel);
 			}else if(node.text=="<font size = '2px'>任务组管理</font>"){
-				secondGuidePanel.removeAll(true);
 				showTaskGroupPanel(secondGuidePanel);
 			}else if(node.text=="<font size = '2px'>用户管理</font>"){
 				showUserPanel(secondGuidePanel);
 			}else if(node.text=="<font size = '2px'>用户组管理</font>"){
-
+				generateUserGroupPanel(secondGuidePanel);
 			}else if(node.text=="<font size = '2px'>任务历史日志</font>"){
 				showHistoryLogPanel(secondGuidePanel);
 			}

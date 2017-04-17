@@ -373,7 +373,7 @@ public class JobServiceImpl implements JobService{
 
     @Override
     //定时作业
-        public void timeExecuteJob(String graphXml,String executionConfiguration) throws Exception {
+        public void addTimeExecuteJob(String graphXml,String executionConfiguration) throws Exception {
         // JobMeta jobMeta = RepositoryUtils.loadJobbyPath(taskName);
         GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
 

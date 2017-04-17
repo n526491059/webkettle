@@ -221,7 +221,7 @@ function beforeUpdateTaskGroup(taskGroupPanel){
 //修改功能  展示修改界面的表单弹窗
 function showUpdateWindow(taskGroupPanel,taskGroupId,taskGroupName,taskGroupDesc){
     //任务组名输入框
-    var taskGroupName=new Ext.form.TextField({
+    var taskGroupNameField=new Ext.form.TextField({
         id:"taskGroupNameInput",
         name: "taskGroupNameInput",
         fieldLabel: "任务组名",
@@ -229,7 +229,7 @@ function showUpdateWindow(taskGroupPanel,taskGroupId,taskGroupName,taskGroupDesc
         value:taskGroupName
     });
     //任务组描述输入框
-    var taskGroupDesc=new Ext.form.TextArea({
+    var taskGroupDescField=new Ext.form.TextArea({
         id:"taskGroupDescInput",
         name: "taskGroupDescInput",
         fieldLabel: "任务组描述",
@@ -249,7 +249,7 @@ function showUpdateWindow(taskGroupPanel,taskGroupId,taskGroupName,taskGroupDesc
         items:[
             {
                 layout:"form",  //从上往下布局
-                items:[taskGroupName,taskGroupDesc]
+                items:[taskGroupNameField,taskGroupDescField]
             }
         ]
     });
@@ -267,8 +267,8 @@ function showUpdateWindow(taskGroupPanel,taskGroupId,taskGroupName,taskGroupDesc
             {
                 text:"修改",
                 handler:function(){
-                    var inputGroupName=taskGroupName.getValue();
-                    var inputGroupDesc=taskGroupDesc.getValue();
+                    var inputGroupName=taskGroupNameField.getValue();
+                    var inputGroupDesc=taskGroupDescField.getValue();
                     if(inputGroupName==undefined || inputGroupName==""){
                         Ext.MessageBox.alert("任务组名不能为空!");
                         return;
@@ -276,7 +276,7 @@ function showUpdateWindow(taskGroupPanel,taskGroupId,taskGroupName,taskGroupDesc
                         Ext.Ajax.request({
                             url:"/taskGroup/decideGroupNameExist.do",
                             success:function(response,config){
-                                if(response.responseText=="Y"){
+                                if(response.responseText=="Y" && inputGroupName!=taskGroupName){
                                     Ext.MessageBox.alert("该任务组名已存在!");
                                     return;
                                 }else{
