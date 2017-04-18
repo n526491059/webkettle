@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.sxdata.jingwei.entity.UserGroupEntity;
 import org.sxdata.jingwei.service.TaskGroupService;
 import org.sxdata.jingwei.service.UserGroupService;
 
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Created by cRAZY on 2017/4/13.
@@ -24,6 +26,8 @@ public class UserGroupController {
     UserGroupService userGroupService;
     @Autowired
     TaskGroupService taskGroupService;
+
+
 
     //添加用户组前  判断用户组名是否已存在
     @RequestMapping(value="/decideGroupNameExist")
@@ -175,7 +179,7 @@ public class UserGroupController {
         String[] taskGroupNameArray=userGroupService.beforeAssignedTaskGroup(userGroupName);
         JSONObject json=new JSONObject();
         json.put("slaveIdArray",slaveIdArray);
-        json.put("taskGroupNameArray",taskGroupNameArray);
+        json.put("taskGroupNameArray", taskGroupNameArray);
         try{
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
@@ -183,6 +187,36 @@ public class UserGroupController {
             out.flush();
             out.close();
         }catch (IOException e){
+
+        }
+    }
+
+    //生成用户组选择下拉框
+    @RequestMapping(value="/getUserGroupSelect")
+    @ResponseBody
+    protected void getSlaveSelect(HttpServletResponse response,HttpServletRequest request){
+        try{
+            StringBuffer sbf=new StringBuffer("[");
+            List<UserGroupEntity> items=userGroupService.getAllUserGroup();
+            for(int i=0;i<items.size();i++){
+                String thisJson="";
+                String userGroup="\""+items.get(i).getUserGroupName()+"\"";
+                String userGroupId="\""+"userGroupId"+"\"";
+                String userGroupName="\""+"userGroupName"+"\"";
+                if(i!=items.size()-1){
+                    thisJson="{"+userGroupId+":"+userGroup+","+userGroupName+":"+userGroup+"},";
+                }else{
+                    thisJson="{"+userGroupId+":"+userGroup+","+userGroupName+":"+userGroup+"}";
+                }
+                sbf.append(thisJson);
+            }
+            sbf.append("]");
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write(sbf.toString());
+            out.flush();
+            out.close();
+        }catch(Exception e){
 
         }
     }

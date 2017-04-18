@@ -16,9 +16,14 @@
 		    <div class="loading-indicator">
 		        <img src="ui/resources/extanim32.gif" width="32" height="32" style="margin-right:8px;" align="absmiddle" />
 				系统加载中，请稍后...
-				<input type="hidden" id="loginUsername"  value="${sessionScope.username}"/>
 		    </div>
 		</div>
+
+		<input type="hidden" id="loginUsername"  value="${sessionScope.login.login}"/>
+		<input type="hidden" id="userTypeHidden" value="${sessionScope.userInfo.userType}" />
+		<input type="hidden" id="slavePowerHidden" value="${sessionScope.userInfo.slavePremissonType}" />
+		<input type="hidden" id="taskGroupPowerHidden" value="${sessionScope.userInfo.taskPremissionType}" />
+		<input type="hidden" id="belongToUserGroup" value="${sessionScope.userInfo.userGroupName}" />
 		
 		<!-- javascript脚本编辑器框架加载 -->
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/CodeMirror/codemirror.css" />

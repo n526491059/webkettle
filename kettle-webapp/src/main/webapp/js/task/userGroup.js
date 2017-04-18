@@ -593,7 +593,11 @@ function chooseVisualSlave(taskGroupNameArray,userGroupName,userGroupDesc,slaveI
 
 //获取所有的任务组  默认选中参数数组中的任务组名
 function getAllTaskGroupPanel(taskGroupNameArray,title){
-    var sm2=new Ext.grid.CheckboxSelectionModel();
+
+    var sm2=undefined;
+    if(title==""){
+        sm2=new Ext.grid.CheckboxSelectionModel();
+    }
     //节点列模型
     var allTaskPanelModel=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
@@ -660,7 +664,10 @@ function getAllTaskGroupPanel(taskGroupNameArray,title){
 
 //获取所有的节点   默认选中参数数组中节点id
 function getAllSlavePanel(slaveIdArray,title){
-    var sm2=new Ext.grid.CheckboxSelectionModel();
+    var sm2=undefined;
+    if(title==""){
+        sm2=new Ext.grid.CheckboxSelectionModel();
+    }
     //节点列模型
     var slaveModel=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号

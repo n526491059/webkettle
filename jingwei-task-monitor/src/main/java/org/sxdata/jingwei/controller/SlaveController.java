@@ -62,7 +62,6 @@ public class SlaveController {
                 sbf.append(thisSlaveJson);
             }
             sbf.append("]");
-            System.out.println(sbf.toString());
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
             out.write(sbf.toString());

@@ -5,16 +5,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 
 /**
  * Created by cRAZY on 2017/4/12.
  */
 public class LoginFilter implements Filter{
-    private String errorUrl="";
+    private String loginUrl="";
     private String[] excludedArray=null;
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        errorUrl=filterConfig.getInitParameter("error_url");
+        loginUrl=filterConfig.getInitParameter("login_url");
         String excludedPages=filterConfig.getInitParameter("excludedPages");
         if(excludedPages.indexOf(",")!=-1){
             excludedArray=excludedPages.split(",");
@@ -41,11 +43,18 @@ public class LoginFilter implements Filter{
                 chain.doFilter(arg0, arg1);
                 return;
             }else {
-                response.sendRedirect(request.getContextPath()+errorUrl);
-                return;
+                PrintWriter out=response.getWriter();
+                //如果是异步请求
+                if (request.getHeader("x-requested-with") != null && request.getHeader("x-requested-with").equals("XMLHttpRequest")) {
+                    response.addHeader("sessionstatus", "timeout");
+                    chain.doFilter(request, response);
+                }else {
+                    response.sendRedirect(request.getContextPath()+loginUrl);
+                    return;
+                }
             }
         }else{
-            chain.doFilter(arg0,arg1);
+            chain.doFilter(arg0, arg1);
             return;
         }
     }
