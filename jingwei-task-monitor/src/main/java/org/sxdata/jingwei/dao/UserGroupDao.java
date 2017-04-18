@@ -22,10 +22,13 @@ public interface UserGroupDao {
     //根据用户组名查询当前用户组下的所有用户
     public List<UserGroupAttributeEntity> getUsersByUserGroupName(String name);
 
+    //根据用名查询当前用户的权限相关信息
+    public UserGroupAttributeEntity getInfoByUserName(String name);
+
     //根据用户组名获取当前用户可见的任务组
     public List<TaskUserRelationEntity> getTaskGroupsByUserGroupName(String name);
 
-    //根据用户组id获取当前用户可见的节点
+    //根据用户组名获取当前用户可见的节点
     public List<SlaveUserRelationEntity> getSlavesByUserGroupName(String name);
 
     //添加用户组
@@ -61,4 +64,6 @@ public interface UserGroupDao {
     //修改用户组在其它关系表中的用户组名
     public void updateUserGroupNameForRelation(String tableName,String oldName,String newName);
 
+    //根据用户名修改用户组与用户的关联表
+    public void updateUserGroupAttrByName(UserGroupAttributeEntity attr);
 }

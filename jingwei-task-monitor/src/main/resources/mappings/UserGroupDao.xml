@@ -32,16 +32,30 @@
         </if>
     </select>
 
-    <!-- 根据用户组id查询当前用户组下的所有用户 -->
+    <!-- 根据用户组查询当前用户组下的所有用户 -->
     <select id="getUsersByUserGroupName" resultType="org.sxdata.jingwei.entity.UserGroupAttributeEntity">
         select
             a.ID_USERGROUP_MEMBER_ATTRIBUTE as groupAttributeId,
             a.USER_GROUP_NAME as userGroupName,
             a.USER_NAME as userName,
             a.SLAVE_PERMISSION_TYPE as slavePremissonType,
-            a.TASK_PERMISSION_TYPE as taskPremissionType
+            a.TASK_PERMISSION_TYPE as taskPremissionType,
+            a.USER_TYPE as userType
             from d_user_group_member_attribute a
         where a.USER_GROUP_NAME = #{name}
+    </select>
+
+    <!-- 根据用户名查询当前用户的权限相关信息 -->
+    <select id="getInfoByUserName" resultType="org.sxdata.jingwei.entity.UserGroupAttributeEntity">
+        select
+        a.ID_USERGROUP_MEMBER_ATTRIBUTE as groupAttributeId,
+        a.USER_GROUP_NAME as userGroupName,
+        a.USER_NAME as userName,
+        a.SLAVE_PERMISSION_TYPE as slavePremissonType,
+        a.TASK_PERMISSION_TYPE as taskPremissionType,
+        a.USER_TYPE as userType
+        from d_user_group_member_attribute a
+        where a.USER_NAME = #{name}
     </select>
 
     <!-- 根据用户组id获取当前用户可见的任务组 -->
@@ -73,8 +87,8 @@
 
     <!-- 添加用户组成员表(即添加该用户组下有哪些用户) -->
     <insert id="addUserGroupAttribute" parameterType="org.sxdata.jingwei.entity.UserGroupAttributeEntity">
-        insert into d_user_group_member_attribute(USER_GROUP_NAME,USER_NAME,SLAVE_PERMISSION_TYPE,TASK_PERMISSION_TYPE)
-         values(#{userGroupName},#{userName},#{slavePremissonType},#{taskPremissionType})
+        insert into d_user_group_member_attribute(USER_GROUP_NAME,USER_NAME,SLAVE_PERMISSION_TYPE,TASK_PERMISSION_TYPE,USER_TYPE)
+         values(#{userGroupName},#{userName},#{slavePremissonType},#{taskPremissionType},#{userType})
     </insert>
 
     <!-- 添加用户组可见的节点记录 -->
@@ -150,5 +164,23 @@
         WHERE USER_GROUP_NAME=#{1}
     </update>
 
-
+    <!--修改用户组-->
+    <update id="updateUserGroupAttrByName" parameterType="org.sxdata.jingwei.entity.UserGroupAttributeEntity">
+        UPDATE d_user_group_member_attribute
+        <trim prefix="set" suffixOverrides=",">
+            <if test='slavePremissonType!=null'  >
+                SLAVE_PERMISSION_TYPE=#{slavePremissonType},
+            </if>
+            <if test='taskPremissionType!=null'  >
+                TASK_PERMISSION_TYPE=#{taskPremissionType},
+            </if>
+            <if test='userType!=null'  >
+                USER_TYPE=#{userType},
+            </if>
+            <if test='userGroupName!=null and userGroupName!=""'  >
+                USER_GROUP_NAME=#{userGroupName}
+            </if>
+        </trim>
+        WHERE USER_NAME=#{userName}
+    </update>
 </mapper>

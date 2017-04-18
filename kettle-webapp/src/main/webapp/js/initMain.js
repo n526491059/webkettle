@@ -1,5 +1,17 @@
 var activeGraph = null;
 
+// ajax回调函数处理session过期
+Ext.Ajax.on('requestcomplete',checkUserSessionStatus, this);
+function checkUserSessionStatus(conn,response,options){
+	var status = response.getResponseHeader("sessionstatus");
+	//Ext重新封装了response对象
+	if(status=="timeout"){
+		Ext.MessageBox.alert("超时","会话已经失效,请重新登录");
+		window.location.href="/login.jsp";
+	}
+}
+
+
 //退出登录
 function loginOut(){
 	window.location.href = 'user/loginOut.do';
@@ -22,7 +34,7 @@ Ext.onReady(function() {
 //		});
 
 		var username=document.getElementById("loginUsername").value;
-		var loginInfo="<div style='margin-left: 85%;margin-top: 1%'>欢迎您：<h3 style='display: inline-block;'>"
+		var loginInfo="<div style='margin-left: 80%;margin-top: 1%'>欢迎您：<h3 style='display: inline-block;'>"
 			+username+"</h3>&nbsp;&nbsp;<input type='button' value='登 出' onclick='loginOut();'></div>";
 		var navigationPanel = new Ext.Panel({
 			id: 'navigationPanel',

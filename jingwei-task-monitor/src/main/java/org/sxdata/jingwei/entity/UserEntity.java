@@ -10,6 +10,42 @@ public class UserEntity {
     private String name;
     private String description;
     private char enabled;
+    private Integer slavePower;
+    private Integer taskGroupPower;
+    private String belongToUserGroup;
+    private Integer userType;
+
+    public Integer getUserType() {
+        return userType;
+    }
+
+    public void setUserType(Integer userType) {
+        this.userType = userType;
+    }
+
+    public Integer getSlavePower() {
+        return slavePower;
+    }
+
+    public void setSlavePower(Integer slavePower) {
+        this.slavePower = slavePower;
+    }
+
+    public Integer getTaskGroupPower() {
+        return taskGroupPower;
+    }
+
+    public void setTaskGroupPower(Integer taskGroupPower) {
+        this.taskGroupPower = taskGroupPower;
+    }
+
+    public String getBelongToUserGroup() {
+        return belongToUserGroup;
+    }
+
+    public void setBelongToUserGroup(String belongToUserGroup) {
+        this.belongToUserGroup = belongToUserGroup;
+    }
 
     public Integer getUserId() {
         return userId;

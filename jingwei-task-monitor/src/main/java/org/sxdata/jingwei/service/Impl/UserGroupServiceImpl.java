@@ -172,4 +172,9 @@ public class UserGroupServiceImpl implements UserGroupService{
         userGroupDao.deleteUserAttributeByGroupName(userGroupName);
         userGroupDao.deleteUserGroupByName(userGroupName);
     }
+
+    @Override
+    public  List<UserGroupEntity> getAllUserGroup() {
+       return userGroupDao.allUserGroup();
+    }
 }
