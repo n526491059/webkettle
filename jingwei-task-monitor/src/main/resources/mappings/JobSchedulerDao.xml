@@ -15,7 +15,8 @@
             d.MINUTES as minutes,
             d.WEEKDAY as weekday,
             d.DAYOFMONTH as dayofmonth,
-            d.executionConfig as executionConfig
+            d.executionConfig as executionConfig,
+            d.username as username
           from d_timerscheduler d
     </select>
 
@@ -33,8 +34,20 @@
         d.MINUTES as minutes,
         d.WEEKDAY as weekday,
         d.DAYOFMONTH as dayofmonth,
-        d.executionConfig as executionConfig
+        d.executionConfig as executionConfig,
+        d.username as username
         from d_timerscheduler d where 1=1
+        <if test='param6!=null and param6!=""'  >
+            and  d.JOB_NAME IN
+            (
+              select  d.TASK_NAME from d_task_group_member_attribute d
+              WHERE d.TASK_GROUP_NAME IN
+              (
+                select TASK_GROUP_NAME from d_user_group_tasks_relation
+                WHERE USER_GROUP_NAME=#{5}
+              ) and type="job"
+            )
+        </if>
         <if test='param3!=null and param3!=""'  >
             and  d.SCHEDULERTYPE = #{2}
         </if>
@@ -50,9 +63,9 @@
     <!--添加新的定时作业-->
     <insert id="addTimerJob" parameterType="org.sxdata.jingwei.entity.JobTimeSchedulerEntity">
 		insert into d_timerscheduler values(#{idJobtask},#{idJob},
-		#{slaves},#{jobName},#{isrepeat},#{schedulertype},
-		#{intervalminutes},#{hour},
-		#{minutes},#{weekday},#{dayofmonth},#{executionConfig}
+		  #{slaves},#{jobName},#{isrepeat},#{schedulertype},
+		  #{intervalminutes},#{hour},
+		  #{minutes},#{weekday},#{dayofmonth},#{executionConfig},#{username}
 		)
     </insert>
 
@@ -64,6 +77,17 @@
 
     <select id="getTotalCount" resultType="java.lang.Integer">
          select count(1) from d_timerscheduler d WHERE 1=1
+        <if test='param4!=null and param4!=""'  >
+            and  d.JOB_NAME IN
+            (
+                select  d.TASK_NAME from d_task_group_member_attribute d
+                WHERE d.TASK_GROUP_NAME IN
+                (
+                    select TASK_GROUP_NAME from d_user_group_tasks_relation
+                    WHERE USER_GROUP_NAME=#{3}
+                ) and type="job"
+            )
+        </if>
         <if test='param1!=null and param1!=""'  >
             and  d.SCHEDULERTYPE = #{0}
         </if>
@@ -88,7 +112,8 @@
         d.MINUTES as minutes,
         d.WEEKDAY as weekday,
         d.DAYOFMONTH as dayofmonth,
-        d.executionConfig as executionConfig
+        d.executionConfig as executionConfig,
+        d.username as username
         from d_timerscheduler d where d.ID_JOBTASK=#{taskId}
     </select>
 
@@ -97,7 +122,6 @@
         <trim prefix="set" suffixOverrides=",">
             INTERVALMINUTES=#{intervalminutes},
             SCHEDULERTYPE=#{schedulertype},
-            SLAVES=#{slaves},
             d_timerscheduler.`HOUR`=#{hour},
             MINUTES=#{minutes},
             WEEKDAY=#{weekday},
@@ -124,7 +148,8 @@
         d.MINUTES as minutes,
         d.WEEKDAY as weekday,
         d.DAYOFMONTH as dayofmonth,
-        d.executionConfig as executionConfig
+        d.executionConfig as executionConfig,
+        d.username as username
         from d_timerscheduler d where d.JOB_NAME=#{0}
     </select>
 </mapper>

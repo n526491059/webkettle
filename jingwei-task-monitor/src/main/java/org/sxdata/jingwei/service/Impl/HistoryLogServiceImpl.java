@@ -28,8 +28,8 @@ public class HistoryLogServiceImpl implements HistoryLogService{
     private TaskGroupDao groupDao;
 
     @Override
-    public String getAllHistoryLog(int start, int limit,String statu,String type,String startDate,String taskName) {
-        List<ExecutionTraceEntity> traces=executionTraceDao.getAllLogByPage(start,limit,statu,type,startDate,taskName);
+    public String getAllHistoryLog(int start, int limit,String statu,String type,String startDate,String taskName,String userGroupName) {
+        List<ExecutionTraceEntity> traces=executionTraceDao.getAllLogByPage(start,limit,statu,type,startDate,taskName,userGroupName);
         for(ExecutionTraceEntity trace:traces){
             if(trace.getStatus().equals("成功")){
                 trace.setStatus("<font color='green'>"+trace.getStatus()+"</font>");
@@ -39,7 +39,7 @@ public class HistoryLogServiceImpl implements HistoryLogService{
         }
 
         PageforBean json=new PageforBean();
-        json.setTotalProperty(executionTraceDao.getAllLogCount(statu,type,startDate,taskName));
+        json.setTotalProperty(executionTraceDao.getAllLogCount(statu,type,startDate,taskName,userGroupName));
         json.setRoot(traces);
 
         return JSONObject.fromObject(json, StringDateUtil.configJson("yyyy-MM-dd HH:mm:ss")).toString();

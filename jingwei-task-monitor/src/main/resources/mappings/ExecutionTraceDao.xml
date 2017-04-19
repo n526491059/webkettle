@@ -20,6 +20,17 @@
         e.executionLog as executionLog,
          e.type as type
       from task_execution_log e WHERE 1=1
+        <if test='param7!=null and param7!=""'>
+            and  e.jobName IN
+            (
+                select  d.TASK_NAME from d_task_group_member_attribute d
+                WHERE d.TASK_GROUP_NAME IN
+                (
+                    select TASK_GROUP_NAME from d_user_group_tasks_relation
+                    WHERE USER_GROUP_NAME=#{6}
+                )
+            )
+        </if>
         <if test='param3!=null and param3!=""'>
             and e.status = #{2}
         </if>
@@ -37,6 +48,17 @@
 
     <select id="getAllLogCount" resultType="java.lang.Integer">
       SELECT  COUNT(1) FROM task_execution_log e WHERE 1=1
+        <if test='param5!=null and param5!=""'>
+            and  e.jobName IN
+            (
+                select  d.TASK_NAME from d_task_group_member_attribute d
+                WHERE d.TASK_GROUP_NAME IN
+                (
+                    select TASK_GROUP_NAME from d_user_group_tasks_relation
+                    WHERE USER_GROUP_NAME=#{4}
+                )
+            )
+        </if>
         <if test='param1!=null and param1!=""'>
             and e.status = #{0}
         </if>

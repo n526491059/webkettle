@@ -35,6 +35,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class JobExecutor implements Runnable {
+	private String username;
 	private boolean isClickStop=false;
 	private String executionId;
 	private JobExecutionConfiguration executionConfiguration;
@@ -68,6 +69,14 @@ public class JobExecutor implements Runnable {
 		this.executionConfiguration = executionConfiguration;
 	}
 
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
 	public boolean isClickStop() {
 		return isClickStop;
 	}
@@ -88,6 +97,7 @@ public class JobExecutor implements Runnable {
 	public void setExecutionId(String executionId) {
 		this.executionId = executionId;
 	}
+
 	public long getErrCount() {
 		return errCount;
 	}

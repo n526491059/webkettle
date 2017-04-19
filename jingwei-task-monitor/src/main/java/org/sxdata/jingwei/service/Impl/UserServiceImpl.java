@@ -112,7 +112,7 @@ public class UserServiceImpl implements UserService{
                 result="密码输入错误,请再次确认";
             }else{
                 if(null==request.getSession().getAttribute("login")){
-                    users.get(0).setPassword(KettleEncr.decryptPasswd(users.get(0).getPassword()));
+                    user.setPassword(KettleEncr.decryptPasswd(users.get(0).getPassword()));
                     request.getSession().setAttribute("login", user);
                     UserGroupAttributeEntity attribute=userGroupDao.getInfoByUserName(userName);
                     if(null==attribute){

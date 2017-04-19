@@ -18,8 +18,11 @@ import org.pentaho.di.www.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sxdata.jingwei.dao.SlaveDao;
+import org.sxdata.jingwei.dao.TaskGroupDao;
+import org.sxdata.jingwei.entity.JobEntity;
 import org.sxdata.jingwei.entity.SlaveEntity;
 import org.sxdata.jingwei.entity.TaskControlEntity;
+import org.sxdata.jingwei.entity.TransformationEntity;
 import org.sxdata.jingwei.service.ControlService;
 import org.sxdata.jingwei.util.TaskUtil.CarteClient;
 import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
@@ -34,6 +37,8 @@ import java.util.*;
 public class ControlServiceImpl extends StopTransServlet implements ControlService{
     @Autowired
     SlaveDao slaveDao;
+    @Autowired
+    TaskGroupDao taskGroupDao;
 
     @Override
     //获取转换的详情列表
@@ -169,7 +174,10 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
 
     //获取所有运行中的转换
     @Override
-    public List<TaskControlEntity> getAllRunningTrans() throws Exception {
+    public List<TaskControlEntity> getAllRunningTrans(String userGroupName) throws Exception {
+        //获取该用户组下所有可见的转换
+        List<TransformationEntity> transItems=taskGroupDao.getAllTrans(userGroupName);
+
         List<TaskControlEntity> items=new ArrayList<TaskControlEntity>();
         //获取内存中正在运行的转换   本地执行的转换
         Hashtable<String,TransExecutor> table= TransExecutor.getExecutors();
@@ -181,6 +189,16 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
             Trans trans=transExecutor.getTrans();
             //转换未完成并且是在本地执行
             if(!transExecutor.isFinished() && executionConfiguration.isExecutingLocally() && !transExecutor.isClickStop()){
+                //判断当前转换是否是该用户的可见转换
+                boolean isSee=false;
+                for(TransformationEntity transformation:transItems){
+                    if(transformation.getName().equals(transExecutor.getTransMeta().getName())){
+                        isSee=true;
+                        break;
+                    }
+                }
+                if (!isSee)
+                    continue;
                 //本地执行
                 TaskControlEntity taskControl=new TaskControlEntity();
                 taskControl.setName(transExecutor.getTransMeta().getName());
@@ -197,7 +215,7 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
             }
         }
         //获取远程执行的转换 从carte服务上获取
-        List<SlaveEntity> slaves=slaveDao.getAllSlave();
+        List<SlaveEntity> slaves=slaveDao.getAllSlave("");
         for(SlaveEntity slave:slaves){
             //对数据库里取出的密码进行转码
             slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));
@@ -206,10 +224,21 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
             if(status==null) continue;
             SlaveServerStatus serverStatus = SlaveServerStatus.fromXML(status);
             for (SlaveServerTransStatus transStatus : serverStatus.getTransStatusList()) {
+                //转换是运行或者暂停状态
                 if(transStatus.isRunning() || transStatus.isPaused()){
                     TaskControlEntity item=new TaskControlEntity();
                     String transStatusXml = carte.getTransStatus(transStatus.getTransName(), transStatus.getId());
                     SlaveServerTransStatus realTransStatus = SlaveServerTransStatus.fromXML(transStatusXml);
+                    //判断当前转换是否是该用户的可见转换
+                    boolean isSee=false;
+                    for(TransformationEntity transformation:transItems){
+                        if(transformation.getName().equals(realTransStatus.getTransName())){
+                            isSee=true;
+                            break;
+                        }
+                    }
+                    if (!isSee)
+                        continue;
                     item.setType("转换");
                     item.setHostName(slave.getHostName());
                     item.setName(realTransStatus.getTransName());
@@ -228,7 +257,9 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
 
     @Override
     //获取所有运行中的作业
-    public List<TaskControlEntity> getAllRunningJob() throws Exception{
+    public List<TaskControlEntity> getAllRunningJob(String userGroupName) throws Exception{
+        //获取所有运行中的作业
+        List<JobEntity> jobItems=taskGroupDao.getAllJob(userGroupName);
         List<TaskControlEntity> items=new ArrayList<TaskControlEntity>();
         //获取本地执行的作业
         Hashtable<String,JobExecutor> table=JobExecutor.getExecutors();
@@ -239,18 +270,28 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
             JobExecutionConfiguration executionConfiguration=jobExecutor.getExecutionConfiguration();
             //作业未完成 而且是本地运行
             if(!jobExecutor.isFinished() && executionConfiguration.isExecutingLocally() && !jobExecutor.isClickStop()){
-                    TaskControlEntity taskControl=new TaskControlEntity();
-                    taskControl.setName(jobExecutor.getJobMeta().getName());
-                    taskControl.setId(jobExecutor.getExecutionId());
-                    taskControl.setType("作业");
-                    taskControl.setIsStart("");
-                    taskControl.setCarteObjectId(jobExecutor.getCarteObjectId());
-                    taskControl.setHostName("本地执行");
-                    items.add(taskControl);
+                //判断当前作业是否是该用户的可见作业
+                boolean isSee=false;
+                for(JobEntity thisJob:jobItems){
+                    if(thisJob.getName().equals(jobExecutor.getJobMeta().getName())){
+                        isSee=true;
+                        break;
+                    }
+                }
+                if (!isSee)
+                    continue;
+                TaskControlEntity taskControl=new TaskControlEntity();
+                taskControl.setName(jobExecutor.getJobMeta().getName());
+                taskControl.setId(jobExecutor.getExecutionId());
+                taskControl.setType("作业");
+                taskControl.setIsStart("");
+                taskControl.setCarteObjectId(jobExecutor.getCarteObjectId());
+                taskControl.setHostName("本地执行");
+                items.add(taskControl);
             }
         }
-        //从carte服务获取远程执行的作业
-        List<SlaveEntity> slaves=slaveDao.getAllSlave();
+        //从carte服务获取远程执行的作业  从所有节点上获取正在运行的作业
+        List<SlaveEntity> slaves=slaveDao.getAllSlave("");
         for(SlaveEntity slave:slaves){
             slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));
             CarteClient carte=new CarteClient(slave);
@@ -262,6 +303,16 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
                     TaskControlEntity item=new TaskControlEntity();
                     String jobStatusxml=carte.getJobStatus(jobStatus.getJobName(), jobStatus.getId());
                     SlaveServerJobStatus realJobStatus=SlaveServerJobStatus.fromXML(jobStatusxml);
+                    //判断当前作业是否是该用户的可见作业
+                    boolean isSee=false;
+                    for(JobEntity thisJob:jobItems){
+                        if(thisJob.getName().equals(realJobStatus.getJobName())){
+                            isSee=true;
+                            break;
+                        }
+                    }
+                    if (!isSee)
+                        continue;
                     //根据前台展示需求来封装 暂时只展示作业名以及所运行节点
                     item.setHostName(slave.getHostName());
                     item.setId(realJobStatus.getId());

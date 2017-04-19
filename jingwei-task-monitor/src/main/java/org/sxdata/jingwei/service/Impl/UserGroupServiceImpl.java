@@ -54,6 +54,9 @@ public class UserGroupServiceImpl implements UserGroupService{
         //添加用户组下的可见任务组记录
         if(null!=taskGroupNameArray && taskGroupNameArray.length>0){
             for(String taskGroupName:taskGroupNameArray){
+                if(taskGroupName.equals("")){
+                    continue;
+                }
                 TaskUserRelationEntity taskUser=new TaskUserRelationEntity();
                 taskUser.setUserGroupName(userGroupName);
                 taskUser.setTaskGroupName(taskGroupName);
@@ -63,6 +66,9 @@ public class UserGroupServiceImpl implements UserGroupService{
         //添加用户组下的可见节点记录
         if(null!=slaveIdArray && slaveIdArray.length>0){
             for(String slaveId:slaveIdArray){
+                if(slaveId.equals("")){
+                    continue;
+                }
                 SlaveUserRelationEntity slaveUser=new SlaveUserRelationEntity();
                 slaveUser.setUserGroupName(userGroupName);
                 slaveUser.setSlaveId(Integer.valueOf(slaveId));

@@ -33,19 +33,10 @@ function showTaskGroupPanel(secondGuidePanel){
     })
     store.load({params:{start:0,limit:10}});
 
-    var taskGroupPanel=new Ext.grid.GridPanel({
-        id:"slaveGridPanel",
-        title:"任务组",
-        width:1200,
-        height:600,
-        cm:taskGroupModel,
-        sm:sm2,
-        store:store,
-        closable:true,
-        viewConfig : {
-            forceFit : true //让grid的列自动填满grid的整个宽度，不用一列一列的设定宽度
-        },
-        tbar:new Ext.Toolbar({
+    var t_bar="";
+
+    if(loginUserType==1 || loginUserName=="admin"){
+        t_bar=new Ext.Toolbar({
             buttons: [
                 {
                     text:"新增",
@@ -72,7 +63,33 @@ function showTaskGroupPanel(secondGuidePanel){
                     }
                 }
             ]
-        }),
+        })
+    }else{
+        t_bar=new Ext.Toolbar({
+            buttons: [
+                {
+                    text:"查看",
+                    handler:function(){
+                        beforeSelectTaskGroupDetail(taskGroupPanel);
+                    }
+                }
+            ]
+        })
+    }
+
+    var taskGroupPanel=new Ext.grid.GridPanel({
+        id:"slaveGridPanel",
+        title:"任务组",
+        width:1200,
+        height:600,
+        cm:taskGroupModel,
+        sm:sm2,
+        store:store,
+        closable:true,
+        viewConfig : {
+            forceFit : true //让grid的列自动填满grid的整个宽度，不用一列一列的设定宽度
+        },
+        tbar:t_bar,
         bbar:new Ext.PagingToolbar({
             store:store,
             pageSize:10,
@@ -514,4 +531,59 @@ function showAllTaskForAdd(){
     });
     allTaskPanelForAdd.getColumnModel().setHidden(2,true);
     return allTaskPanelForAdd;
+}
+
+//新增作业or转换前获取当前用户下的所有任务组
+function getAllTaskGroupBeforeCreate(){
+    var sm2=new Ext.grid.CheckboxSelectionModel();
+    //节点列模型
+    var taskGroupModel=new Ext.grid.ColumnModel([
+        new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
+        sm2,
+        {header:"任务组ID",dataIndex:"taskGroupId"},
+        {header:"任务组名",dataIndex:"taskGroupName"},
+        {header:"任务组描述",dataIndex:"taskGroupDesc"}
+    ]);
+
+    var proxy=new Ext.data.HttpProxy({url:"/taskGroup/getAllTaskGroupBeforeCreate.do"});
+
+    var taskGroupRecord=Ext.data.Record.create([
+        {name:"taskGroupId",type:"string",mapping:"taskGroupId"},
+        {name:"taskGroupName",type:"string",mapping:"taskGroupName"},
+        {name:"taskGroupDesc",type:"string",mapping:"taskGroupDesc"}
+    ])
+    var reader=new Ext.data.JsonReader({},taskGroupRecord);
+    var store=new Ext.data.Store({
+        proxy:proxy,
+        reader:reader
+    })
+    store.load();
+
+    var taskGroupPanelByAssigned=new Ext.grid.GridPanel({
+        id:"taskGroupPanelByAssigned",
+        width:450,
+        height:550,
+        autoScroll:true,//滚动条
+        cm:taskGroupModel,
+        sm:sm2,
+        store:store,
+        closable:true,
+        viewConfig : {
+            forceFit : true //让grid的列自动填满grid的整个宽度，不用一列一列的设定宽度
+        },
+        tbar:new Ext.Toolbar({
+            buttons: [
+                {
+                    text:"确认",
+                    handler:function(){
+
+                    }
+                }
+            ]
+        })
+    });
+
+    //隐藏第二列
+    taskGroupPanelByAssigned.getColumnModel().setHidden(2,true);
+    return taskGroupPanelByAssigned;
 }

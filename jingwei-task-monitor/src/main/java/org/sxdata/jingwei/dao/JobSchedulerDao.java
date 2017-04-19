@@ -14,9 +14,9 @@ public interface JobSchedulerDao {
 
     public void addTimerJob(JobTimeSchedulerEntity job);
 
-    public Integer getTotalCount(Integer typeId,String slaves,String jobName);
+    public Integer getTotalCount(Integer typeId,String slaves,String jobName,String userGroupName);
 
-    public List<JobTimeSchedulerEntity> getTimerJobByPage(int start,int limit,Integer typeId,String slaves,String jobName);
+    public List<JobTimeSchedulerEntity> getTimerJobByPage(int start,int limit,Integer typeId,String slaves,String jobName,String userGroupName);
 
     public void deleteScheduler(long taskId);
 

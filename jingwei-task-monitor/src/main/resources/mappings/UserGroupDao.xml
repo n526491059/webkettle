@@ -69,7 +69,7 @@
         where d.USER_GROUP_NAME=#{name}
     </select>
 
-    <!-- 根据用户组id获取当前用户可见的节点 -->
+    <!-- 根据用户组名获取当前用户可见的节点 -->
     <select id="getSlavesByUserGroupName" resultType="org.sxdata.jingwei.entity.SlaveUserRelationEntity">
        select
         d.ID_SLAVE as slaveId,

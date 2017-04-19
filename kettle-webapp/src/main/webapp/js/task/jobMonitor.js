@@ -1,6 +1,5 @@
 //作业面板
 function generateJobPanel(secondGuidePanel){
-
     //为表格添加一行复选框用于选择行
     var sm=new Ext.grid.CheckboxSelectionModel();
 
@@ -18,11 +17,16 @@ function generateJobPanel(secondGuidePanel){
         {header:"所属任务组",dataIndex:"belongToTaskGroup"},
         {header:"作业属性",width:280,dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
-                return "<input type='button' onclick='showOneJobDetail()' value='作业属性'>&nbsp;"+
-                    "<input type='button' onclick='deleteJobByJobPath()' value='删除'>&nbsp;"+
-                    "<input type='button' onclick='editorJob()' value='编辑'>&nbsp;"+
-                    "<input type='button' onclick='jobCompositionImg()' value='结构图'>&nbsp;"+
-                    "<input type='button' onclick='jobPowerExecute()' value='智能执行'>&nbsp;";
+                if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
+                    return "<input type='button' onclick='showOneJobDetail()' value='作业属性'>&nbsp;"+
+                        "<input type='button' onclick='deleteJobByJobPath()' value='删除'>&nbsp;"+
+                        "<input type='button' onclick='editorJob()' value='编辑'>&nbsp;"+
+                        "<input type='button' onclick='jobCompositionImg()' value='结构图'>&nbsp;"+
+                        "<input type='button' onclick='jobPowerExecute()' value='智能执行'>&nbsp;";
+                }else{
+                    return "<input type='button' onclick='showOneJobDetail()' value='作业属性'>&nbsp;"+
+                            "<input type='button' onclick='jobCompositionImg()' value='结构图'>&nbsp;";
+                }
             }
         }
     ]);
@@ -98,28 +102,14 @@ function generateJobPanel(secondGuidePanel){
             }
         ]
     })
-
-
-
-    var grid=new Ext.grid.GridPanel({
-        id:"JobPanel",
-        title:"JobPanel",
-        height:470,
-        cm:cm,      //列模型
-        sm:sm,
-        store:store,
-        closable:true,
-        tbar:new Ext.Toolbar({
+    var t_bar="";
+    if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
+        t_bar=new Ext.Toolbar({
             buttons:[
                 f ,"-",
                 {
                     text:"查询",
                     handler:function(){
-                        /*var transValue= f.getForm().findField("name").getValue();
-                        var createDate= f.getForm().findField("createDate").getRawValue();
-                        secondGuidePanel.removeAll(true);
-                        secondGuidePanel.add(generateJobPanel(transValue,createDate,transValue));
-                        secondGuidePanel.doLayout();*/
                         generateJobPanel(secondGuidePanel);
                     }
                 },"-",{
@@ -160,7 +150,6 @@ function generateJobPanel(secondGuidePanel){
                                     var graph = graphPanel.getGraph();
                                     decoder.decode(node, graph.getModel());
                                     graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
-
                                 });
                             }
                         });
@@ -192,7 +181,29 @@ function generateJobPanel(secondGuidePanel){
                     }
                 }
             ]
-        }),
+        })
+    }else{
+        t_bar=new Ext.Toolbar({
+            buttons:[
+                f ,"-",
+                {
+                    text:"查询",
+                    handler:function(){
+                        generateJobPanel(secondGuidePanel);
+                    }
+                }
+            ]
+        })
+    }
+    var grid=new Ext.grid.GridPanel({
+        id:"JobPanel",
+        title:"JobPanel",
+        height:470,
+        cm:cm,      //列模型
+        sm:sm,
+        store:store,
+        closable:true,
+        tbar:t_bar,
         bbar:new Ext.PagingToolbar({
             store:store,
             pageSize:15,
@@ -400,13 +411,13 @@ function beforeAssignedTaskGroup(grid,secondGuidePanel){
     if(jobNameArray.length!=1){
         Ext.MessageBox.alert("请选择一个作业(单选)再分配任务组");
     }else{
-        showWindowByAssigned(jobId,jobPath,jobNameArray[0],grid,secondGuidePanel);
+        showWindowByAssigned(jobId,jobPath,jobNameArray[0],grid);
     }
 }
 
 //展示分配任务组的窗口
-function showWindowByAssigned(jobId,jobPath,jobName,grid,secondGuidePanel){
-    var panelByAssigned=generateAllTaskGroupPanel(jobId,jobPath,jobName,"noCreate");
+function showWindowByAssigned(jobId,jobPath,jobName,grid){
+    var panelByAssigned=generateAllTaskGroupPanel(jobId,jobPath,jobName);
     var taskGroupAssignedWindow=new Ext.Window({
         id:"taskGroupAssignedWindow",
         title:"任务组分配",
@@ -422,7 +433,7 @@ function showWindowByAssigned(jobId,jobPath,jobName,grid,secondGuidePanel){
 }
 
 //获取该用户下的所有任务组  并且设置任务组是否包含该任务的标识
-function generateAllTaskGroupPanel(jobId,jobPath,jobName,flag){
+function generateAllTaskGroupPanel(jobId,jobPath,jobName){
     var sm2=new Ext.grid.CheckboxSelectionModel();
     //节点列模型
     var taskGroupModel=new Ext.grid.ColumnModel([
@@ -466,7 +477,7 @@ function generateAllTaskGroupPanel(jobId,jobPath,jobName,flag){
                 {
                     text:"确认",
                     handler:function(){
-                        assignedTaskGroup(jobId,jobName,jobPath,taskGroupPanelByAssigned,flag);
+                        assignedTaskGroup(jobId,jobName,jobPath,taskGroupPanelByAssigned);
                     }
                 }
             ]
@@ -494,7 +505,7 @@ function generateAllTaskGroupPanel(jobId,jobPath,jobName,flag){
 }
 
 //访问后台分配任务组
-function assignedTaskGroup(jobId,jobName,jobPath,taskGroupPanelByAssigned,flag){
+function assignedTaskGroup(jobId,jobName,jobPath,taskGroupPanelByAssigned){
     var view=taskGroupPanelByAssigned.getView();
     var rsm=taskGroupPanelByAssigned.getSelectionModel();
     var taskGroupNameArray=new Array();
@@ -510,20 +521,10 @@ function assignedTaskGroup(jobId,jobName,jobPath,taskGroupPanelByAssigned,flag){
                 success:function(response,config){
                     Ext.MessageBox.alert("任务组分配成功!");
                     var secondGuidePanel=Ext.getCmp("secondGuidePanel");
-                    if(flag!="create"){
-                        Ext.getCmp("taskGroupAssignedWindow").close();
-                        generateJobPanel(secondGuidePanel);
-                    }else{
-                        Ext.getCmp("assignedWindowByCreate").close();
-                        Ext.getCmp("jobBodyPanel").enable();
-                        Ext.getCmp("jobWestTreePanel").enable();
-                    }
-
+                    Ext.getCmp("taskGroupAssignedWindow").close();
+                    generateJobPanel(secondGuidePanel);
                 },
                 failure:function(){
-                    if(flag!="create"){
-                        Ext.getCmp("taskGroupAssignedWindow").close();
-                    }
                     Ext.MessageBox.alert("result","服务器异常,任务组分配失败!");
 
                 },

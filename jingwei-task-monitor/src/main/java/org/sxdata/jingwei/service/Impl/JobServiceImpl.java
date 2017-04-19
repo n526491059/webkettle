@@ -28,6 +28,7 @@ import org.sxdata.jingwei.util.TaskUtil.CarteTaskManager;
 import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
 import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,10 +56,6 @@ public class JobServiceImpl implements JobService{
     protected  JobSchedulerDao schedulerDao;
 
     protected SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    private final Integer loadElement =3;   //表示只加载转换和作业,根据业务需求会作不同修改
-    private final String path="";           //表示查询资源库下根目录的所有作业  根据业务需求会作不同修改
-
 
     @Override
     public JobEntity getJobById(Integer jobId) {
@@ -106,28 +103,29 @@ public class JobServiceImpl implements JobService{
     }
 
     @Override
-    public JSONObject findJobs(int start, int limit, String name, String createDate) throws Exception{
+    public JSONObject findJobs(int start, int limit, String name, String createDate,String userGroupName) throws Exception{
         PageforBean pages=new PageforBean();
         net.sf.json.JSONObject result=null;
         //该页的作业信息以及整个表(可能是条件查询)的总记录条数
         List<JobEntity> jobs=null;
         Integer totalCount=0;
         if (StringDateUtil.isEmpty(name)  && StringDateUtil.isEmpty(createDate)){
-          jobs=jobDao.getThisPageJob(start,limit);
+          jobs=jobDao.getThisPageJob(start,limit,userGroupName);
             //对日期进行处理转换成指定的格式
             for (JobEntity job:jobs){
                 job.setCreateDate(format.parse(format.format(job.getCreateDate())));
                 job.setModifiedDate(format.parse(format.format(job.getModifiedDate())));
             }
-            totalCount=jobDao.getTotalCount();
+            totalCount=jobDao.getTotalCount(userGroupName);
         }else{
-            createDate+=" 00:00:00";
-            jobs=jobDao.conditionFindJobs(start, limit, name, createDate);
+            if(!createDate.isEmpty())
+                createDate+=" 00:00:00";
+            jobs=jobDao.conditionFindJobs(start, limit, name, createDate,userGroupName);
             for (JobEntity job:jobs){
                 job.setCreateDate(format.parse(format.format(job.getCreateDate())));
                 job.setModifiedDate(format.parse(format.format(job.getModifiedDate())));
             }
-            totalCount=jobDao.conditionFindJobCount(name,createDate);
+            totalCount=jobDao.conditionFindJobCount(name,createDate,userGroupName);
         }
 
         //设置作业的全目录名
@@ -329,7 +327,7 @@ public class JobServiceImpl implements JobService{
 
     @Override
     //定时作业
-    public boolean beforeTimeExecuteJob(Map<String, Object> params) throws Exception {
+    public boolean beforeTimeExecuteJob(Map<String, Object> params,HttpServletRequest request) throws Exception {
         boolean isSuccess=false;
         JobTimeSchedulerEntity jobTimeScheduler=new JobTimeSchedulerEntity();
         jobTimeScheduler.setIdJobtask(System.nanoTime());   //定时的ID 唯一标识
@@ -362,18 +360,20 @@ public class JobServiceImpl implements JobService{
         }
         //如果库中不存在相同的定时作业则放入内存
         if(!this.judgeJobIsAlike(jobTimeScheduler)){
-            //TODO 登录功能暂未实现 暂时使用默认用户admin
+            //获取当前登录的用户
+            UserEntity loginUser=(UserEntity)request.getSession().getAttribute("login");
+            String username=loginUser.getLogin();
             isSuccess=true;
-            if(CarteTaskManager.jobTimerMap.containsKey("admin"))
-                CarteTaskManager.jobTimerMap.remove("admin");
-            CarteTaskManager.jobTimerMap.put("admin", jobTimeScheduler);
+            if(CarteTaskManager.jobTimerMap.containsKey(username))
+                CarteTaskManager.jobTimerMap.remove(username);
+            CarteTaskManager.jobTimerMap.put(username, jobTimeScheduler);
         }
         return isSuccess;
     }
 
     @Override
     //定时作业
-        public void addTimeExecuteJob(String graphXml,String executionConfiguration) throws Exception {
+        public void addTimeExecuteJob(String graphXml,String executionConfiguration,HttpServletRequest request) throws Exception {
         // JobMeta jobMeta = RepositoryUtils.loadJobbyPath(taskName);
         GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
 
@@ -381,21 +381,25 @@ public class JobServiceImpl implements JobService{
         org.flhy.ext.utils.JSONObject jsonObject = org.flhy.ext.utils.JSONObject.fromObject(executionConfiguration);
         JobExecutionConfiguration jobExecutionConfiguration = JobExecutionConfigurationCodec.decode(jsonObject, jobMeta);
         JobExecutor jobExecutor = JobExecutor.initExecutor(jobExecutionConfiguration, jobMeta);
-        //TODO 登录功能暂未实现 暂时使用默认用户admin
-        JobTimeSchedulerEntity jobTimeScheduler=CarteTaskManager.jobTimerMap.get("admin");
+        //获取当前登录的用户
+        UserEntity loginUser=(UserEntity)request.getSession().getAttribute("login");
+        JobTimeSchedulerEntity jobTimeScheduler=CarteTaskManager.jobTimerMap.get(loginUser.getLogin());
+        jobExecutor.setUsername(loginUser.getLogin());
+        //设置执行时的配置参数 以及执行节点
         jobTimeScheduler.setExecutionConfig(executionConfiguration);
         if(jobExecutor.getExecutionConfiguration().isExecutingLocally()){
             jobTimeScheduler.setSlaves("本地执行");
         }else{
-            jobTimeScheduler.setSlaves(jobExecutor.getExecutionConfiguration().getRemoteServer().getHostname());
+            SlaveEntity thisSlave=slaveDao.getSlaveByHostName(jobExecutor.getExecutionConfiguration().getRemoteServer().getHostname());
+            jobTimeScheduler.setSlaves(thisSlave.getSlaveId()+"_"+thisSlave.getHostName());
         }
-        UserEntity loginUser=userDao.getUserbyName("admin").get(0);
-        loginUser.setPassword(KettleEncr.decryptPasswd("Encrypted " + loginUser.getPassword()));
+
         //执行定时任务
         CarteTaskManager.addTimerTask(jobExecutor, null, jobTimeScheduler, loginUser);
         //把该定时信息更新到数据库
+        jobTimeScheduler.setUsername(loginUser.getLogin());
         jobSchedulerDao.addTimerJob(jobTimeScheduler);
-        CarteTaskManager.jobTimerMap.remove("admin");
+        CarteTaskManager.jobTimerMap.remove(loginUser.getLogin());
     }
 
     @Override

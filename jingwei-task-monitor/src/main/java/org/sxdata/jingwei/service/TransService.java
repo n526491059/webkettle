@@ -9,7 +9,7 @@ import java.util.List;
  * Created by cRAZY on 2017/2/22.
  */
 public interface TransService {
-    public JSONObject findTrans(int start,int limit,String namme,String date) throws Exception;
+    public JSONObject findTrans(int start,int limit,String namme,String date,String userGroupName) throws Exception;
 
     public void deleteTransformation(String transPath,String flag) throws Exception;
 

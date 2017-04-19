@@ -205,6 +205,7 @@ function slaveManager(){
                 },"-",
                 {
                     text:"删除节点",
+                    id:"deleteSlaveButton",
                     handler:function(){
                         deleteSlave(slaveGridPanel,secondGuidePanel);
                     }
@@ -231,6 +232,9 @@ function slaveManager(){
             emptyMsg:"没有记录"
         })
     })
+    if(loginUserName!="admin" && loginUserType!=1){
+        Ext.getCmp("deleteSlaveButton").hide();
+    }
     return slaveGridPanel;
 }
 
@@ -480,7 +484,7 @@ function deleteSlave(slaveGridPanel,secondGuidePanel){
     }
 }
 
-//刷新节点
+//刷新节点列表
 function refreshSlavePanel(secondGuidePanel){
     secondGuidePanel.removeAll(true);
     secondGuidePanel.add(slaveManager());

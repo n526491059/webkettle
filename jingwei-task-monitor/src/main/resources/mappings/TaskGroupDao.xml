@@ -6,11 +6,20 @@
             d.ID_TASK_GROUP as taskGroupId,
             d.TASK_GROUP_NAME as taskGroupName,
             d.TASK_DESC as taskGroupDesc
-        from d_task_group d limit #{0},#{1}
+        from d_task_group d
+        WHERE 1=1
+        <if test='param3!=null and param3!=""'>
+            AND d.TASK_GROUP_NAME IN
+            (
+                SELECT TASK_GROUP_NAME FROM d_user_group_tasks_relation WHERE
+                USER_GROUP_NAME=#{2}
+            )
+        </if>
+        limit #{0},#{1}
     </select>
 
 
-    <!--获取该用户下所有的任务组 不分页形式获取-->
+    <!--获取所有的任务组 不分页形式获取-->
     <select id="getAllTaskGroupNoLimit" resultType="org.sxdata.jingwei.entity.TaskGroupEntity">
         select
         d.ID_TASK_GROUP as taskGroupId,
@@ -22,6 +31,14 @@
     <!--获取任务组总数量-->
     <select id="getTotalCountTaskGroup" resultType="java.lang.Integer">
         select COUNT(1) from d_task_group d
+        WHERE 1=1
+        <if test='_parameter!=null and _parameter!=""'>
+            AND d.TASK_GROUP_NAME IN
+            (
+                SELECT TASK_GROUP_NAME FROM d_user_group_tasks_relation WHERE
+                USER_GROUP_NAME=#{0}
+            )
+        </if>
     </select>
 
     <!--添加任务组-->
@@ -44,7 +61,18 @@
         j.name as name,
         j.ID_DIRECTORY as directoryId,
         j.ID_TRANSFORMATION as transformationId
-        from  r_transformation j
+        from  r_transformation j WHERE 1=1
+        <if test='_parameter!=null and _parameter!=""'  >
+            AND j.`NAME` IN
+            (
+                select DISTINCT TASK_NAME from d_task_group_member_attribute where TASK_GROUP_NAME in
+                (
+                    select TASK_GROUP_NAME from
+                    d_user_group_tasks_relation where USER_GROUP_NAME=#{0}
+                )
+                AND TYPE="trans"
+            )
+        </if>
     </select>
 
     <!--获取该用户下的所有作业-->
@@ -53,7 +81,18 @@
         j.name as name,
         j.ID_DIRECTORY as directoryId,
         j.ID_JOB as jobId
-        from  r_job j
+        from  r_job j WHERE 1=1
+        <if test='_parameter!=null and _parameter!=""'  >
+            AND j.`NAME` IN
+            (
+                select DISTINCT TASK_NAME from d_task_group_member_attribute where TASK_GROUP_NAME in
+                (
+                    select TASK_GROUP_NAME from
+                    d_user_group_tasks_relation where USER_GROUP_NAME=#{0}
+                )
+                AND TYPE="job"
+            )
+        </if>
     </select>
 
     <!--修改任务组 当前只支持修改任务组名以及任务组备注-->
@@ -138,4 +177,25 @@
         </trim>
         WHERE TASK_GROUP_NAME=#{0}
     </update>
+
+    <!--根据任务组名 删除任务组与用户组关系表中的记录-->
+    <delete id="deleteUserTaskRelationByName">
+        delete from d_user_group_tasks_relation
+        where  TASK_GROUP_NAME=#{0}
+    </delete>
+
+    <select id="getTaskGroupByThisUser" resultType="org.sxdata.jingwei.entity.TaskGroupEntity">
+        SELECT
+        d.ID_TASK_GROUP as taskGroupId,
+        d.TASK_GROUP_NAME as taskGroupName,
+        d.TASK_DESC as taskGroupDesc
+        from d_task_group d WHERE 1=1
+        <if test='_parameter!=null and _parameter!=""'>
+            AND  d.TASK_GROUP_NAME IN
+            (
+                select TASK_GROUP_NAME from d_user_group_tasks_relation WHERE
+                USER_GROUP_NAME=#{0}
+            )
+        </if>
+    </select>
 </mapper>

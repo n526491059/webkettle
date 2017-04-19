@@ -33,7 +33,14 @@
         r.`PORT` as port,
         r.USERNAME as slaveUsername,
         r.PASSWORD as slavePassword
-        from r_slave r
+        from r_slave r WHERE 1=1
+        <if test='_parameter!=null and _parameter!=""'>
+            AND r.ID_SLAVE IN
+            (
+                select ID_SLAVE from
+                d_user_group_slaves_relation where USER_GROUP_NAME=#{0}
+            )
+        </if>
     </select>
 
     <select id="findSlaveByPageInfo" resultType="org.sxdata.jingwei.entity.SlaveEntity">
@@ -43,7 +50,15 @@
         r.`PORT` as port,
         r.USERNAME as slaveUsername,
         r.PASSWORD as slavePassword
-        from r_slave r limit #{0},#{1}
+        from r_slave r WHERE 1=1
+        <if test='param3!=null and param3!=""'>
+            AND r.ID_SLAVE IN
+            (
+                select ID_SLAVE from
+                d_user_group_slaves_relation where USER_GROUP_NAME=#{2}
+            )
+        </if>
+         limit #{0},#{1}
     </select>
 
 </mapper>

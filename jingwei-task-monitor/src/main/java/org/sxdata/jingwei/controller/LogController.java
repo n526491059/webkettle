@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.sxdata.jingwei.entity.UserGroupAttributeEntity;
 import org.sxdata.jingwei.service.HistoryLogService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +33,10 @@ public class LogController {
             String type="";
             String startTime="";
             String taskName="";
+            //获取当前用户所在的用户组
+            UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
+            String userGroupName=attr.getUserGroupName();
+
             //获取查询参数
             String search=request.getParameter("search");
             if(null!=search && !search.equals("")){
@@ -42,7 +47,7 @@ public class LogController {
                 taskName=(String)json.get("taskName");
                 startTime+=" 00:00:00";
             }
-            String result=logService.getAllHistoryLog(start,limit,statu,type,startTime,taskName);
+            String result=logService.getAllHistoryLog(start,limit,statu,type,startTime,taskName,userGroupName);
             result=result.replaceAll("\n","<br/>");
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();

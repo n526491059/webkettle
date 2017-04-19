@@ -61,8 +61,8 @@ public class SlaveServiceImpl implements SlaveService {
 
     @Override
     //获取所有节点的所有指标信息(某个时间段,默认3个小时内的)
-    public String allSlaveQuato() throws Exception {
-        List<SlaveEntity> slaves=slaveDao.getAllSlave();
+    public String allSlaveQuato(String userGroupName) throws Exception {
+        List<SlaveEntity> slaves=slaveDao.getAllSlave(userGroupName);
         JSONObject result=new JSONObject();
         //负载
         JSONObject loadAvg=new JSONObject();
@@ -251,8 +251,8 @@ public class SlaveServiceImpl implements SlaveService {
 
     @Override
     //所有节点某个指标信息的折线图
-    public String slaveQuatoLineChart(String quatoType,String maxOrAvg,String chooseDate) throws Exception {
-        List<SlaveEntity> slaves=slaveDao.getAllSlave();
+    public String slaveQuatoLineChart(String quatoType,String maxOrAvg,String chooseDate,String userGroupName) throws Exception {
+        List<SlaveEntity> slaves=slaveDao.getAllSlave(userGroupName);
         if(null==slaves || slaves.size()<1)
             return null;
         slaves=setLoadAvgAndStatus(slaves);
@@ -562,27 +562,27 @@ public class SlaveServiceImpl implements SlaveService {
 
     @Override
     //所有节点某个指标信息的柱形图
-    public String slaveQuatoColumnDiagram(String quatoType,String maxOrAvg,String chooseDate) throws Exception {
+    public String slaveQuatoColumnDiagram(String quatoType,String maxOrAvg,String chooseDate,String userGroupName) throws Exception {
         return null;
     }
 
     @Override
     //所有节点某个指标信息的文本
-    public String slaveQuatoHTMLText(String quatoType,String maxOrAvg,String chooseDate) throws Exception {
+    public String slaveQuatoHTMLText(String quatoType,String maxOrAvg,String chooseDate,String userGroupName) throws Exception {
         return null;
     }
 
     @Override
     //获取所有节点的某个指标项信息
     //param1:节点的哪个指标   params2:视图类型     param3:显示平均值还是最大值
-    public String slaveQuatoByCondition(String quatoType,String viewType,String maxOrAvg,String chooseDate) throws Exception {
+    public String slaveQuatoByCondition(String quatoType,String viewType,String maxOrAvg,String chooseDate,String userGroupName) throws Exception {
         String result=null;
         if(viewType.equals("折线图")){
-            result=this.slaveQuatoLineChart(quatoType,maxOrAvg,chooseDate);
+            result=this.slaveQuatoLineChart(quatoType,maxOrAvg,chooseDate,userGroupName);
         }else if(viewType.equals("柱形图")){
-            result=this.slaveQuatoColumnDiagram(quatoType,maxOrAvg,chooseDate);
+            result=this.slaveQuatoColumnDiagram(quatoType,maxOrAvg,chooseDate,userGroupName);
         }else{
-            result=this.slaveQuatoHTMLText(quatoType,maxOrAvg,chooseDate);
+            result=this.slaveQuatoHTMLText(quatoType,maxOrAvg,chooseDate,userGroupName);
         }
         return result;
     }
@@ -620,8 +620,8 @@ public class SlaveServiceImpl implements SlaveService {
 
     @Override
     //获取所有节点信息
-    public List<SlaveEntity> getAllSlave() throws Exception {
-        List<SlaveEntity> slaves=slaveDao.getAllSlave();
+    public List<SlaveEntity> getAllSlave(String userGroupName) throws Exception {
+        List<SlaveEntity> slaves=slaveDao.getAllSlave(userGroupName);
         return this.setLoadAvgAndStatus(slaves);
     }
 
@@ -651,9 +651,9 @@ public class SlaveServiceImpl implements SlaveService {
     }
 
     @Override
-    public PageforBean findSlaveByPageInfo(Integer start, Integer limit) throws Exception {
-        //TODO  当前暂无用户模块 默认获取所有节点用作分页
-        List<SlaveEntity> slaves=slaveDao.findSlaveByPageInfo(start,limit);
+    public PageforBean findSlaveByPageInfo(Integer start, Integer limit,String userGroupName) throws Exception {
+
+        List<SlaveEntity> slaves=slaveDao.findSlaveByPageInfo(start,limit,userGroupName);
         //进一步获取节点的详细信息 运行的作业/转换数 在线时长等
         for(SlaveEntity slave:slaves){
             slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));

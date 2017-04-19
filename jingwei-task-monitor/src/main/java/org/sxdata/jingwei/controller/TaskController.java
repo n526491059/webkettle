@@ -26,10 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.sxdata.jingwei.entity.JobEntity;
-import org.sxdata.jingwei.entity.SlaveEntity;
-import org.sxdata.jingwei.entity.TaskControlEntity;
-import org.sxdata.jingwei.entity.TransformationEntity;
+import org.sxdata.jingwei.entity.*;
 import org.sxdata.jingwei.service.ControlService;
 import org.sxdata.jingwei.service.JobService;
 import org.sxdata.jingwei.service.SlaveService;
@@ -181,8 +178,10 @@ public class TaskController {
     protected void getRunningTask(HttpServletResponse response,HttpServletRequest request){
         try{
 
-            List<TaskControlEntity> jobItems=controlService.getAllRunningJob();
-            for(TaskControlEntity item:controlService.getAllRunningTrans()){
+            UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
+            String userGroupName=attr.getUserGroupName();
+            List<TaskControlEntity> jobItems=controlService.getAllRunningJob(userGroupName);
+            for(TaskControlEntity item:controlService.getAllRunningTrans(userGroupName)){
                 jobItems.add(item);
             }
             String result=JSONArray.fromObject(jobItems).toString();
@@ -209,7 +208,10 @@ public class TaskController {
             //获取前台传递的查询参数 作业名以及创建时间 如果为空则代表是全部查询
             String name=request.getParameter("name");
             String createDate=request.getParameter("date");
-            JSONObject result=jobService.findJobs(start, limit, name, createDate);
+            //获取当前用户所在的用户组
+            UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
+            String userGroupName=attr.getUserGroupName();
+            JSONObject result=jobService.findJobs(start, limit, name, createDate,userGroupName);
 
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
@@ -253,8 +255,11 @@ public class TaskController {
             //获取前台传递的查询参数转换名以及创建时间 如果两个参数为空则代表是查询全部
             String transName=request.getParameter("name");
             String createDate=request.getParameter("date");
+            //获取当前用户所在的用户组
+            UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
+            String userGroupName=attr.getUserGroupName();
 
-            JSONObject result=transService.findTrans(start, limit, transName, createDate);
+            JSONObject result=transService.findTrans(start, limit, transName, createDate,userGroupName);
             //输出结果返回给客户端
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
@@ -296,43 +301,45 @@ public class TaskController {
     @ResponseBody
     @RequestMapping(value="/powerExecute")
     protected void powerExecute(HttpServletResponse response,HttpServletRequest request) throws Exception{
-            String path=request.getParameter("path");
-            String flag=request.getParameter("powerFlag");
-            //在所有节点中获取负载最低的节点
-            SlaveEntity minSlave=slaveService.getSlaveByLoadAvg(slaveService.getAllSlave());
-            String config="{\"exec_local\":\"N\",\"exec_remote\":\"Y\",\"pass_export\":\"N\","
+        String path=request.getParameter("path");
+        String flag=request.getParameter("powerFlag");
+        //在所有节点中获取负载最低的节点
+        UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
+        String userGroupName=attr.getUserGroupName();
+        SlaveEntity minSlave=slaveService.getSlaveByLoadAvg(slaveService.getAllSlave(userGroupName));
+        String config="{\"exec_local\":\"N\",\"exec_remote\":\"Y\",\"pass_export\":\"N\","
                 +"\"exec_cluster\":\"N\",\"cluster_post\":\"Y\",\"cluster_prepare\":\"Y\",\"cluster_start\":\"Y\","
                 +"\"cluster_show_trans\":\"N\",\"parameters\":[],"
                 +"\"variables\":[{\"name\":\"Internal.Entry.Current.Directory\",\"value\":\"/\"},{\"name\":\"Internal.Job.Filename.Directory\",\"value\":\"Parent Job File Directory\"},{\"name\":\"Internal.Job.Filename.Name\",\"value\":\"Parent Job Filename\"},{\"name\":\"Internal.Job.Name\",\"value\":\"Parent Job Name\"},{\"name\":\"Internal.Job.Repository.Directory\",\"value\":\"Parent Job Repository Directory\"}],"
                 +"\"arguments\":[],\"safe_mode\":\"N\",\"log_level\":\"Basic\",\"clear_log\":\"Y\",\"gather_metrics\":\"Y\",\"log_file\":\"N\",\"log_file_append\":\"N\",\"show_subcomponents\":\"Y\""
                 +",\"create_parent_folder\":\"N\",\"remote_server\":\"192.168.1.201\",\"replay_date\":\"\"}";
-            JSONObject json=JSONObject.fromObject(config);
-            json.put("remote_server",minSlave.getHostName());
-            if(minSlave==null){
-                throw new Exception("当前无可用的正常节点!");
-            }else{
-                if(flag.equals("job")){
-                    JobMeta jobMeta=RepositoryUtils.loadJobbyPath(path);
-                    org.flhy.ext.utils.JSONObject jsonObject = org.flhy.ext.utils.JSONObject.fromObject(json.toString());
-                    JobExecutionConfiguration jobExecutionConfiguration = JobExecutionConfigurationCodec.decode(jsonObject, jobMeta);
-                    JobExecutor jobExecutor = JobExecutor.initExecutor(jobExecutionConfiguration, jobMeta);
-                    Thread tr = new Thread(jobExecutor, "JobExecutor_" + jobExecutor.getExecutionId());
-                    tr.start();
-                }else if(flag.equals("transformation")){
-                    TransMeta transMeta=RepositoryUtils.loadTransByPath(path);
-                    org.flhy.ext.utils.JSONObject jsonObject = org.flhy.ext.utils.JSONObject.fromObject(json.toString());
-                    TransExecutionConfiguration transExecutionConfiguration = TransExecutionConfigurationCodec.decode(jsonObject, transMeta);
-                    TransExecutor transExecutor = TransExecutor.initExecutor(transExecutionConfiguration, transMeta);
-                    Thread tr = new Thread(transExecutor, "TransExecutor_" + transExecutor.getExecutionId());
-                    tr.start();
-                }
-                //输出结果返回给客户端
-                response.setContentType("text/html;charset=utf-8");
-                PrintWriter out=response.getWriter();
-                out.write("......");
-                out.flush();
-                out.close();
+        JSONObject json=JSONObject.fromObject(config);
+        json.put("remote_server",minSlave.getHostName());
+        if(minSlave==null){
+            throw new Exception("当前无可用的正常节点!");
+        }else{
+            if(flag.equals("job")){
+                JobMeta jobMeta=RepositoryUtils.loadJobbyPath(path);
+                org.flhy.ext.utils.JSONObject jsonObject = org.flhy.ext.utils.JSONObject.fromObject(json.toString());
+                JobExecutionConfiguration jobExecutionConfiguration = JobExecutionConfigurationCodec.decode(jsonObject, jobMeta);
+                JobExecutor jobExecutor = JobExecutor.initExecutor(jobExecutionConfiguration, jobMeta);
+                Thread tr = new Thread(jobExecutor, "JobExecutor_" + jobExecutor.getExecutionId());
+                tr.start();
+            }else if(flag.equals("transformation")){
+                TransMeta transMeta=RepositoryUtils.loadTransByPath(path);
+                org.flhy.ext.utils.JSONObject jsonObject = org.flhy.ext.utils.JSONObject.fromObject(json.toString());
+                TransExecutionConfiguration transExecutionConfiguration = TransExecutionConfigurationCodec.decode(jsonObject, transMeta);
+                TransExecutor transExecutor = TransExecutor.initExecutor(transExecutionConfiguration, transMeta);
+                Thread tr = new Thread(transExecutor, "TransExecutor_" + transExecutor.getExecutionId());
+                tr.start();
             }
+            //输出结果返回给客户端
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write("......");
+            out.flush();
+            out.close();
+        }
     }
 
     //定时执行作业
@@ -342,7 +349,7 @@ public class TaskController {
         boolean isSuccess=false;
         String json="";
         try{
-            isSuccess=jobService.beforeTimeExecuteJob(StringDateUtil.getMapByRequest(request));
+            isSuccess=jobService.beforeTimeExecuteJob(StringDateUtil.getMapByRequest(request),request);
             if(isSuccess){
                 json="{'success':true,'isSuccess':true}";
             }else{
@@ -363,7 +370,7 @@ public class TaskController {
     @RequestMapping(value="/fiexdExecute")
     protected void fiexdExecute(HttpServletResponse response,HttpServletRequest request,@RequestParam String graphXml, @RequestParam String executionConfiguration) throws Exception{
         try{
-            jobService.addTimeExecuteJob(graphXml,executionConfiguration);
+            jobService.addTimeExecuteJob(graphXml,executionConfiguration,request);
         }catch(Exception e){
             e.printStackTrace();
         }
