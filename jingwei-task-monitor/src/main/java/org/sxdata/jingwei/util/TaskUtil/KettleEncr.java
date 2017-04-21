@@ -14,9 +14,9 @@ public class KettleEncr {
     private static final int RADIX = 16;
     private static final String SEED = "0933910847463829827159347601486730416058";
     public static void main(String[] args) {
-       String x = decryptPasswd("Encrypted 2be98afc86aa7f2e4cb79ce10cc9da0ce");
+       String x = decryptPasswd("Encrypted 2be98afc86aa7f2e4cb1aa265cd86aac8");
         System.out.println(x);
-        String cluster = encryptPassword("3xdata209");
+        String cluster = encryptPassword("cluster");
         System.out.println(cluster);
 
     }

@@ -9,14 +9,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.sxdata.jingwei.entity.UserEntity;
 import org.sxdata.jingwei.entity.UserGroupAttributeEntity;
 import org.sxdata.jingwei.service.UserService;
-import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Map;
 
 /**
  * Created by cRAZY on 2017/3/28.
@@ -73,7 +71,8 @@ public class UserController {
     @ResponseBody
     protected void deleteUser(HttpServletResponse response,HttpServletRequest request){
         String userId=request.getParameter("userId");
-        userService.deleteUserById(Integer.valueOf(userId));
+        String username=request.getParameter("username");
+        userService.deleteUser(Integer.valueOf(userId),username);
     }
 
     //修改用户

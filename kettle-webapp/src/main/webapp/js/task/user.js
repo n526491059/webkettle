@@ -1,5 +1,6 @@
 //展示用户信息
 function showUserPanel(secondGuidePanel){
+    secondGuidePanel.removeAll(true);
     //为表格添加一行复选框用于选择行
     var sm=new Ext.grid.CheckboxSelectionModel();
     //列模型
@@ -33,7 +34,7 @@ function showUserPanel(secondGuidePanel){
         {header:"操作",width:280,dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(loginUserName=="admin"){
-                    return "<input type='button' onclick='' value='删除'>&nbsp;"+
+                    return "<input type='button' onclick='deleteUser()' value='删除'>&nbsp;"+
                         "<input type='button' onclick='updateUser()' value='修改'>&nbsp;"+
                         "<input type='button' onclick='allotUserGroup()' value='修改用户组'>&nbsp;";
                 }else{
@@ -94,7 +95,6 @@ function showUserPanel(secondGuidePanel){
     grid.getColumnModel().setHidden(2,true);
     //grid.getColumnModel().setHidden(3,true);
     grid.getColumnModel().setHidden(4,true);
-    secondGuidePanel.removeAll(true);
     secondGuidePanel.add(grid);
     secondGuidePanel.doLayout();
 }
@@ -745,5 +745,24 @@ function allotUserGroup(){
         grpSlavePower.hide();
         grpTaskGroupPower.hide();
     }
+}
+
+//删除用户
+function deleteUser(){
+    var usersPanel=Ext.getCmp("usersPanel");
+    var username=usersPanel.getSelectionModel().getSelected().get("login");
+    var userId=usersPanel.getSelectionModel().getSelected().get("userId");
+    Ext.Ajax.request({
+        url:"/user/deleteUser.do",
+        success:function(response,config){
+            Ext.MessageBox.alert("success");
+            var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+            showUserPanel(secondGuidePanel);
+        },
+        failure:function(){
+            Ext.MessageBox.alert("error","服务器异常,请稍后尝试");
+        },
+        params:{username:username,userId:userId}
+    })
 }
 

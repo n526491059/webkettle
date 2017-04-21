@@ -121,6 +121,11 @@
         delete from d_user_group_member_attribute where USER_GROUP_NAME=#{name}
     </delete>
 
+    <!--根据用户名删除用户用户成员表中的记录-->
+    <delete id="deleteUserAttributeByName">
+        delete from d_user_group_member_attribute where USER_NAME=#{username}
+    </delete>
+
     <!--删除用户组下可见的节点记录-->
     <delete id="deleteSlaveRelationByGroupName">
         delete from d_user_group_slaves_relation where USER_GROUP_NAME=#{name}

@@ -204,12 +204,13 @@ function assignedSlaveForUserGroup(){
     var userGroupPanel=Ext.getCmp("userGroupPanel");
     //获取被选中的用户组名
     var userGroupName=userGroupPanel.getSelectionModel().getSelected().get("userGroupName");
-    //获取该用户组下可见的任务组名的集合
+    //获取该用户组下可见节点的集合
     Ext.Ajax.request({
         url:"/userGroup/beforeAssignedSlave.do",
         success:function(response,config){
             var slaveIdArrayByChoose=Ext.decode(response.responseText).slaveIdArray;
             var slavePanel=getAllSlavePanel(slaveIdArrayByChoose,"");
+
             var chooseSlaveWindow=new Ext.Window({
                 title:"请选择可见节点",
                 modal:true,
@@ -259,7 +260,7 @@ function deleteUserGroup(){
     Ext.Ajax.request({
         url:"/user/getLoginUser.do",
         success:function(response,config){
-            var password=Ext.decode(response.responseText).password;
+            var password=Ext.decode(response.responseText).user.password;
             var onePassword="";
             var repeatPassword="";
             //设置密码框格式
@@ -306,35 +307,29 @@ function deleteUserGroup(){
 function userGroupInfo(){
     var userGroupPanel=Ext.getCmp("userGroupPanel");
     var chooseUserGroupName=userGroupPanel.getSelectionModel().getSelected().get("userGroupName");
-    Ext.Ajax.request({
-        url:"/userGroup/beforeSelectUserGroupInfo.do",
-        success:function(response,config){
-            var result=Ext.decode(response.responseText);
-            var slavePanel=getAllSlavePanel(result.slaveIdArray,"节点");
-            var taskGroupPanel=getAllTaskGroupPanel(result.taskGroupNameArray,"用户组");
-            var infoTabPanel=new Ext.TabPanel({
-                width:575,
-                height:510
-            })
-            infoTabPanel.add(slavePanel);
-            infoTabPanel.add(taskGroupPanel);
-            infoTabPanel.setActiveTab(slavePanel);
-            var userGroupInfoWindow=new Ext.Window({
-                id: "userGroupInfoWindow",
-                title: "用户组详情",
-                bodyStyle: "background-color:white",
-                width: 575,
-                modal: true,
-                height: 520,
-                items: [
-                    infoTabPanel
-                ]
-            })
-            userGroupInfoWindow.show(userGroupPanel);
-        },
-        failure:function(){},
-        params:{userGroupName:chooseUserGroupName}
+    //根据被选中的用户组名获取当前用户组下的节点、任务组列表
+    var slavePanel=getSlaveByThis(chooseUserGroupName);
+    var taskGroupPanel=getTaskGroupByThis(chooseUserGroupName);
+    var infoTabPanel=new Ext.TabPanel({
+        width:575,
+        height:510
     })
+    infoTabPanel.add(slavePanel);
+    infoTabPanel.add(taskGroupPanel);
+    infoTabPanel.setActiveTab(slavePanel);
+    var userGroupInfoWindow=new Ext.Window({
+        id: "userGroupInfoWindow",
+        title: "用户组详情",
+        bodyStyle: "background-color:white",
+        width: 575,
+        modal: true,
+        height: 520,
+        items: [
+            infoTabPanel
+        ]
+    })
+    userGroupInfoWindow.show(userGroupPanel);
+
 }
 
 //修改用户组 获取修改前的数据展示
@@ -633,13 +628,10 @@ function chooseVisualSlave(taskGroupNameArray,userGroupName,userGroupDesc,slaveI
     chooseSlaveWindow.show(userGroupPanel);
 }
 
-//获取所有的任务组  默认选中参数数组中的任务组名
+//获取所有任务组  默认选中参数数组中的任务组名
 function getAllTaskGroupPanel(taskGroupNameArray,title){
 
-    var sm2=undefined;
-    if(title==""){
-        sm2=new Ext.grid.CheckboxSelectionModel();
-    }
+    sm2=new Ext.grid.CheckboxSelectionModel();
     //节点列模型
     var allTaskPanelModel=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
@@ -701,19 +693,19 @@ function getAllTaskGroupPanel(taskGroupNameArray,title){
             rsm.selectRows(chooseIndex,true);
         }
     },taskGroupPanelForAdd);
+    if(title!=""){
+        taskGroupPanelForAdd.getColumnModel().setHidden(1,true);
+    }
     return taskGroupPanelForAdd;
 }
 
-//获取所有的节点   默认选中参数数组中节点id
+//获取所有节点   默认选中参数数组中节点id
 function getAllSlavePanel(slaveIdArray,title){
-    var sm2=undefined;
-    if(title==""){
-        sm2=new Ext.grid.CheckboxSelectionModel();
-    }
-    //节点列模型
+    var sm2=new Ext.grid.CheckboxSelectionModel();
     var slaveModel=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
         sm2,
+        {header:"slaveId",width:50,dataIndex:"slaveId"},
         {header:"主机名",width:140,dataIndex:"hostName"},
         {header:"端口",width:90,dataIndex:"port"},
         {header:"负载指数",width:90,dataIndex:"loadAvg",tooltip:"这是负载指数"},
@@ -770,5 +762,97 @@ function getAllSlavePanel(slaveIdArray,title){
             rsm.selectRows(chooseIndex,true);
         }
     },slaveGridPanel);
+    slaveGridPanel.getColumnModel().setHidden(2,true);
+    if(title!=""){
+        slaveGridPanel.getColumnModel().setHidden(1,true);
+    }
     return slaveGridPanel;
 }
+
+//获取当前用户组下的任务组
+function getTaskGroupByThis(chooseUserGroupName){
+    //节点列模型
+    var allTaskPanelModel=new Ext.grid.ColumnModel([
+        new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
+        {header:"任务组id",dataIndex:"taskGroupId"},
+        {header:"任务组名",dataIndex:"taskGroupName"},
+        {header:"任务组描述",dataIndex:"taskGroupDesc"}
+    ]);
+
+    var proxy=new Ext.data.HttpProxy({url:"/userGroup/taskGroupByUserGroup.do"});
+
+    var allTaskRecord=Ext.data.Record.create([
+        {name:"taskGroupId",type:"string",mapping:"taskGroupId"},
+        {name:"taskGroupName",type:"string",mapping:"taskGroupName"},
+        {name:"taskGroupDesc",type:"string",mapping:"taskGroupDesc"}
+    ])
+    //totalProperty代表总条数 root代表当页的数据
+    var reader=new Ext.data.JsonReader({},allTaskRecord);
+
+    var store=new Ext.data.Store({
+        proxy:proxy,
+        reader:reader
+    })
+    store.load({params:{userGroupName:chooseUserGroupName}});
+
+    var taskGroupPanelForAdd=new Ext.grid.GridPanel({
+        title:"任务组",
+        autoScroll:true,
+        id:"taskGroupPanelForAdd",
+        width:595,
+        height:500,
+        cm:allTaskPanelModel,
+        store:store,
+        closable:true,
+        viewConfig : {
+            forceFit : true //让grid的列自动填满grid的整个宽度，不用一列一列的设定宽度
+        }
+    });
+    taskGroupPanelForAdd.getColumnModel().setHidden(1,true);
+    return taskGroupPanelForAdd;
+}
+
+//获取当前用户组下的节点
+function getSlaveByThis(chooseUserGroupName){
+
+    var slaveModel=new Ext.grid.ColumnModel([
+        new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
+        {header:"slaveId",width:50,dataIndex:"slaveId"},
+        {header:"主机名",width:140,dataIndex:"hostName"},
+        {header:"端口",width:90,dataIndex:"port"},
+        {header:"负载指数",width:90,dataIndex:"loadAvg",tooltip:"这是负载指数"},
+        {header:"状态",width:200,dataIndex:"status",align:"center"}
+    ]);
+
+    var proxy=new Ext.data.HttpProxy({url:"/userGroup/slaveByUserGroup.do"});
+
+    var slaveRecord=Ext.data.Record.create([
+        {name:"slaveId",type:"string",mapping:"slaveId"},
+        {name:"hostName",type:"string",mapping:"hostName"},
+        {name:"port",type:"string",mapping:"port"},
+        {name:"loadAvg",type:"string",mapping:"loadAvg"},
+        {name:"status",type:"string",mapping:"status"}
+    ])
+    var reader=new Ext.data.JsonReader({},slaveRecord);
+
+    var store=new Ext.data.Store({
+        proxy:proxy,
+        reader:reader
+    })
+    store.load({params:{userGroupName:chooseUserGroupName}});
+
+    var slaveGridPanel=new Ext.grid.GridPanel({
+        title:"节点",
+        autoScroll:true,
+        id:"slaveGridPanelBeforeAdd",
+        width:590,
+        height:500,
+        cm:slaveModel,      //列模型
+        store:store,    //数据源
+        closable:true
+    });
+    slaveGridPanel.getColumnModel().setHidden(1,true);
+
+    return slaveGridPanel;
+}
+

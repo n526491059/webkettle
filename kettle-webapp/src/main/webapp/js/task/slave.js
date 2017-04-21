@@ -426,7 +426,7 @@ function slaveTest(slaveGridPanel){
             url:"/slave/slaveTest.do",
             success:function(response,config){
                 Ext.MessageBox.updateProgress(1,"100%");
-                var testJSONString=response.responseText;
+                testJSONString=response.responseText;
                 setTimeout("showTestResultByWindow(testJSONString,slaveGridPanel)",600);
             },
             failure:function(){

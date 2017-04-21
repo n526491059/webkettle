@@ -183,4 +183,6 @@ public class UserGroupServiceImpl implements UserGroupService{
     public  List<UserGroupEntity> getAllUserGroup() {
        return userGroupDao.allUserGroup();
     }
+
+
 }

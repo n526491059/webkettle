@@ -66,4 +66,7 @@ public interface UserGroupDao {
 
     //根据用户名修改用户组与用户的关联表
     public void updateUserGroupAttrByName(UserGroupAttributeEntity attr);
+
+    //根据用户名删除用户用户成员表中的记录
+    public void deleteUserAttributeByName(String username);
 }

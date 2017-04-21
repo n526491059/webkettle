@@ -26,13 +26,26 @@
               d.TASK_PERMISSION_TYPE as taskGroupPower,
                d.USER_TYPE as userType
         from r_user r INNER JOIN d_user_group_member_attribute d
-        ON r.LOGIN=d.USER_NAME limit #{0},#{1}
+        ON r.LOGIN=d.USER_NAME
+        WHERE 1=1
+        <if test='param3!=null and param3!=""'>
+            AND r.LOGIN IN
+              (select a.USER_NAME from
+              d_user_group_member_attribute a where a.USER_GROUP_NAME=#{userGroupName})
+        </if>
+         limit #{0},#{1}
     </select>
 
     <!--获取用户的总数量-->
     <select id="getUserCount" resultType="java.lang.Integer">
         select count(0)
-        from r_user
+        from r_user r
+        WHERE 1=1
+        <if test='_parameter!=null and _parameter!=""'>
+            AND r.LOGIN IN
+            (select a.USER_NAME from
+            d_user_group_member_attribute a where a.USER_GROUP_NAME=#{userGroupName})
+        </if>
     </select>
 
     <!--修改用户-->
@@ -70,25 +83,6 @@
 
     <select id="selectMaxId" resultType="java.lang.Integer">
         select MAX(r.ID_USER) from r_user r
-    </select>
-
-    <select id="getUsersByUserGroupName" resultType="org.sxdata.jingwei.entity.UserEntity">
-            select
-              r.DESCRIPTION as description,
-              r.ID_USER as userId,
-              r.LOGIN as login,
-              r.`PASSWORD` as password,
-              r.`NAME` as name,
-              r.ENABLED as enabled,
-              d.USER_GROUP_NAME as belongToUserGroup,
-              d.SLAVE_PERMISSION_TYPE as slavePower,
-              d.TASK_PERMISSION_TYPE as taskGroupPower,
-              d.USER_TYPE as userType
-            from r_user r INNER JOIN d_user_group_member_attribute d
-            ON r.LOGIN=d.USER_NAME
-            WHERE d.USER_NAME IN
-              (select a.USER_NAME from
-              d_user_group_member_attribute a where a.USER_GROUP_NAME=#{userGroupName})
     </select>
 
 </mapper>

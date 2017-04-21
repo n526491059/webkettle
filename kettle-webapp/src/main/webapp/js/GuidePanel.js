@@ -225,7 +225,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 								{id:"transMonitor",text:"<font size = '2px'>转换管理</font>",cls:"nav",leaf:true},
 								{id:"taskGroupMonitor",text:"<font size = '2px'>任务组管理</font>",cls:"nav",leaf:true},
 								{id:"taskMonitoring",text:"<font size = '2px'>任务监控</font>",cls:"nav",leaf:true}
-							]
+							],id:"taskIdTwo",expand:true
 						},{
 							text : "<font size = '3px'>日志</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
 							children:[
@@ -255,6 +255,24 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				ddGroup:'TreePanelDDGroup',
 				autoScroll: true,
 				animate: false,
+				listeners: {
+					afterrender: function(node) {
+						fristGuidePanel.expandAll();
+						var rootnodes = fristGuidePanel.getRootNode().childNodes;   //获取主节点
+						for(var i=0;i<rootnodes.length;i++){  //从节点中取出子节点依次遍历
+							var rootnode = rootnodes[i];
+							if(rootnode.id=="taskIdTwo"){
+								var leafNodes=rootnode.childNodes;
+								for(var k=0;k<leafNodes.length;k++){
+									var leafNode=leafNodes[k];
+									if(leafNode.id=="jobMonitor"){
+										leafNode.fireEvent("click",leafNode)
+									}
+								}
+							}
+						}
+					}
+				},
 				rootVisible: false
 			});
 		}else{

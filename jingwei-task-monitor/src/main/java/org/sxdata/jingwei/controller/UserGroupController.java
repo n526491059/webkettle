@@ -6,7 +6,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.sxdata.jingwei.entity.SlaveEntity;
+import org.sxdata.jingwei.entity.TaskGroupEntity;
 import org.sxdata.jingwei.entity.UserGroupEntity;
+import org.sxdata.jingwei.service.SlaveService;
 import org.sxdata.jingwei.service.TaskGroupService;
 import org.sxdata.jingwei.service.UserGroupService;
 
@@ -26,6 +29,8 @@ public class UserGroupController {
     UserGroupService userGroupService;
     @Autowired
     TaskGroupService taskGroupService;
+    @Autowired
+    SlaveService slaveService;
 
 
 
@@ -227,6 +232,38 @@ public class UserGroupController {
     protected  void beforeAddSlave(HttpServletResponse response,HttpServletRequest request){
         try{
             List<UserGroupEntity> items=userGroupService.getAllUserGroup();
+            PrintWriter out=response.getWriter();
+            out.write(net.sf.json.JSONArray.fromObject(items).toString());
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    //获取某个用户组下的任务组
+    @RequestMapping(value="/taskGroupByUserGroup")
+    @ResponseBody
+    protected  void taskGroupByUserGroup(HttpServletResponse response,HttpServletRequest request){
+        try{
+            String userGroupName=request.getParameter("userGroupName");
+            List<TaskGroupEntity> items=taskGroupService.AllTaskGroupBeforeAdd(userGroupName);
+            PrintWriter out=response.getWriter();
+            out.write(net.sf.json.JSONArray.fromObject(items).toString());
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    //获取某用户组下的节点
+    @RequestMapping(value="/slaveByUserGroup")
+    @ResponseBody
+    protected  void slaveByUserGroup(HttpServletResponse response,HttpServletRequest request){
+        try{
+            String userGroupName=request.getParameter("userGroupName");
+            List<SlaveEntity> items=slaveService.getAllSlave(userGroupName);
             PrintWriter out=response.getWriter();
             out.write(net.sf.json.JSONArray.fromObject(items).toString());
             out.flush();

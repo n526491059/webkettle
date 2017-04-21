@@ -27,4 +27,5 @@ public interface UserGroupService {
     public void deleteUserGroup(String userGroupName);
 
     public List<UserGroupEntity> getAllUserGroup();
+
 }

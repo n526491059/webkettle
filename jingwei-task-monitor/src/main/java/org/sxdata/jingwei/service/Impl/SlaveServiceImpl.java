@@ -4,6 +4,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.flhy.ext.App;
 import org.flhy.ext.trans.steps.SystemInfo;
+import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.repository.LongObjectId;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
@@ -261,7 +262,11 @@ public class SlaveServiceImpl implements SlaveService {
         List<SlaveEntity> slaves=slaveDao.getAllSlave(userGroupName);
         if(null==slaves || slaves.size()<1)
             return null;
-        slaves=setLoadAvgAndStatus(slaves);
+       /* try{
+            slaves=setLoadAvgAndStatus(slaves);
+        }catch (Exception e){
+            e.printStackTrace();
+        }*/
         JSONObject result=new JSONObject();
         //设置需要获取指标信息的起止时间段
         if(null==chooseDate || chooseDate==""){
@@ -719,7 +724,6 @@ public class SlaveServiceImpl implements SlaveService {
         slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));
         CarteClient cc=new CarteClient(slave);
         boolean isActive=cc.isActive();
-        boolean isdbActive=!cc.isDBActive();
         int timeOut=3000;
         boolean slaveNetStatus= InetAddress.getByName(hostName).isReachable(timeOut);
         if(isActive){
@@ -737,8 +741,15 @@ public class SlaveServiceImpl implements SlaveService {
         }else{
             json.put("slaveNetwork","N");
         }
-        String hostInfo=cc.getSlaveHostInfo();
-        String jarArray=hostInfo.split("\\$")[3];
+        String jarArray="";
+        try {
+            boolean isdbActive=!cc.isDBActive();
+            String hostInfo=cc.getSlaveHostInfo();
+            if(!StringDateUtil.isEmpty(hostInfo)){
+                jarArray=hostInfo.split("\\$")[3];
+            }
+        }catch (Exception e){
+        }
         json.put("slaveJarSupport",jarArray);
         return json.toString();
     }
@@ -754,7 +765,7 @@ public class SlaveServiceImpl implements SlaveService {
         String port=(String)json.get("port");
         String webAppName=(String)json.get("webAppName");
         String username=(String)json.get("username");
-        String password=KettleEncr.encryptPassword((String)json.get("password"));
+        String password = Encr.encryptPasswordIfNotUsingVariables((String) json.get("password"));
         String master1=(String)json.get("master");
         char master;
         if(master1.equals("Y"))
