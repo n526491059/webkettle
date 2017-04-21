@@ -6,6 +6,7 @@ import org.sxdata.jingwei.entity.DirectoryEntity;
 import org.sxdata.jingwei.entity.JobEntity;
 import org.sxdata.jingwei.entity.JobTimeSchedulerEntity;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.Map;
  * Created by cRAZY on 2017/2/22.
  */
 public interface JobService {
-    public JSONObject findJobs(int start,int limit,String name,String createDate) throws Exception;
+    public JSONObject findJobs(int start,int limit,String name,String createDate,String userGroupName) throws Exception;
 
     public void deleteJobs(String jobPath,String flag) throws Exception;
 
@@ -22,9 +23,9 @@ public interface JobService {
 
     public boolean judgeJobIsAlike(JobTimeSchedulerEntity willAddJobTimer);
 
-    public void addTimeExecuteJob(String graphXml,String executionConfiguration) throws Exception;
+    public void addTimeExecuteJob(String graphXml,String executionConfiguration,HttpServletRequest request) throws Exception;
 
-    public boolean beforeTimeExecuteJob(Map<String, Object> params) throws Exception;
+    public boolean beforeTimeExecuteJob(Map<String, Object> params,HttpServletRequest request) throws Exception;
 
     public List<JobTimeSchedulerEntity> getAllTimerJob();
 

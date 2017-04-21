@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.sxdata.jingwei.bean.PageforBean;
+import org.sxdata.jingwei.entity.UserGroupAttributeEntity;
 import org.sxdata.jingwei.service.SchedulerService;
 import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 
@@ -24,7 +25,7 @@ public class TaskSchedulerController {
     @Autowired
     SchedulerService schedulerService;
 
-    //获取所有作业的定时调度信息
+    //获取作业的定时调度信息
     @RequestMapping(value="/getAllJobScheduler")
     @ResponseBody
     protected void getJobs(HttpServletResponse response,HttpServletRequest request) {
@@ -47,7 +48,10 @@ public class TaskSchedulerController {
             }
             String hostName=request.getParameter("hostName");
             String jobName=request.getParameter("jobName");
-            PageforBean bean=schedulerService.getAllSchedulerByPage(start,limit,typeId,hostName,jobName);
+            //获取当前用户所在的用户组
+            UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
+            String userGroupName=attr.getUserGroupName();
+            PageforBean bean=schedulerService.getAllSchedulerByPage(start,limit,typeId,hostName,jobName,userGroupName);
             //输出结果返回给客户端
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
@@ -101,7 +105,7 @@ public class TaskSchedulerController {
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
             String json="";
-                boolean isSuccess=schedulerService.updateSchedulerJob(StringDateUtil.getMapByRequest(request));
+                boolean isSuccess=schedulerService.updateSchedulerJob(StringDateUtil.getMapByRequest(request),request);
             if(isSuccess){
                 json="{'success':true,'isSuccess':true}";
             }else{

@@ -13,17 +13,17 @@ import java.util.List;
  */
 @Repository
 public interface TaskGroupDao {
-    public List<TaskGroupEntity> getAllTaskGroup(int start,int limit);
+    public List<TaskGroupEntity> getAllTaskGroup(int start,int limit,String userGroupName);
 
-    public Integer getTotalCountTaskGroup();
+    public Integer getTotalCountTaskGroup(String userGroupName);
 
     public void addTaskGroup(TaskGroupEntity taskGroup);
 
     public void addTaskGroupAttribute(TaskGroupAttributeEntity taskGroupAttribute);
 
-    public List<JobEntity> getAllJob();
+    public List<JobEntity> getAllJob(String userGroupName);
 
-    public List<TransformationEntity> getAllTrans();
+    public List<TransformationEntity> getAllTrans(String userGroupName);
 
     public List<TaskGroupEntity> getAllTaskGroupNoLimit();
 
@@ -48,4 +48,9 @@ public interface TaskGroupDao {
     //修改用户组-任务组关系表中的任务组名
     public void updateTaskGroupForTaskRelation(String oldName,String newName);
 
+    //删除用户组-任务组关系表中的某个任务组记录
+    public void deleteUserTaskRelationByName(String taskGroupName);
+
+    //查询当前用户组下的所有任务组
+    public List<TaskGroupEntity> getTaskGroupByThisUser(String userGroupName);
 }

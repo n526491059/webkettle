@@ -6,10 +6,16 @@ package org.sxdata.jingwei.entity;
  */
 public class SlaveEntity {
     private Integer slaveId;    //节点id
+    private String name;
     private String hostName;    //节点的ip地址
-    private String slaveUsername;
-    private String slavePassword;
+    private String username;
+    private String password;
     private String port;        //端口
+    private String webappName;
+    private String proxyHostname;
+    private String proxyPort;
+    private String nonproxyHosts;
+    private char master;
     private double loadAvg;     //负载指数
     private String status;      //状态
     private Integer runningJobNum;  //运行中的作业数
@@ -18,7 +24,53 @@ public class SlaveEntity {
     private Integer finishTransNum;  //当天完成的转换数
     private String upTime;  //在线时长
 
+    public String getNonproxyHosts() {
+        return nonproxyHosts;
+    }
 
+    public void setNonproxyHosts(String nonproxyHosts) {
+        this.nonproxyHosts = nonproxyHosts;
+    }
+
+    public String getWebappName() {
+        return webappName;
+    }
+
+    public void setWebappName(String webappName) {
+        this.webappName = webappName;
+    }
+
+    public String getProxyHostname() {
+        return proxyHostname;
+    }
+
+    public void setProxyHostname(String proxyHostname) {
+        this.proxyHostname = proxyHostname;
+    }
+
+    public String getProxyPort() {
+        return proxyPort;
+    }
+
+    public void setProxyPort(String proxyPort) {
+        this.proxyPort = proxyPort;
+    }
+
+    public char getMaster() {
+        return master;
+    }
+
+    public void setMaster(char master) {
+        this.master = master;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public void setRunningJobNum(Integer runningJobNum) {
         this.runningJobNum = runningJobNum;
@@ -61,19 +113,19 @@ public class SlaveEntity {
     }
 
     public String getUsername() {
-        return slaveUsername;
+        return username;
     }
 
     public String getPassword() {
-        return slavePassword;
+        return password;
     }
 
     public void setPassword(String password) {
-        this.slavePassword = password;
+        this.password = password;
     }
 
     public void setUsername(String username) {
-        this.slaveUsername = username;
+        this.username = username;
     }
 
     public void setLoadAvg(double loadAvg) {

@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.sxdata.jingwei.entity.TaskGroupAttributeEntity;
 import org.sxdata.jingwei.entity.TaskGroupEntity;
+import org.sxdata.jingwei.entity.UserGroupAttributeEntity;
 import org.sxdata.jingwei.service.TaskGroupService;
+import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -32,7 +35,10 @@ public class TaskGroupController {
         try{
             String taskName=request.getParameter("name");
             String type=request.getParameter("type");
-            List<TaskGroupEntity> items=taskGroupService.isContainsTask(taskName,type);
+            //获取当前用户所在的用户组
+            UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
+            String userGroupName=attr.getUserGroupName();
+            List<TaskGroupEntity> items=taskGroupService.isContainsTask(taskName,type,userGroupName);
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
             out.write(JSONArray.fromObject(items).toString());
@@ -100,7 +106,10 @@ public class TaskGroupController {
         try{
             Integer start=Integer.valueOf(request.getParameter("start"));
             Integer limit=Integer.valueOf(request.getParameter("limit"));
-            String result=taskGroupService.getAllTaskGroupByLogin(start,limit);
+            //获取当前用户所在的用户组
+            UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
+            String userGroupName=attr.getUserGroupName();
+            String result=taskGroupService.getAllTaskGroupByLogin(start, limit, userGroupName);
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
             out.write(result);
@@ -115,39 +124,7 @@ public class TaskGroupController {
     @RequestMapping(value="/addTaskGroup")
     @ResponseBody
     protected void addTaskGroup(HttpServletResponse response,HttpServletRequest request){
-        try{
-            List<TaskGroupAttributeEntity> attributes=new ArrayList<TaskGroupAttributeEntity>();
-            String taskGroupDesc=request.getParameter("taskGroupDesc");
-            String taskGroupName=request.getParameter("taskGroupName").trim();
-            String flag=request.getParameter("flag");
-
-            TaskGroupEntity taskGroup=new TaskGroupEntity();
-            taskGroup.setTaskGroupName(taskGroupName);
-            taskGroup.setTaskGroupDesc(taskGroupDesc);
-            if(flag.equals("Y")){
-                String taskArray=request.getParameter("taskArray");
-                //获取前台传递的json数组 每一个json存放 任务ID 任务类型
-                JSONArray jsons=JSONArray.fromObject(taskArray);
-                for(int i=0;i<jsons.size();i++){
-                    JSONObject json=jsons.getJSONObject(i);
-                    TaskGroupAttributeEntity item=new TaskGroupAttributeEntity();
-                    item.setType((String) json.get("type"));
-                    item.setTaskId(Integer.valueOf((String) json.get("taskId")));
-                    item.setTaskPath((String) json.get("taskPath"));
-                    item.setTaskName((String) json.get("taskName"));
-                    item.setTaskGroupName(taskGroupName);
-                    attributes.add(item);
-                }
-            }
-            taskGroupService.addTaskGroup(taskGroup,attributes);
-            response.setContentType("text/html;charset=utf-8");
-            PrintWriter out=response.getWriter();
-            out.write("");
-            out.flush();
-            out.close();
-        }catch (IOException e){
-            e.printStackTrace();
-        }
+        taskGroupService.addTaskGroup(request);
     }
 
     //添加新的任务组前先获取该用户下所有的作业以及转换
@@ -155,7 +132,10 @@ public class TaskGroupController {
     @ResponseBody
     protected void getAllTaskBeforeAdd(HttpServletResponse response,HttpServletRequest request){
         try{
-            String taskList=taskGroupService.getAllTaskBeforeAdd();
+            //获取当前用户所在的用户组
+            UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
+            String userGroupName=attr.getUserGroupName();
+            String taskList=taskGroupService.getAllTaskBeforeAdd(userGroupName);
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
             out.write(taskList);
@@ -218,6 +198,25 @@ public class TaskGroupController {
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
             out.write(result);
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    //创建作业or转换前获取所有的任务组
+    @RequestMapping(value = "/getAllTaskGroupBeforeCreate")
+    @ResponseBody
+    protected void getAllTaskGroupBeforeCreate(HttpServletRequest request,HttpServletResponse response){
+        try{
+            //获取当前用户所在的用户组
+            UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
+            String userGroupName=attr.getUserGroupName();
+            List<TaskGroupEntity> items=taskGroupService.AllTaskGroupBeforeAdd(userGroupName);
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write(JSONArray.fromObject(items).toString());
             out.flush();
             out.close();
         }catch (Exception e){

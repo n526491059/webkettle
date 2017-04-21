@@ -10,7 +10,20 @@
         j.CREATED_DATE as createDate,
         j.MODIFIED_USER as modifiedUser,
         j.MODIFIED_DATE as modifiedDate
-        from  r_transformation j limit #{0},#{1}
+        from  r_transformation j
+        WHERE 1=1
+        <if test='param3!=null and param3!=""'  >
+            AND j.`NAME` IN
+            (
+                select DISTINCT TASK_NAME from d_task_group_member_attribute where TASK_GROUP_NAME in
+                (
+                    select TASK_GROUP_NAME from
+                    d_user_group_tasks_relation where USER_GROUP_NAME=#{2}
+                )
+                AND TYPE="trans"
+            )
+        </if>
+         limit #{0},#{1}
     </select>
 
     <!--根据转换名获取转换-->
@@ -27,7 +40,18 @@
     </select>
 
     <select id="getTotalSize" resultType="java.lang.Integer">
-        select count(1) from r_transformation
+        select count(1) from r_transformation j WHERE 1=1
+        <if test='_parameter!=null and _parameter!=""'  >
+            AND j.`NAME` IN
+            (
+                select DISTINCT TASK_NAME from d_task_group_member_attribute where TASK_GROUP_NAME in
+                (
+                    select TASK_GROUP_NAME from
+                    d_user_group_tasks_relation where USER_GROUP_NAME=#{0}
+                )
+                AND TYPE="trans"
+            )
+        </if>
     </select>
 
 
@@ -42,6 +66,17 @@
         j.MODIFIED_USER as modifiedUser,
         j.MODIFIED_DATE as modifiedDate
         from  r_transformation j where 1=1
+        <if test='param5!=null and param5!=""'  >
+            AND j.`NAME` IN
+            (
+                select DISTINCT TASK_NAME from d_task_group_member_attribute where TASK_GROUP_NAME in
+                (
+                    select TASK_GROUP_NAME from
+                    d_user_group_tasks_relation where USER_GROUP_NAME=#{4}
+                )
+                AND TYPE="trans"
+            )
+        </if>
         <if test='param3!=null and param3!=""'  >
            and j.name LIKE concat('%',#{2},'%')
         </if>
@@ -53,6 +88,17 @@
 
     <select id="conditionFindTransCount" resultType="java.lang.Integer">
         select count(1) from r_transformation j WHERE 1=1
+        <if test='param3!=null and param3!=""'  >
+            AND j.`NAME` IN
+            (
+                select DISTINCT TASK_NAME from d_task_group_member_attribute where TASK_GROUP_NAME in
+                (
+                    select TASK_GROUP_NAME from
+                    d_user_group_tasks_relation where USER_GROUP_NAME=#{2}
+                )
+                AND TYPE="trans"
+            )
+        </if>
         <if test='param1!=null and param1!=""'>
             and j.name LIKE concat('%',#{0},'%')
         </if>

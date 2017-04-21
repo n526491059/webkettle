@@ -10,7 +10,7 @@ import java.util.List;
  * Created by cRAZY on 2017/3/28.
  */
 public interface UserService {
-    public void deleteUserById(Integer id);
+    public void deleteUser(Integer id,String username);
 
     public void updateUser(UserEntity user,UserGroupAttributeEntity attr);
 
@@ -23,4 +23,5 @@ public interface UserService {
     public String login(String userName,String password,HttpServletRequest request);
 
     public void allotUserGroup(UserGroupAttributeEntity attr);
+
 }

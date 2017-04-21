@@ -27,8 +27,6 @@ public abstract class AbstractJobEntry implements JobEntryEncoder, JobEntryDecod
 		
 		if(entry != null) {
 			decode(entry, cell, databases, metaStore);
-			// System.out.println("New JobEntryInterface built of type:
-			// "+entry.getTypeDesc());
 			if (jobPlugin != null) {
 				entry.setPluginId(jobPlugin.getIds()[0]);
 			}

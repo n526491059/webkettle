@@ -10,9 +10,9 @@ import java.util.List;
  * Created by cRAZY on 2017/3/10.
  */
 public interface ControlService {
-    public List<TaskControlEntity> getAllRunningJob() throws Exception;
+    public List<TaskControlEntity> getAllRunningJob(String userGroupName) throws Exception;
 
-    public List<TaskControlEntity> getAllRunningTrans() throws Exception;
+    public List<TaskControlEntity> getAllRunningTrans(String userGroupName) throws Exception;
 
     public String getLogDetailForJob(String id,String hostName) throws Exception;
 

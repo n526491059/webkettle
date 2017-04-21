@@ -90,11 +90,8 @@ function repositryOpenJob(secondGuidePanel,path,text){
 					var graph = graphPanel.getGraph();
 					decoder.decode(node, graph.getModel());
 					graphPanel.fireEvent('load');
-					Ext.getCmp("jobBodyPanel").disable();
-					Ext.getCmp("jobWestTreePanel").disable();
 				} finally {
 					Ext.getBody().unmask();
-					assignedTaskGroupByCreate(text,"job",secondGuidePanel);
 				}
 			},
 			failure: failureResponse
@@ -145,11 +142,8 @@ function repositryOpenTrans(secondGuidePanel,path,text){
 					var graph = graphPanel.getGraph();
 					decoder.decode(node, graph.getModel());
 					graphPanel.fireEvent('load');
-					Ext.getCmp("bodyPanelForTrans").disable();
-					Ext.getCmp("westTreePanelForTrans").disable();
 				} finally {
 					Ext.getBody().unmask();
-					assignedTaskGroupByCreate(text,"trans",secondGuidePanel);
 				}
 			},
 			failure: failureResponse
@@ -231,7 +225,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 								{id:"transMonitor",text:"<font size = '2px'>转换管理</font>",cls:"nav",leaf:true},
 								{id:"taskGroupMonitor",text:"<font size = '2px'>任务组管理</font>",cls:"nav",leaf:true},
 								{id:"taskMonitoring",text:"<font size = '2px'>任务监控</font>",cls:"nav",leaf:true}
-							]
+							],id:"taskIdTwo",expand:true
 						},{
 							text : "<font size = '3px'>日志</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
 							children:[
@@ -261,6 +255,25 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				ddGroup:'TreePanelDDGroup',
 				autoScroll: true,
 				animate: false,
+				listeners: {
+					afterrender: function(node) {
+						//fristGuidePanel.expandAll();
+						var rootnodes = fristGuidePanel.getRootNode().childNodes;   //获取主节点
+						for(var i=0;i<rootnodes.length;i++){  //从节点中取出子节点依次遍历
+							var rootnode = rootnodes[i];
+							if(rootnode.id=="taskIdTwo"){
+								rootnode.expand();
+								var leafNodes=rootnode.childNodes;
+								for(var k=0;k<leafNodes.length;k++){
+									var leafNode=leafNodes[k];
+									if(leafNode.id=="jobMonitor"){
+										leafNode.fireEvent("click",leafNode)
+									}
+								}
+							}
+						}
+					}
+				},
 				rootVisible: false
 			});
 		}else{
@@ -275,15 +288,6 @@ GuidePanel = Ext.extend(Ext.Panel, {
 						id:'fristGuidePanel',
 						children:[
 							{
-								id:'task',
-								cls:'nav-node',
-								icon:'ui/images/folder.svg?scale=32',
-								text : "<font size = '3px'>模型</font>",
-								children:[
-									{id:"newTrans",text:"<font size = '2px'>新建转换</font>",cls:"nav",leaf:true},
-									{id:"newJob",text:"<font size = '2px'>新建作业</font>",cls:"nav",leaf:true}
-								]
-							},{
 								text : "<font size = '3px'>任务</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
 								children:[
 									{id:"jobMonitor",text:"<font size = '2px'>作业管理</font>",cls:"nav",leaf:true},
@@ -393,17 +397,50 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				secondGuidePanel.removeAll(true);
 				Ext.Msg.prompt('系统提示', '请输入转换名称:', function(btn, text){
 				    if (btn == 'ok' && text != '') {
-				    	Ext.getBody().mask('正在创建转换，请稍后...');
-				    	Ext.Ajax.request({
-							url: GetUrl('repository/createTrans.do'),
-							method: 'POST',
-							params: {dir: '/', transName: text},
-							success: function(response) {
-								var path = Ext.decode(response.responseText).message;
-								repositryOpenTrans(secondGuidePanel,path,text)
-							},
-							failure: failureResponse
-					   });
+						var taskGroupPanel=getAllTaskGroupBeforeCreate();
+						var addTaskGroupWindow=new Ext.Window({
+							title:"分配任务组",
+							bodyStyle:"background-color:white",
+							width:450,
+							modal:true,
+							height:550,
+							items:[
+								taskGroupPanel
+							],
+							tbar:new Ext.Toolbar({buttons:[
+								{
+									text:"下一步",
+									handler:function(){
+										var view=taskGroupPanel.getView();
+										var rsm=taskGroupPanel.getSelectionModel();
+										var taskGroupNameArray=new Array();
+										for(var i=0;i<view.getRows().length;i++) {
+											if(rsm.isSelected(i)){
+												taskGroupNameArray.push(taskGroupPanel.getStore().getAt(i).get("taskGroupName"));
+											}
+										}
+										if(taskGroupNameArray.length>0){
+											addTaskGroupWindow.close();
+											Ext.getBody().mask('正在创建转换，请稍后...');
+											Ext.Ajax.request({
+												url: GetUrl('repository/createTrans.do'),
+												method: 'POST',
+												params: {dir: '/',transName:text,taskGroupArray:taskGroupNameArray},
+												success: function(response) {
+													var path = Ext.decode(response.responseText).message;
+													repositryOpenTrans(secondGuidePanel,path,text)
+												},
+												failure: failureResponse
+											});
+										}else{
+											Ext.MessageBox.alert("提示","必须为该转换分配至少一个任务组");
+											return;
+										}
+									}
+								}
+							]})
+						});
+						addTaskGroupWindow.show(secondGuidePanel);
 				    }
 				});
 			}
@@ -412,18 +449,50 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				secondGuidePanel.removeAll(true);
 				Ext.Msg.prompt('系统提示', '请输入作业名称:', function(btn, text){
 				    if (btn == 'ok' && text != '') {
-				    	Ext.getBody().mask('正在创建作业，请稍后...');
-				    	Ext.Ajax.request({
-							url: GetUrl('repository/createJob.do'),
-							method: 'POST',
-							params: {dir: '/', jobName: text},
-							success: function(response) {
-								var path = Ext.decode(response.responseText).message;
-								repositryOpenJob(secondGuidePanel,path,text);
-							},
-							failure: failureResponse
-					   });
-
+						var taskGroupPanel=getAllTaskGroupBeforeCreate();
+						var addTaskGroupWindow=new Ext.Window({
+							title:"分配任务组",
+							bodyStyle:"background-color:white",
+							width:450,
+							modal:true,
+							height:550,
+							items:[
+								taskGroupPanel
+							],
+							tbar:new Ext.Toolbar({buttons:[
+								{
+									text:"下一步",
+									handler:function(){
+										var view=taskGroupPanel.getView();
+										var rsm=taskGroupPanel.getSelectionModel();
+										var taskGroupNameArray=new Array();
+										for(var i=0;i<view.getRows().length;i++) {
+											if(rsm.isSelected(i)){
+												taskGroupNameArray.push(taskGroupPanel.getStore().getAt(i).get("taskGroupName"));
+											}
+										}
+										if(taskGroupNameArray.length>0){
+											addTaskGroupWindow.close();
+											Ext.getBody().mask('正在创建作业，请稍后...');
+											Ext.Ajax.request({
+												url: GetUrl('repository/createJob.do'),
+												method: 'POST',
+												params: {dir: '/', jobName: text,taskGroupArray:taskGroupNameArray},
+												success: function(response) {
+													var path = Ext.decode(response.responseText).message;
+													repositryOpenJob(secondGuidePanel,path,text);
+												},
+												failure: failureResponse
+											});
+										}else{
+											Ext.MessageBox.alert("提示","必须为该转换分配至少一个任务组");
+											return;
+										}
+									}
+								}
+							]})
+						});
+						addTaskGroupWindow.show(secondGuidePanel);
 				    }
 				});
 			} else if(node.text == "<font size = '2px'>作业管理</font>") {
@@ -438,9 +507,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				secondGuidePanel.doLayout();
 				timeIntervalByTaskControl=setInterval("refreshControlPanel()",5000);
 			}else if(node.text=="<font size = '2px'>节点管理</font>"){
-				secondGuidePanel.removeAll(true);
-				secondGuidePanel.add(slaveManager());
-				secondGuidePanel.doLayout();
+				slaveManager(secondGuidePanel);
 			}else if(node.text=="<font size = '2px'>节点监控</font>"){
 				showSlaveMonitorPanel(secondGuidePanel);
 			}else if(node.text=="<font size = '2px'>任务组管理</font>"){
@@ -458,6 +525,8 @@ GuidePanel = Ext.extend(Ext.Panel, {
 		GuidePanel.superclass.initComponent.call(this);
 	}
 });
+
+
 
 
 //  TransGuide = Ext.extend(Ext.Panel, {

@@ -12,11 +12,13 @@ import org.sxdata.jingwei.dao.UserDao;
 import org.sxdata.jingwei.entity.JobTimeSchedulerEntity;
 import org.sxdata.jingwei.bean.PageforBean;
 import org.sxdata.jingwei.entity.SlaveEntity;
+import org.sxdata.jingwei.entity.UserEntity;
 import org.sxdata.jingwei.service.JobService;
 import org.sxdata.jingwei.service.SchedulerService;
 import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 import org.sxdata.jingwei.util.TaskUtil.CarteTaskManager;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -176,15 +178,15 @@ public class SchedulerServiceImpl implements SchedulerService {
 
     //分页形式获取所有的定时作业信息(包括查询功能)
     @Override
-    public PageforBean getAllSchedulerByPage(int start,int limit,Integer typeId,String hostName,String jobName) throws Exception {
+    public PageforBean getAllSchedulerByPage(int start,int limit,Integer typeId,String hostName,String jobName,String userGroupName) throws Exception {
         if(!StringDateUtil.isEmpty(hostName)){
             SlaveEntity slave=slaveDao.getSlaveByHostName(hostName);
             hostName=slave.getSlaveId()+"_"+hostName;
         }
-        List<JobTimeSchedulerEntity> jobs=schedulerDao.getTimerJobByPage(start,limit,typeId,hostName,jobName);
+        List<JobTimeSchedulerEntity> jobs=schedulerDao.getTimerJobByPage(start,limit,typeId,hostName,jobName,userGroupName);
         for(JobTimeSchedulerEntity job:jobs){
             int index=job.getSlaves().indexOf("_");
-            job.setHostName(job.getSlaves().substring(index+1));
+            job.setHostName(job.getSlaves().substring(index + 1));
             switch(job.getSchedulertype()){
                 case 1:
                     job.setTimerInfo("每隔"+job.getIntervalminutes()+"分钟执行");
@@ -206,7 +208,7 @@ public class SchedulerServiceImpl implements SchedulerService {
         PageforBean bean=new PageforBean();
         //查询总条数
         bean.setRoot(jobs);
-        bean.setTotalProperty(schedulerDao.getTotalCount(typeId,hostName,jobName));
+        bean.setTotalProperty(schedulerDao.getTotalCount(typeId,hostName,jobName,userGroupName));
         return bean;
     }
 
@@ -217,7 +219,7 @@ public class SchedulerServiceImpl implements SchedulerService {
     }
 
     @Override
-    public boolean updateSchedulerJob(Map<String, Object> params) throws Exception{
+    public boolean updateSchedulerJob(Map<String, Object> params,HttpServletRequest request) throws Exception{
         boolean isSuccess=false;
         //获取修改前对象
         JobTimeSchedulerEntity oldJobScheduler=schedulerDao.getSchedulerBytaskId(Long.valueOf(params.get("taskId").toString()));
@@ -227,11 +229,11 @@ public class SchedulerServiceImpl implements SchedulerService {
         //获取修改前的trigger
         SchedulerFactory factory=new StdSchedulerFactory();
         Scheduler scheduler=factory.getScheduler();
-        TriggerKey triggerKey=TriggerKey.triggerKey( triggerName, CarteTaskManager.JOB_TIMER_TASK_GROUP);
+        TriggerKey triggerKey=TriggerKey.triggerKey(triggerName, CarteTaskManager.JOB_TIMER_TASK_GROUP);
         Trigger oldtrigger=scheduler.getTrigger(triggerKey);
         //把新值赋给旧对象 并且根据不同的定时类型拼接不同的cron表达式
-        SlaveEntity slave=slaveDao.getSlaveById(Integer.valueOf(params.get("slaveId").toString()));
-        oldJobScheduler.setSlaves(slave.getSlaveId() + "_" + slave.getHostName());
+        String slaves=oldJobScheduler.getSlaves();
+        SlaveEntity slave=slaveDao.getSlaveByHostName(slaves.substring(slaves.indexOf("_") + 1));
         String type=params.get("typeChoose").toString().trim();
         if(type.equals("间隔重复")){
             Integer intervalMinutes=Integer.valueOf(params.get("intervalminute").toString());
@@ -308,10 +310,10 @@ public class SchedulerServiceImpl implements SchedulerService {
             //设置修改后的trigger
             builder.startNow();
             scheduler.rescheduleJob(triggerKey, oldtrigger);
-            //TODO
             JobDetail jobDetail=scheduler.getJobDetail(JobKey.jobKey(taskJobId.toString(), CarteTaskManager.JOB_TIMER_TASK_GROUP));
             jobDetail.getJobDataMap().put("slave", slave);
-            jobDetail.getJobDataMap().put("loginUser",userDao.getUserbyName("admin"));
+            String username=oldJobScheduler.getUsername();
+            jobDetail.getJobDataMap().put("loginUser",userDao.getUserbyName(username).get(0));
             //更新数据库
             schedulerDao.updateScheduler(oldJobScheduler);
             isSuccess=true;

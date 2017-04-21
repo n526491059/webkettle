@@ -15,6 +15,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.ibatis.session.SqlSession;
 import org.flhy.ext.App;
 import org.flhy.ext.PluginFactory;
 import org.flhy.ext.base.GraphCodec;
@@ -62,6 +63,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.sxdata.jingwei.entity.TaskGroupAttributeEntity;
+import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
+import org.sxdata.jingwei.util.TaskUtil.CarteClient;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -128,7 +132,8 @@ public class RepositoryController {
 	
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "/createTrans")
-	protected void createTrans(@RequestParam String dir, @RequestParam String transName) throws KettleException, IOException {
+	protected void createTrans(@RequestParam String dir, @RequestParam String transName,@RequestParam String[] taskGroupArray) throws KettleException, IOException {
+
 		Repository repository = App.getInstance().getRepository();
 		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
 		if(directory == null)
@@ -146,26 +151,52 @@ public class RepositoryController {
 		transMeta.setRepositoryDirectory(directory);
 		
 		repository.save(transMeta, "add: " + new Date(), null);
-		
+		//添加任务组记录
+		if(null!=taskGroupArray && taskGroupArray.length>0){
+			SqlSession sqlSession=CarteClient.sessionFactory.openSession();
+			try{
+				Integer taskId=Integer.valueOf(transMeta.getObjectId().getId());
+				for(String taskGroupName:taskGroupArray){
+					if(StringDateUtil.isEmpty(taskGroupName)){
+						continue;
+					}
+					TaskGroupAttributeEntity attr=new TaskGroupAttributeEntity();
+					attr.setTaskGroupName(taskGroupName);
+					attr.setType("trans");
+					attr.setTaskId(taskId);
+					attr.setTaskPath(dir + transName);
+					attr.setTaskName(transName);
+					sqlSession.insert("org.sxdata.jingwei.dao.TaskGroupDao.addTaskGroupAttribute",attr);
+				}
+				sqlSession.commit();
+				sqlSession.close();
+			}catch(Exception e){
+				e.printStackTrace();
+				sqlSession.rollback();
+				//删除转换
+				ObjectId id = repository.getTransformationID(transName, directory);
+				repository.deleteTransformation(id);
+				JsonUtils.fail("分配任务组失败!");
+			}
+		}
 		String transPath = directory.getPath();
 		if(!transPath.endsWith("/"))
 			transPath = transPath + '/';
 		transPath = transPath + transName;
-		
 		JsonUtils.success(transPath);
 		
 	}
 	
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "/createJob")
-	protected void createJob(@RequestParam String dir, @RequestParam String jobName) throws KettleException, IOException {
+	protected void createJob(@RequestParam String dir, @RequestParam String jobName,@RequestParam String[] taskGroupArray) throws KettleException, IOException {
 		Repository repository = App.getInstance().getRepository();
 		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
 		if(directory == null)
 			directory = repository.getUserHomeDirectory();
 		
 		if(repository.exists(jobName, directory, RepositoryObjectType.JOB)) {
-			JsonUtils.fail("该转换已经存在，请重新输入！");
+			JsonUtils.fail("该作业已经存在，请重新输入！");
 			return;
 		}
 		
@@ -176,6 +207,34 @@ public class RepositoryController {
 		jobMeta.setRepositoryDirectory(directory);
 		
 		repository.save(jobMeta, "add: " + new Date(), null);
+		//添加任务组记录
+		if(null!=taskGroupArray && taskGroupArray.length>0){
+			SqlSession sqlSession=CarteClient.sessionFactory.openSession();
+			try{
+				Integer taskId=Integer.valueOf(jobMeta.getObjectId().getId());
+				for(String taskGroupName:taskGroupArray){
+					if(StringDateUtil.isEmpty(taskGroupName)){
+						continue;
+					}
+					TaskGroupAttributeEntity attr=new TaskGroupAttributeEntity();
+					attr.setTaskGroupName(taskGroupName);
+					attr.setType("job");
+					attr.setTaskId(taskId);
+					attr.setTaskPath(dir + jobName);
+					attr.setTaskName(jobName);
+					sqlSession.insert("org.sxdata.jingwei.dao.TaskGroupDao.addTaskGroupAttribute",attr);
+				}
+				sqlSession.commit();
+				sqlSession.close();
+			}catch(Exception e){
+				e.printStackTrace();
+				sqlSession.rollback();
+				//删除作业
+				ObjectId id = repository.getJobId(jobName, directory);
+				repository.deleteJob(id);
+				JsonUtils.fail("作业创建失败!");
+			}
+		}
 		
 		String jobPath = directory.getPath();
 		if(!jobPath.endsWith("/"))

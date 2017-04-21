@@ -9,6 +9,7 @@ import org.sxdata.jingwei.dao.UserGroupDao;
 import org.sxdata.jingwei.entity.UserEntity;
 import org.sxdata.jingwei.entity.UserGroupAttributeEntity;
 import org.sxdata.jingwei.service.UserService;
+import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +27,8 @@ public class UserServiceImpl implements UserService{
     private UserGroupDao userGroupDao;
 
     @Override
-    public void deleteUserById(Integer id) {
+    public void deleteUser(Integer id,String username){
+        userGroupDao.deleteUserAttributeByName(username);
         userDao.deleteUser(id);
     }
 
@@ -58,37 +60,30 @@ public class UserServiceImpl implements UserService{
         //获取当前用户所在的用户组
         UserGroupAttributeEntity userAttribute=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
         String userGroupName=userAttribute.getUserGroupName();
+        //获取用户集合    总记录数
         List<UserEntity> users=new ArrayList<>();
-        //如果不是是admin用户
-        if(null!=userGroupName && !userGroupName.equals("")){
-            users=userDao.getUsersByUserGroupName(userGroupName);
-            //把管理员用户移除
+        Integer count= userDao.getUserCount(userGroupName);
+        users=userDao.getUsersLimit(start, limit,userGroupName);
+        //如果不是是admin用户 把该用户组下面所有用户权限为1的用户移除
+        if(!StringDateUtil.isEmpty(userGroupName)){
             List<UserEntity> adminUserArray=new ArrayList<>();
             for(int i=0;i<users.size();i++){
                 users.get(i).setPassword(KettleEncr.decryptPasswd(users.get(i).getPassword()));
-                UserGroupAttributeEntity attr=userGroupDao.getInfoByUserName(users.get(i).getLogin());
-                if(attr.getUserType()==1){
+                if(users.get(i).getUserType()==1){
                     adminUserArray.add(users.get(i));
                 }
             }
             for(UserEntity adminUser:adminUserArray){
                 users.remove(adminUser);
+                count--;
             }
         }else{
-            //如果是admin用户获取所有的用户列表
-            users=userDao.getUsersLimit(start, limit);
-            //移除admin用户本身
-            for(UserEntity user:users){
-                if(user.getLogin().equals("admin")){
-                    users.remove(user);
-                    break;
-                }
-            }
+            count--;
             for(UserEntity user:users){
                 user.setPassword(KettleEncr.decryptPasswd(user.getPassword()));
             }
         }
-        Integer count= userDao.getUserCount();
+
         PageforBean bean=new PageforBean();
         bean.setRoot(users);
         bean.setTotalProperty(count);
@@ -112,7 +107,7 @@ public class UserServiceImpl implements UserService{
                 result="密码输入错误,请再次确认";
             }else{
                 if(null==request.getSession().getAttribute("login")){
-                    users.get(0).setPassword(KettleEncr.decryptPasswd(users.get(0).getPassword()));
+                    user.setPassword(KettleEncr.decryptPasswd(users.get(0).getPassword()));
                     request.getSession().setAttribute("login", user);
                     UserGroupAttributeEntity attribute=userGroupDao.getInfoByUserName(userName);
                     if(null==attribute){

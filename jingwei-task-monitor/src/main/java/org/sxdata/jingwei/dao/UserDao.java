@@ -10,11 +10,10 @@ import java.util.List;
  */
 @Repository
 public interface UserDao {
-    public List<UserEntity> getUsersByUserGroupName(String userGroupName);
 
     public List<UserEntity> getUserbyName(String name);
 
-    public List<UserEntity> getUsersLimit(int start,int limit);
+    public List<UserEntity> getUsersLimit(int start,int limit,String userGroupName);
 
     public void updateUser(UserEntity user);
 
@@ -22,7 +21,7 @@ public interface UserDao {
 
     public void addUser(UserEntity user);
 
-    public Integer getUserCount();
+    public Integer getUserCount(String userGroupName);
 
     public List<UserEntity> getAllUsers();
 

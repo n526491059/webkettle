@@ -16,11 +16,16 @@ function generateTrans(secondGuidePanel){
         {header:"所属任务组",dataIndex:"belongToTaskGroup"},
         {header:"转换属性",width:280,dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
-                return "<input type='button' onclick='showOneTransDetail()' value='查看转换属性'>&nbsp;"+
-                    "<input type='button' onclick='deleteTransByTransPath()' value='删除'>&nbsp;"+
-                    "<input type='button' onclick='editorTrans()' value='编辑'>&nbsp;"+
-                    "<input type='button' onclick='transCompositionImg()' value='结构图'>&nbsp;"+
-                    "<input type='button' onclick='transPowerExecute()' value='智能执行'>&nbsp;";
+                if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
+                    return "<input type='button' onclick='showOneTransDetail()' value='查看转换属性'>&nbsp;"+
+                        "<input type='button' onclick='deleteTransByTransPath()' value='删除'>&nbsp;"+
+                        "<input type='button' onclick='editorTrans()' value='编辑'>&nbsp;"+
+                        "<input type='button' onclick='transCompositionImg()' value='结构图'>&nbsp;"+
+                        "<input type='button' onclick='transPowerExecute()' value='智能执行'>&nbsp;";;
+                }else{
+                    return "<input type='button' onclick='showOneTransDetail()' value='查看转换属性'>&nbsp;"+
+                        "<input type='button' onclick='transCompositionImg()' value='结构图'>&nbsp;";
+                }
             }
         }
     ]);
@@ -98,6 +103,80 @@ function generateTrans(secondGuidePanel){
         ]
     })
 
+    var t_bar="";
+    if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
+       t_bar=new Ext.Toolbar({
+           buttons:[
+               f ,"-",
+               {
+                   text:"查询",
+                   handler:function(){
+                       generateTrans(secondGuidePanel);
+                   }
+               },"-", {
+                   text:"执行转换配置",
+                   handler:function(){
+                       var path="";
+                       var num=0;
+                       var view=grid.getView();
+                       var rsm=grid.getSelectionModel();
+                       for(var i= 0;i<view.getRows().length;i++){
+                           if(rsm.isSelected(i)){
+                               //获取被选中的转换全目录路径
+                               path=grid.getStore().getAt(i).get("directoryName");
+                               num++;
+                           }
+                       }
+                       if(num!=1){
+                           Ext.MessageBox.alert("请先选择一个(只能一个)转换再执行");
+                           return;
+                       }
+                       /* var executeWindow=generateSlaveWindow(path,"transformation");
+                        executeWindow.show(grid);*/
+                       Ext.Ajax.request({
+                           url: GetUrl('task/detail.do'),
+                           method: 'POST',
+                           params: {taskName: path,type:'trans'},
+                           success: function(response) {
+                               var resObj = Ext.decode(response.responseText);
+                               var graphPanel = Ext.create({border: false, Executable: true }, resObj.GraphType);
+                               var dialog = new LogDetailDialog({
+                                   items: graphPanel
+                               });
+                               activeGraph = graphPanel;
+                               dialog.show(null, function() {
+                                   var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
+                                   var decoder = new mxCodec(xmlDocument);
+                                   var node = xmlDocument.documentElement;
+                                   var graph = graphPanel.getGraph();
+                                   decoder.decode(node, graph.getModel());
+                                   graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
+                               });
+                           }
+                       });
+                   }
+               },"-",{
+                   text:"分配任务组",
+                   handler:function () {
+                       beforeAssigned(grid,secondGuidePanel);
+                   }
+               }
+           ]
+       })
+    }else{
+        t_bar=new Ext.Toolbar({
+            buttons:[
+                f ,"-",
+                {
+                    text:"查询",
+                    handler:function(){
+                        generateTrans(secondGuidePanel);
+                    }
+                }
+            ]
+        })
+    }
+
     var grid=new Ext.grid.GridPanel({
         id:"transPanel",
         title:"transPanel",
@@ -109,64 +188,7 @@ function generateTrans(secondGuidePanel){
             forceFit : true //让grid的列自动填满grid的整个宽度，不用一列一列的设定宽度
         },
         closable:true,
-        tbar:new Ext.Toolbar({
-            buttons:[
-                f ,"-",
-                {
-                    text:"查询",
-                    handler:function(){
-                        generateTrans(secondGuidePanel);
-                    }
-                },"-", {
-                    text:"执行转换配置",
-                    handler:function(){
-                       var path="";
-                        var num=0;
-                        var view=grid.getView();
-                        var rsm=grid.getSelectionModel();
-                        for(var i= 0;i<view.getRows().length;i++){
-                            if(rsm.isSelected(i)){
-                                //获取被选中的转换全目录路径
-                                path=grid.getStore().getAt(i).get("directoryName");
-                                num++;
-                            }
-                        }
-                        if(num!=1){
-                            Ext.MessageBox.alert("请先选择一个(只能一个)转换再执行");
-                            return;
-                        }
-                       /* var executeWindow=generateSlaveWindow(path,"transformation");
-                        executeWindow.show(grid);*/
-                        Ext.Ajax.request({
-                            url: GetUrl('task/detail.do'),
-                            method: 'POST',
-                            params: {taskName: path,type:'trans'},
-                            success: function(response) {
-                                var resObj = Ext.decode(response.responseText);
-                                var graphPanel = Ext.create({border: false, Executable: true }, resObj.GraphType);
-                                var dialog = new LogDetailDialog({
-                                    items: graphPanel
-                                });
-                                activeGraph = graphPanel;
-                                dialog.show(null, function() {
-                                    var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
-                                    var decoder = new mxCodec(xmlDocument);
-                                    var node = xmlDocument.documentElement;
-                                    var graph = graphPanel.getGraph();
-                                    decoder.decode(node, graph.getModel());
-                                    graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
-                                });
-                            }
-                        });
-                    }
-                },"-",{
-                    text:"分配任务组",
-                    handler:function () {
-                        beforeAssigned(grid,secondGuidePanel);
-                    }
-                }
-            ]
-        }),
+        tbar:t_bar,
         bbar:new Ext.PagingToolbar({
             store:store,
             pageSize:15,
@@ -261,10 +283,7 @@ function editorTrans(){
                     items: [transComponentTree, graphPanel]
                 });
                 secondGuidePanel.doLayout();
-
                 activeGraph = graphPanel;
-
-
                 var xmlDocument = mxUtils.parseXml(decodeURIComponent(response.responseText));
                 var decoder = new mxCodec(xmlDocument);
                 var node = xmlDocument.documentElement;

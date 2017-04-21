@@ -11,13 +11,13 @@ import java.util.List;
 @Repository
 public interface JobDao {
 
-    public List<JobEntity> getThisPageJob(int start,int limit);
+    public List<JobEntity> getThisPageJob(int start,int limit,String userGroupName);
 
-    public Integer getTotalCount(); //获得总记录数
+    public Integer getTotalCount(String userGroupName); //获得总记录数
 
-    public List<JobEntity> conditionFindJobs(int start,int limit,String namme,String date);//带条件的查询
+    public List<JobEntity> conditionFindJobs(int start,int limit,String namme,String date,String userGroupName);//带条件的查询
 
-    public Integer conditionFindJobCount(String name,String date);//带条件查询总记录数
+    public Integer conditionFindJobCount(String name,String date,String UserGroupName);//带条件查询总记录数
 
     public JobEntity getJobById(Integer jobId);
 

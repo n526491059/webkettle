@@ -15,10 +15,13 @@ public interface SlaveDao {
 
     public SlaveEntity getSlaveById(Integer id);
 
-    public List<SlaveEntity> getAllSlave();
+    public List<SlaveEntity> getAllSlave(String userGroupName);
 
     public SlaveEntity getSlaveByHostName(String hostName);
 
-    public List<SlaveEntity> findSlaveByPageInfo(Integer start,Integer limit);
+    public List<SlaveEntity> findSlaveByPageInfo(Integer start,Integer limit,String userGroupName);
 
+    public void addSlave(SlaveEntity slave);
+
+    public Integer selectMaxId();
 }

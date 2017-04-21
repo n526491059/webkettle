@@ -75,7 +75,7 @@ public class TransServiceImpl implements TransService {
     }
 
     @Override
-    public JSONObject findTrans(int start, int limit, String transName, String createDate) throws Exception{
+    public JSONObject findTrans(int start, int limit, String transName, String createDate,String userGroupName) throws Exception{
 
         //创建分页对象以及需要返回客户端的数据
         net.sf.json.JSONObject result=null;
@@ -85,22 +85,24 @@ public class TransServiceImpl implements TransService {
 
         //如果传递的日期以及转换名参数都为空则代表是无条件查询,否则根据条件查询
         if(StringDateUtil.isEmpty(createDate) && StringDateUtil.isEmpty(transName)){
-           trans=transDao.getThisPageTrans(start, limit);
+           trans=transDao.getThisPageTrans(start, limit,userGroupName);
             //对日期进行处理转换成指定的格式
             for (TransformationEntity transformation:trans){
                 transformation.setCreateDate(format.parse(format.format(transformation.getCreateDate())));
                 transformation.setModifiedDate(format.parse(format.format(transformation.getModifiedDate())));
             }
             //获取总记录数、该页的记录,并且封装成分页对象
-            totalCount=transDao.getTotalSize();
+            totalCount=transDao.getTotalSize(userGroupName);
         }else{
-            createDate+=" 00:00:00";
-            trans=transDao.conditionFindTrans(start,limit,transName,createDate);
+            if(!createDate.isEmpty()){
+                createDate+=" 00:00:00";
+            }
+            trans=transDao.conditionFindTrans(start,limit,transName,createDate,userGroupName);
             for (TransformationEntity transformation:trans){
                 transformation.setCreateDate(format.parse(format.format(transformation.getCreateDate())));
                 transformation.setModifiedDate(format.parse(format.format(transformation.getModifiedDate())));
             }
-           totalCount=transDao.conditionFindTransCount(transName,createDate);
+           totalCount=transDao.conditionFindTransCount(transName,createDate,userGroupName);
 
         }
         //根据转换的id来查找该作业在资源库的绝对目录

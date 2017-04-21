@@ -90,6 +90,7 @@ function generateSchedulerMonitorPanel(secondGuidePanel){
                     }
                 },'-',
                 {
+                    id:"deleteSchedulerButton",
                     text:"删除",
                     handler:function(){
                         var view=jobSchedulerGrid.getView();
@@ -127,6 +128,7 @@ function generateSchedulerMonitorPanel(secondGuidePanel){
                 },'-',
                 {
                     text:"修改",
+                    id:"updateSchedulerButton",
                     handler:function(){
                         var view=jobSchedulerGrid.getView();
                         //获得行选择模型
@@ -232,6 +234,10 @@ function generateSchedulerMonitorPanel(secondGuidePanel){
     secondGuidePanel.removeAll(true);
     secondGuidePanel.add(jobSchedulerGrid);
     secondGuidePanel.doLayout();
+    if(loginUserType!=1 && loginUserName!="admin"){
+        Ext.getCmp("updateSchedulerButton").hide();
+        Ext.getCmp("deleteSchedulerButton").hide();
+    }
 }
 
 //生成定时类型的下拉列表

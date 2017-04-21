@@ -18,7 +18,16 @@ public class JobTimeSchedulerEntity {
     private Integer dayofmonth;
     private String timerInfo;   //定时信息的详细描述
     private String hostName;    //节点ip
-    private String executionConfig;
+    private String executionConfig; //执行定时作业时的配置信息 不参与持久化
+    private String username;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public long getIdJobtask() {
         return idJobtask;

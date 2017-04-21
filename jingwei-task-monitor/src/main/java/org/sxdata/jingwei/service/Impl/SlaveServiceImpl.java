@@ -4,6 +4,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.flhy.ext.App;
 import org.flhy.ext.trans.steps.SystemInfo;
+import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.repository.LongObjectId;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
@@ -14,7 +15,10 @@ import org.springframework.stereotype.Service;
 import org.sxdata.jingwei.bean.PageforBean;
 import org.sxdata.jingwei.dao.CarteInfoDao;
 import org.sxdata.jingwei.dao.SlaveDao;
+import org.sxdata.jingwei.dao.UserGroupDao;
 import org.sxdata.jingwei.entity.CarteInfoEntity;
+import org.sxdata.jingwei.entity.SlaveUserRelationEntity;
+import org.sxdata.jingwei.entity.UserGroupAttributeEntity;
 import org.sxdata.jingwei.service.SlaveService;
 import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 import org.sxdata.jingwei.util.TaskUtil.CarteClient;
@@ -22,6 +26,7 @@ import org.sxdata.jingwei.util.TaskUtil.CarteStatusVo;
 import org.sxdata.jingwei.entity.SlaveEntity;
 import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -37,6 +42,8 @@ public class SlaveServiceImpl implements SlaveService {
     protected SlaveDao slaveDao;
     @Autowired
     protected CarteInfoDao carteInfoDao;
+    @Autowired
+    protected UserGroupDao userGroupDao;
 
     public String[] getXvalue(List<CarteInfoEntity> items) throws Exception{
         String[] xValue=new String[items.size()];
@@ -61,8 +68,8 @@ public class SlaveServiceImpl implements SlaveService {
 
     @Override
     //获取所有节点的所有指标信息(某个时间段,默认3个小时内的)
-    public String allSlaveQuato() throws Exception {
-        List<SlaveEntity> slaves=slaveDao.getAllSlave();
+    public String allSlaveQuato(String userGroupName) throws Exception {
+        List<SlaveEntity> slaves=slaveDao.getAllSlave(userGroupName);
         JSONObject result=new JSONObject();
         //负载
         JSONObject loadAvg=new JSONObject();
@@ -251,11 +258,15 @@ public class SlaveServiceImpl implements SlaveService {
 
     @Override
     //所有节点某个指标信息的折线图
-    public String slaveQuatoLineChart(String quatoType,String maxOrAvg,String chooseDate) throws Exception {
-        List<SlaveEntity> slaves=slaveDao.getAllSlave();
+    public String slaveQuatoLineChart(String quatoType,String maxOrAvg,String chooseDate,String userGroupName) throws Exception {
+        List<SlaveEntity> slaves=slaveDao.getAllSlave(userGroupName);
         if(null==slaves || slaves.size()<1)
             return null;
-        slaves=setLoadAvgAndStatus(slaves);
+       /* try{
+            slaves=setLoadAvgAndStatus(slaves);
+        }catch (Exception e){
+            e.printStackTrace();
+        }*/
         JSONObject result=new JSONObject();
         //设置需要获取指标信息的起止时间段
         if(null==chooseDate || chooseDate==""){
@@ -562,27 +573,27 @@ public class SlaveServiceImpl implements SlaveService {
 
     @Override
     //所有节点某个指标信息的柱形图
-    public String slaveQuatoColumnDiagram(String quatoType,String maxOrAvg,String chooseDate) throws Exception {
+    public String slaveQuatoColumnDiagram(String quatoType,String maxOrAvg,String chooseDate,String userGroupName) throws Exception {
         return null;
     }
 
     @Override
     //所有节点某个指标信息的文本
-    public String slaveQuatoHTMLText(String quatoType,String maxOrAvg,String chooseDate) throws Exception {
+    public String slaveQuatoHTMLText(String quatoType,String maxOrAvg,String chooseDate,String userGroupName) throws Exception {
         return null;
     }
 
     @Override
     //获取所有节点的某个指标项信息
     //param1:节点的哪个指标   params2:视图类型     param3:显示平均值还是最大值
-    public String slaveQuatoByCondition(String quatoType,String viewType,String maxOrAvg,String chooseDate) throws Exception {
+    public String slaveQuatoByCondition(String quatoType,String viewType,String maxOrAvg,String chooseDate,String userGroupName) throws Exception {
         String result=null;
         if(viewType.equals("折线图")){
-            result=this.slaveQuatoLineChart(quatoType,maxOrAvg,chooseDate);
+            result=this.slaveQuatoLineChart(quatoType,maxOrAvg,chooseDate,userGroupName);
         }else if(viewType.equals("柱形图")){
-            result=this.slaveQuatoColumnDiagram(quatoType,maxOrAvg,chooseDate);
+            result=this.slaveQuatoColumnDiagram(quatoType,maxOrAvg,chooseDate,userGroupName);
         }else{
-            result=this.slaveQuatoHTMLText(quatoType,maxOrAvg,chooseDate);
+            result=this.slaveQuatoHTMLText(quatoType,maxOrAvg,chooseDate,userGroupName);
         }
         return result;
     }
@@ -620,8 +631,8 @@ public class SlaveServiceImpl implements SlaveService {
 
     @Override
     //获取所有节点信息
-    public List<SlaveEntity> getAllSlave() throws Exception {
-        List<SlaveEntity> slaves=slaveDao.getAllSlave();
+    public List<SlaveEntity> getAllSlave(String userGroupName) throws Exception {
+        List<SlaveEntity> slaves=slaveDao.getAllSlave(userGroupName);
         return this.setLoadAvgAndStatus(slaves);
     }
 
@@ -651,9 +662,9 @@ public class SlaveServiceImpl implements SlaveService {
     }
 
     @Override
-    public PageforBean findSlaveByPageInfo(Integer start, Integer limit) throws Exception {
-        //TODO  当前暂无用户模块 默认获取所有节点用作分页
-        List<SlaveEntity> slaves=slaveDao.findSlaveByPageInfo(start,limit);
+    public PageforBean findSlaveByPageInfo(Integer start, Integer limit,String userGroupName) throws Exception {
+
+        List<SlaveEntity> slaves=slaveDao.findSlaveByPageInfo(start,limit,userGroupName);
         //进一步获取节点的详细信息 运行的作业/转换数 在线时长等
         for(SlaveEntity slave:slaves){
             slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));
@@ -698,11 +709,13 @@ public class SlaveServiceImpl implements SlaveService {
     @Override
     public void deleteSlave(String[] items) throws Exception {
         for(String item:items){
-            SlaveEntity slave=slaveDao.getSlaveByHostName(item);
-            ObjectId objectId=new LongObjectId(slave.getSlaveId());
+            ObjectId objectId=new LongObjectId(Integer.valueOf(item));
             App.getInstance().getRepository().deleteSlave(objectId);
+
         }
     }
+
+
 
     @Override
     public String slaveTest(String hostName) throws Exception{
@@ -711,7 +724,6 @@ public class SlaveServiceImpl implements SlaveService {
         slave.setPassword(KettleEncr.decryptPasswd(slave.getPassword()));
         CarteClient cc=new CarteClient(slave);
         boolean isActive=cc.isActive();
-        boolean isdbActive=!cc.isDBActive();
         int timeOut=3000;
         boolean slaveNetStatus= InetAddress.getByName(hostName).isReachable(timeOut);
         if(isActive){
@@ -729,9 +741,88 @@ public class SlaveServiceImpl implements SlaveService {
         }else{
             json.put("slaveNetwork","N");
         }
-        String hostInfo=cc.getSlaveHostInfo();
-        String jarArray=hostInfo.split("\\$")[3];
+        String jarArray="";
+        try {
+            boolean isdbActive=!cc.isDBActive();
+            String hostInfo=cc.getSlaveHostInfo();
+            if(!StringDateUtil.isEmpty(hostInfo)){
+                jarArray=hostInfo.split("\\$")[3];
+            }
+        }catch (Exception e){
+        }
         json.put("slaveJarSupport",jarArray);
         return json.toString();
+    }
+
+    @Override
+    public String addSlave(HttpServletRequest request) {
+        String result="Y";
+        //解析json参数
+        String slaveServer=request.getParameter("slaveServer");
+        JSONObject json=JSONObject.fromObject(slaveServer);
+        String name=(String)json.get("name");
+        String hostname=(String)json.get("hostname");
+        String port=(String)json.get("port");
+        String webAppName=(String)json.get("webAppName");
+        String username=(String)json.get("username");
+        String password = Encr.encryptPasswordIfNotUsingVariables((String) json.get("password"));
+        String master1=(String)json.get("master");
+        char master;
+        if(master1.equals("Y"))
+            master='Y';
+        else
+            master='N';
+        String proxyHostname=(String)json.get("proxy_hostname");
+        String proxy_port=(String)json.get("proxy_port");
+        String nonproxyHosts=(String)json.get("non_proxy_hosts");
+        //判断是否该节点是否已经配置
+        List<SlaveEntity> items=slaveDao.getAllSlave("");
+        for(SlaveEntity item:items){
+            if(item.getHostName().equals(hostname) && item.getPort().equals(port)){
+                result="N";
+                return result;
+            }
+        }
+        Integer typeId=Integer.valueOf(request.getParameter("userType"));
+        SlaveEntity slave=new SlaveEntity();
+        Integer id=slaveDao.selectMaxId();
+        if(null==id)
+            id=1;
+        else
+            id+=1;
+        slave.setSlaveId(id);
+        slave.setName(name);
+        slave.setHostName(hostname);
+        slave.setPort(port);
+        slave.setWebappName(webAppName);
+        slave.setUsername(username);
+        slave.setPassword(password);
+        slave.setMaster(master);
+        slave.setProxyHostname(proxyHostname);
+        slave.setProxyPort(proxy_port);
+        slave.setNonproxyHosts(nonproxyHosts);
+        //判断添加节点的是admin还是普通管理员
+        slaveDao.addSlave(slave);
+        if(typeId==1){
+            UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
+            String userGroupName=attr.getUserGroupName();
+            SlaveUserRelationEntity sr=new SlaveUserRelationEntity();
+            sr.setSlaveId(id);
+            sr.setUserGroupName(userGroupName);
+            userGroupDao.addUserSlaveRelation(sr);
+        }else{
+            String[] userGroupNameArray=request.getParameterValues("userGroupArray");
+            if(null!=userGroupNameArray && userGroupNameArray.length>0){
+                for(String userGroupName:userGroupNameArray){
+                    if(!StringDateUtil.isEmpty(userGroupName)){
+                        SlaveUserRelationEntity sr=new SlaveUserRelationEntity();
+                        sr.setSlaveId(id);
+                        sr.setUserGroupName(userGroupName);
+                        userGroupDao.addUserSlaveRelation(sr);
+                    }
+                }
+            }
+        }
+        return result;
     }
 }

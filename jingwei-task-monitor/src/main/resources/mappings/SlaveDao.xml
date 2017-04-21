@@ -11,8 +11,8 @@
           r.ID_SLAVE as slaveId,
           r.HOST_NAME as hostName,
           r.`PORT` as port,
-          r.USERNAME as slaveUsername,
-          r.PASSWORD as slavePassword
+          r.USERNAME as username,
+          r.PASSWORD as password
         from r_slave r where r.ID_SLAVE=#{id}
     </select>
 
@@ -21,8 +21,8 @@
         r.ID_SLAVE as slaveId,
         r.HOST_NAME as hostName,
         r.`PORT` as port,
-        r.USERNAME as slaveUsername,
-        r.PASSWORD as slavePassword
+        r.USERNAME as username,
+        r.PASSWORD as password
         from r_slave r where r.HOST_NAME=#{hostName}
     </select>
 
@@ -31,9 +31,16 @@
         r.ID_SLAVE as slaveId,
         r.HOST_NAME as hostName,
         r.`PORT` as port,
-        r.USERNAME as slaveUsername,
-        r.PASSWORD as slavePassword
-        from r_slave r
+        r.USERNAME as username,
+        r.PASSWORD as password
+        from r_slave r WHERE 1=1
+        <if test='_parameter!=null and _parameter!=""'>
+            AND r.ID_SLAVE IN
+            (
+                select ID_SLAVE from
+                d_user_group_slaves_relation where USER_GROUP_NAME=#{0}
+            )
+        </if>
     </select>
 
     <select id="findSlaveByPageInfo" resultType="org.sxdata.jingwei.entity.SlaveEntity">
@@ -41,9 +48,24 @@
         r.ID_SLAVE as slaveId,
         r.HOST_NAME as hostName,
         r.`PORT` as port,
-        r.USERNAME as slaveUsername,
-        r.PASSWORD as slavePassword
-        from r_slave r limit #{0},#{1}
+        r.USERNAME as username,
+        r.PASSWORD as password
+        from r_slave r WHERE 1=1
+        <if test='param3!=null and param3!=""'>
+            AND r.ID_SLAVE IN
+            (
+                select ID_SLAVE from
+                d_user_group_slaves_relation where USER_GROUP_NAME=#{2}
+            )
+        </if>
+         limit #{0},#{1}
     </select>
 
+    <insert id="addSlave" parameterType="org.sxdata.jingwei.entity.SlaveEntity">
+      INSERT INTO r_slave VALUES (#{slaveId},#{name},#{hostName},#{port},#{webappName},#{username},#{password},#{proxyHostname},#{proxyPort},#{nonproxyHosts},#{master})
+    </insert>
+
+    <select id="selectMaxId" resultType="java.lang.Integer">
+      select MAX(r.ID_SLAVE) from r_slave r
+    </select>
 </mapper>

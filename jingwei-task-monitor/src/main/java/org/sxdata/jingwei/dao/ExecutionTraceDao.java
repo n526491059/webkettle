@@ -12,9 +12,9 @@ import java.util.List;
 public interface ExecutionTraceDao {
     public void addExecutionTrace(ExecutionTraceEntity trace);
 
-    public List<ExecutionTraceEntity> getAllLogByPage(int start,int limit,String statu,String type,String startDate,String taskName);
+    public List<ExecutionTraceEntity> getAllLogByPage(int start,int limit,String statu,String type,String startDate,String taskName,String userGroupName);
 
-    public Integer getAllLogCount(String statu,String type,String startDate,String taskName);
+    public Integer getAllLogCount(String statu,String type,String startDate,String taskName,String userGroupName);
 
     public ExecutionTraceEntity getTraceById(Integer id);
 }

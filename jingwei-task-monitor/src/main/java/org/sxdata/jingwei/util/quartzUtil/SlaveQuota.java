@@ -19,8 +19,8 @@ public class SlaveQuota {
     public static void quotaSlaveInfoRepeat() throws Exception{
         SqlSession session=CarteClient.sessionFactory.openSession();
         List<CarteInfoEntity> carteInfoList=new ArrayList<CarteInfoEntity>();
-        // TODO 当前暂无用户模块 获取所有节点
-        List<SlaveEntity> slaves=session.selectList("org.sxdata.jingwei.dao.SlaveDao.getAllSlave");
+        // 采集所有节点的信息
+        List<SlaveEntity> slaves=session.selectList("org.sxdata.jingwei.dao.SlaveDao.getAllSlave","");
         String nDate= StringDateUtil.dateToString(new java.util.Date(), "yyyy-MM-dd HH:mm:ss");
 
         CarteStatusVo vo=null;

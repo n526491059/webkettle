@@ -11,11 +11,37 @@
             j.CREATED_DATE as createDate,
             j.MODIFIED_USER as modifiedUser,
             j.MODIFIED_DATE as modifiedDate
-        from  r_job j limit #{0},#{1}
+            from  r_job j
+            WHERE 1=1
+        <if test='param3!=null and param3!=""'  >
+            AND j.`NAME` IN
+            (
+                select DISTINCT TASK_NAME from d_task_group_member_attribute
+                where TASK_GROUP_NAME in
+                    (
+                        select TASK_GROUP_NAME from
+                        d_user_group_tasks_relation where USER_GROUP_NAME=#{2}
+                    )
+                AND TYPE="job"
+            )
+        </if>
+         limit #{0},#{1}
     </select>
 
     <select id="getTotalCount" resultType="java.lang.Integer">
-        select count(*) from  r_job
+        select count(*) from  r_job j WHERE 1=1
+        <if test='_parameter!=null and _parameter!=""'  >
+            AND j.`NAME` IN
+            (
+                select DISTINCT TASK_NAME from d_task_group_member_attribute
+                where TASK_GROUP_NAME in
+                    (
+                    select TASK_GROUP_NAME from
+                    d_user_group_tasks_relation where USER_GROUP_NAME=#{0}
+                    )
+                AND TYPE="job"
+            )
+        </if>
     </select>
 
     <select id="conditionFindJobs" resultType="org.sxdata.jingwei.entity.JobEntity">
@@ -28,6 +54,17 @@
         j.MODIFIED_USER as modifiedUser,
         j.MODIFIED_DATE as modifiedDate
         from  r_job j where 1=1
+        <if test='param5!=null and param5!=""'  >
+            AND j.`NAME` IN
+            (
+                select DISTINCT TASK_NAME from d_task_group_member_attribute where TASK_GROUP_NAME in
+                (
+                  select TASK_GROUP_NAME from
+                  d_user_group_tasks_relation where USER_GROUP_NAME=#{4}
+                )
+                AND TYPE="job"
+            )
+        </if>
         <if test='param3!=null and param3!=""'  >
             and j.name LIKE concat('%',#{2},'%')
         </if>
@@ -38,7 +75,18 @@
     </select>
 
     <select id="conditionFindJobCount" resultType="java.lang.Integer">
-        select count(*) from  r_job j where 1=1
+        select count(1) from  r_job j where 1=1
+        <if test='param3!=null and param3!=""'  >
+            AND j.`NAME` IN
+            (
+                select DISTINCT TASK_NAME from d_task_group_member_attribute where TASK_GROUP_NAME in
+                    (
+                    select TASK_GROUP_NAME from
+                    d_user_group_tasks_relation where USER_GROUP_NAME=#{2}
+                    )
+                AND TYPE="job"
+            )
+        </if>
         <if test='param1!=null and param1!=""'  >
             and j.name LIKE concat('%',#{0},'%')
         </if>

@@ -64,7 +64,6 @@ public class JSONArray extends ArrayList<Object> {
 //	public static void main(String[] args) throws IOException {
 //		String fragment = null;
 //		ClassPathResource cpr = new ClassPathResource("common_jndi.json", DatabaseController.class);
-//		System.out.println(fragment = FileUtils.readFileToString(cpr.getFile(), "utf-8"));
 //		JSONArray jsonArray = JSONArray.fromObject(fragment);
 //	}
 }

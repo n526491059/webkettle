@@ -400,9 +400,9 @@ TransGraph = Ext.extend(BaseGraph, {
 				iconCls: 'check', scope: this, tooltip: '校验这个转换', handler: this.check
 			}, {
 				iconCls: 'SQLbutton', scope: this, tooltip: '产生需要运行这个转换的SQL', handler: this.getSQL
-			}, '-', {
+			}, '-', /*{
 				iconCls: 'SlaveServer', scope: this, handler: this.showSlaves
-			}, {
+			}*/, {
 				iconCls: 'ClusterSchema', scope: this, handler: this.clusterSchema
 			}, {
 				iconCls: 'PartitionSchema', scope: this, handler: this.partitionSchema

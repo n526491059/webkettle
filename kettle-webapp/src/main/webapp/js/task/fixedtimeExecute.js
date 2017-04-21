@@ -148,30 +148,14 @@ function IntevalMinuteTextField(){
 function fixedExecuteWindow(flag,formElementArray,uri){
      var chooseForm=generateDateForm(flag,formElementArray,uri);
     //获得节点展示列表
-    var fiexdWindow="";
-    if(flag!="添加"){
-        var slavePanel=getSlaveGridPanel(150,"");
-        fiexdWindow=new Ext.Window({
-            id:"fiexdWindow",
-            title:"定时窗口",
-            width:620,
-            height:450,
-            id:"fiexdWindow",
-            modal:true,
-            items:[slavePanel,chooseForm]
-        });
-    }else{
-        fiexdWindow=new Ext.Window({
-            id:"fiexdWindow",
-            width:610,
-            height:280,
-            id:"fiexdWindow",
-            modal:true,
-            items:[chooseForm]
-        });
-    }
-
-
+    fiexdWindow=new Ext.Window({
+        id:"fiexdWindow",
+        width:610,
+        height:280,
+        id:"fiexdWindow",
+        modal:true,
+        items:[chooseForm]
+    });
     return fiexdWindow;
 }
 
@@ -297,68 +281,50 @@ function generateToolButton(flag){
                 marginTop:'10px'
             },
             handler:function(){
-                var resultArrya=ifSlaveChoose();
-                if(resultArrya[0]==0){
-                    Ext.MessageBox.alert("提示","请至少选择一个正常节点进行修改!");
+                var chooseType=Ext.getCmp("typeChoose").getValue();
+                if(chooseType==undefined || chooseType==""){
+                    Ext.MessageBox.alert("提交失败","请先选择定时类型");
                     return;
-                }else if(resultArrya[0]>1){
-                    Ext.MessageBox.alert("提示","只能选择一个正常节点");
-                    return;
-                }else if(resultArrya[0]==-1){
-                    Ext.MessageBox.alert("提示","该节点异常,请重新选择!");
-                    return;
-                }else if(resultArrya[0]==1){
-                    var chooseType=Ext.getCmp("typeChoose").getValue();
-                    if(chooseType==undefined || chooseType==""){
-                        Ext.MessageBox.alert("提交失败","请先选择定时类型");
-                        return;
-                    }else{
-                        var targetForm=Ext.getCmp("fiexdForm");
-                        //把节点id以隐藏域形式显示 并且加入到表单中
-                        var slaveHidden=new Ext.form.Hidden({
-                            name: "slaveId",
-                            value:resultArrya[1]
-                        });
-                        targetForm.items.add(slaveHidden);
-                        //把获取到的定时Id以隐藏域形式显示 并且加入到表单中
-                        var jobSchedulerGrid=Ext.getCmp("schedulergrid");
-                        var view=jobSchedulerGrid.getView();
+                }else{
+                    var targetForm=Ext.getCmp("fiexdForm");
 
-                        var rsm=jobSchedulerGrid.getSelectionModel();
-                        var taskId="";
-                        for(var i=0;i<view.getRows().length;i++){
-                            if(rsm.isSelected(i)){
-                                taskId=jobSchedulerGrid.getStore().getAt(i).get("idJobtask");
-                            }
+                    //把获取到的定时Id以隐藏域形式显示 并且加入到表单中
+                    var jobSchedulerGrid=Ext.getCmp("schedulergrid");
+                    var view=jobSchedulerGrid.getView();
+                    var rsm=jobSchedulerGrid.getSelectionModel();
+                    var taskId="";
+                    for(var i=0;i<view.getRows().length;i++){
+                        if(rsm.isSelected(i)){
+                            taskId=jobSchedulerGrid.getStore().getAt(i).get("idJobtask");
                         }
-                        var taskIdHidden=new Ext.form.Hidden({
-                            name: "taskId",
-                            value:taskId
-                        });
-                        targetForm.items.add(taskIdHidden);
-                        targetForm.doLayout();
-                        //验证表单填写是否规范 然后提交表单
-                        targetForm.baseParams=targetForm.getForm().getValues();
-                        if(targetForm.getForm().isValid()){
-                            targetForm.getForm().submit({
-                                success:function(form,action){
-                                    if(action.result.isSuccess==false){
-                                        Ext.MessageBox.alert("修改失败","该作业已经存在相同执行周期的调度计划");
-                                    }else{
-                                        Ext.MessageBox.alert("成功","修改定时成功!");
-                                        var thisWindow=Ext.getCmp("fiexdWindow");
-                                        thisWindow.close();
-                                        var secondGuidePanel=Ext.getCmp("secondGuidePanel");
-                                        generateSchedulerMonitorPanel(secondGuidePanel);
-                                    }
-                                },
-                                failure:function(){
-                                    Ext.MessageBox.alert("异常","服务器异常,请稍后再试!");
+                    }
+                    var taskIdHidden=new Ext.form.Hidden({
+                        name: "taskId",
+                        value:taskId
+                    });
+                    targetForm.items.add(taskIdHidden);
+                    targetForm.doLayout();
+                    //验证表单填写是否规范 然后提交表单
+                    targetForm.baseParams=targetForm.getForm().getValues();
+                    if(targetForm.getForm().isValid()){
+                        targetForm.getForm().submit({
+                            success:function(form,action){
+                                if(action.result.isSuccess==false){
+                                    Ext.MessageBox.alert("修改失败","该作业已经存在相同执行周期的调度计划");
+                                }else{
+                                    Ext.MessageBox.alert("成功","修改定时成功!");
+                                    var thisWindow=Ext.getCmp("fiexdWindow");
+                                    thisWindow.close();
+                                    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+                                    generateSchedulerMonitorPanel(secondGuidePanel);
                                 }
-                            })
-                        }else{
-                            Ext.MessageBox.alert("失败","表单存在不规范填写,请再次确认后提交!");
-                        }
+                            },
+                            failure:function(){
+                                Ext.MessageBox.alert("异常","服务器异常,请稍后再试!");
+                            }
+                        })
+                    }else{
+                        Ext.MessageBox.alert("失败","表单存在不规范填写,请再次确认后提交!");
                     }
                 }
             }
@@ -380,6 +346,22 @@ function generateToolButton(flag){
                     Ext.MessageBox.alert("提交失败","请先选择定时类型");
                     return;
                 }else{
+
+                    var weekChoose=Ext.getCmp("weekChoose");
+                    var monthChoose=Ext.getCmp("monthChoose");
+                    if(chooseType=="每周执行"){
+                        if(weekChoose.getValue()==undefined || weekChoose.getValue()==""){
+                            Ext.MessageBox.alert("提示","请先选择每周执行的时间")
+                            return;
+                        }
+                    }
+                    if(chooseType=="每月执行"){
+                        if(monthChoose.getValue()==undefined || monthChoose.getValue()==""){
+                            Ext.MessageBox.alert("提示","请先选择每月执行的日期")
+                            return;
+                        }
+                    }
+
                     var targetForm=Ext.getCmp("fiexdForm");
                     //获取被选中作业的作业名 作业id 作业全目录名
                     var jobInfo=getJobInfo();

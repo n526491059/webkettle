@@ -96,6 +96,7 @@ function showTaskControlPanel(){
             },'-',
             {
                 text:"结束",
+                id:"endTaskByRunning",
                 handler:function(){
                     stopJobOrTrans(grid,secondGuidePanel);
                 }
@@ -117,6 +118,10 @@ function showTaskControlPanel(){
         ]})
     });
     grid.getColumnModel().setHidden(2,true);
+    if(loginUserName!="admin" && loginUserType!=1){
+        Ext.getCmp("pushOrStart").hide();
+        Ext.getCmp("endTaskByRunning").hide();
+    }
     transAndJobGrid=grid;
     return grid;
 }
