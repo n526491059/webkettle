@@ -7,9 +7,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.sxdata.jingwei.bean.PageforBean;
+import org.sxdata.jingwei.dao.UserGroupDao;
 import org.sxdata.jingwei.entity.SlaveEntity;
 import org.sxdata.jingwei.entity.UserGroupAttributeEntity;
+import org.sxdata.jingwei.entity.UserGroupEntity;
 import org.sxdata.jingwei.service.SlaveService;
+import org.sxdata.jingwei.service.UserGroupService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,6 +29,7 @@ public class SlaveController {
 
     @Autowired
     protected SlaveService slaveService;
+
 
     //获得节点信息 以panel形式显示
     @RequestMapping(value="/getSlave")
@@ -105,7 +109,7 @@ public class SlaveController {
             Integer limit=Integer.valueOf(request.getParameter("limit"));
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
             String userGroupName=attr.getUserGroupName();
-            PageforBean result=slaveService.findSlaveByPageInfo(start, limit,userGroupName);
+            PageforBean result=slaveService.findSlaveByPageInfo(start, limit, userGroupName);
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
             out.write(JSONObject.fromObject(result).toString());
@@ -159,11 +163,26 @@ public class SlaveController {
             //默认使用折线图作为展现方式
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
             String userGroupName=attr.getUserGroupName();
-            String result=slaveService.slaveQuatoByCondition(quatoType,"折线图",maxOrAvg,chooseDate,userGroupName);
+            String result=slaveService.slaveQuatoByCondition(quatoType, "折线图", maxOrAvg, chooseDate, userGroupName);
 
             if(null==result){
                 result="";
             }
+            PrintWriter out=response.getWriter();
+            out.write(result);
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    //新增节点
+    @RequestMapping(value="/addSlave")
+    @ResponseBody
+    protected  void addSlave(HttpServletResponse response,HttpServletRequest request){
+        try{
+            String result=slaveService.addSlave(request);
             PrintWriter out=response.getWriter();
             out.write(result);
             out.flush();

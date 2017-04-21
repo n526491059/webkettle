@@ -3,6 +3,7 @@ package org.flhy.webapp.trans;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Toolkit;
+import java.awt.color.ColorSpace;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -12,9 +13,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.print.attribute.IntegerSyntax;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.mchange.v2.c3p0.stmt.GooGooStatementCache;
 import net.sf.json.JSON;
 import org.flhy.ext.App;
 import org.flhy.ext.PluginFactory;
@@ -61,6 +64,7 @@ import org.pentaho.di.trans.debug.StepDebugMeta;
 import org.pentaho.di.trans.debug.TransDebugMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.springframework.beans.factory.parsing.QualifierEntry;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -103,6 +107,8 @@ public class TransGraphController {
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/save")
 	protected void save(@RequestParam String graphXml) throws Exception {
+
+
 		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
 		AbstractMeta transMeta = codec.decode(StringEscapeHelper.decode(graphXml));
 		Repository repository = App.getInstance().getRepository();
@@ -112,13 +118,13 @@ public class TransGraphController {
 		if(transMeta.getObjectId() == null)
 			transMeta.setObjectId(existingId);
 		transMeta.setModifiedDate(new Date());
-		
+
 		 boolean versioningEnabled = true;
          boolean versionCommentsEnabled = true;
          String fullPath = transMeta.getRepositoryDirectory() + "/" + transMeta.getName() + transMeta.getRepositoryElementType().getExtension(); 
          RepositorySecurityProvider repositorySecurityProvider = repository.getSecurityProvider() != null ? repository.getSecurityProvider() : null;
          if ( repositorySecurityProvider != null ) {
-        	 versioningEnabled = repositorySecurityProvider.isVersioningEnabled( fullPath );
+        	 versioningEnabled = repositorySecurityProvider.isVersioningEnabled(fullPath);
         	 versionCommentsEnabled = repositorySecurityProvider.allowsVersionComments( fullPath );
          }
 		String versionComment = null;
@@ -127,7 +133,6 @@ public class TransGraphController {
 		} else {
 			versionComment = "no comment";
 		}
-		
 		repository.save( transMeta, versionComment, null);
 		
 		JsonUtils.success("转换保存成功！");

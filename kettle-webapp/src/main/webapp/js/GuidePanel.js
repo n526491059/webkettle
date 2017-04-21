@@ -488,9 +488,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				secondGuidePanel.doLayout();
 				timeIntervalByTaskControl=setInterval("refreshControlPanel()",5000);
 			}else if(node.text=="<font size = '2px'>节点管理</font>"){
-				secondGuidePanel.removeAll(true);
-				secondGuidePanel.add(slaveManager());
-				secondGuidePanel.doLayout();
+				slaveManager(secondGuidePanel);
 			}else if(node.text=="<font size = '2px'>节点监控</font>"){
 				showSlaveMonitorPanel(secondGuidePanel);
 			}else if(node.text=="<font size = '2px'>任务组管理</font>"){
@@ -508,6 +506,8 @@ GuidePanel = Ext.extend(Ext.Panel, {
 		GuidePanel.superclass.initComponent.call(this);
 	}
 });
+
+
 
 
 //  TransGuide = Ext.extend(Ext.Panel, {

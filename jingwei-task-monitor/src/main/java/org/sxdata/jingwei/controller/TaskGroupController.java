@@ -10,6 +10,8 @@ import org.sxdata.jingwei.entity.TaskGroupAttributeEntity;
 import org.sxdata.jingwei.entity.TaskGroupEntity;
 import org.sxdata.jingwei.entity.UserGroupAttributeEntity;
 import org.sxdata.jingwei.service.TaskGroupService;
+import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -122,42 +124,7 @@ public class TaskGroupController {
     @RequestMapping(value="/addTaskGroup")
     @ResponseBody
     protected void addTaskGroup(HttpServletResponse response,HttpServletRequest request){
-        try{
-            List<TaskGroupAttributeEntity> attributes=new ArrayList<TaskGroupAttributeEntity>();
-            String taskGroupDesc=request.getParameter("taskGroupDesc");
-            String taskGroupName=request.getParameter("taskGroupName").trim();
-            String flag=request.getParameter("flag");
-            //获取当前用户所在的用户组
-            UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
-
-            TaskGroupEntity taskGroup=new TaskGroupEntity();
-            taskGroup.setTaskGroupName(taskGroupName);
-            taskGroup.setTaskGroupDesc(taskGroupDesc);
-            if(flag.equals("Y")){
-                String taskArray=request.getParameter("taskArray");
-                //获取前台传递的json数组 每一个json存放 任务ID 任务类型
-                JSONArray jsons=JSONArray.fromObject(taskArray);
-                for(int i=0;i<jsons.size();i++){
-                    JSONObject json=jsons.getJSONObject(i);
-                    TaskGroupAttributeEntity item=new TaskGroupAttributeEntity();
-                    item.setType((String) json.get("type"));
-                    item.setTaskId(Integer.valueOf((String) json.get("taskId")));
-                    item.setTaskPath((String) json.get("taskPath"));
-                    item.setTaskName((String) json.get("taskName"));
-                    item.setTaskGroupName(taskGroupName);
-                    attributes.add(item);
-                }
-            }
-            taskGroupService.addTaskGroup(taskGroup,attributes,userGroupName);
-            response.setContentType("text/html;charset=utf-8");
-            PrintWriter out=response.getWriter();
-            out.write("");
-            out.flush();
-            out.close();
-        }catch (IOException e){
-            e.printStackTrace();
-        }
+        taskGroupService.addTaskGroup(request);
     }
 
     //添加新的任务组前先获取该用户下所有的作业以及转换

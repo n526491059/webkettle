@@ -1,3 +1,45 @@
+function allUserGroupPanel(){
+    //为表格添加一行复选框用于选择需要操作 的记录
+    var sm=new Ext.grid.CheckboxSelectionModel();
+    //列模型
+    var cm=new Ext.grid.ColumnModel([
+        new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
+        sm,
+        {header:"用户组名",dataIndex:"userGroupName"},
+        {header:"用户组描述",dataIndex:"userGroupDesc"}
+    ]);
+
+    //准备数据 使用HttpProxy方式从后台获取json格式的数据
+    var proxy=new Ext.data.HttpProxy({url:"/userGroup/beforeAdd.do"});
+
+    //Record定义记录结果
+    var human=Ext.data.Record.create([
+        {name:"userGroupName",type:"string",mapping:"userGroupName"},
+        {name:"userGroupDesc",type:"string",mapping:"userGroupDesc"}
+    ])
+    var reader=new Ext.data.JsonReader({},human);
+
+    var store=new Ext.data.Store({
+        proxy:proxy,
+        reader:reader
+    })
+    store.load();
+
+    var grid=new Ext.grid.GridPanel({
+        id:"userGroupPanel",
+        width:400,
+        height:470,
+        cm:cm,      //列模型
+        sm:sm,      //行选择框
+        store:store,    //数据源
+        viewConfig : {
+            forceFit : true //让grid的列自动填满grid的整个宽度，不用一列一列的设定宽度
+        },
+        closable:true
+    });
+   return grid;
+}
+
 function generateUserGroupPanel(secondGuidePanel){
     //为表格添加一行复选框用于选择需要操作 的记录
     var sm=new Ext.grid.CheckboxSelectionModel();

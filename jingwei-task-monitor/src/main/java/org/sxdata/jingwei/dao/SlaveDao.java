@@ -21,4 +21,7 @@ public interface SlaveDao {
 
     public List<SlaveEntity> findSlaveByPageInfo(Integer start,Integer limit,String userGroupName);
 
+    public void addSlave(SlaveEntity slave);
+
+    public Integer selectMaxId();
 }

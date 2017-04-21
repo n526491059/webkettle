@@ -3,6 +3,7 @@ package org.sxdata.jingwei.service;
 import org.sxdata.jingwei.bean.PageforBean;
 import org.sxdata.jingwei.entity.SlaveEntity;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -30,4 +31,5 @@ public interface SlaveService {
 
     public String slaveQuatoHTMLText(String quatoType,String maxOrAvg,String chooseDate,String userGroupName) throws Exception;
 
+    public String addSlave(HttpServletRequest request);
 }

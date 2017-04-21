@@ -14,7 +14,10 @@ import org.springframework.stereotype.Service;
 import org.sxdata.jingwei.bean.PageforBean;
 import org.sxdata.jingwei.dao.CarteInfoDao;
 import org.sxdata.jingwei.dao.SlaveDao;
+import org.sxdata.jingwei.dao.UserGroupDao;
 import org.sxdata.jingwei.entity.CarteInfoEntity;
+import org.sxdata.jingwei.entity.SlaveUserRelationEntity;
+import org.sxdata.jingwei.entity.UserGroupAttributeEntity;
 import org.sxdata.jingwei.service.SlaveService;
 import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 import org.sxdata.jingwei.util.TaskUtil.CarteClient;
@@ -22,6 +25,7 @@ import org.sxdata.jingwei.util.TaskUtil.CarteStatusVo;
 import org.sxdata.jingwei.entity.SlaveEntity;
 import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -37,6 +41,8 @@ public class SlaveServiceImpl implements SlaveService {
     protected SlaveDao slaveDao;
     @Autowired
     protected CarteInfoDao carteInfoDao;
+    @Autowired
+    protected UserGroupDao userGroupDao;
 
     public String[] getXvalue(List<CarteInfoEntity> items) throws Exception{
         String[] xValue=new String[items.size()];
@@ -698,11 +704,13 @@ public class SlaveServiceImpl implements SlaveService {
     @Override
     public void deleteSlave(String[] items) throws Exception {
         for(String item:items){
-            SlaveEntity slave=slaveDao.getSlaveByHostName(item);
-            ObjectId objectId=new LongObjectId(slave.getSlaveId());
+            ObjectId objectId=new LongObjectId(Integer.valueOf(item));
             App.getInstance().getRepository().deleteSlave(objectId);
+
         }
     }
+
+
 
     @Override
     public String slaveTest(String hostName) throws Exception{
@@ -733,5 +741,77 @@ public class SlaveServiceImpl implements SlaveService {
         String jarArray=hostInfo.split("\\$")[3];
         json.put("slaveJarSupport",jarArray);
         return json.toString();
+    }
+
+    @Override
+    public String addSlave(HttpServletRequest request) {
+        String result="Y";
+        //解析json参数
+        String slaveServer=request.getParameter("slaveServer");
+        JSONObject json=JSONObject.fromObject(slaveServer);
+        String name=(String)json.get("name");
+        String hostname=(String)json.get("hostname");
+        String port=(String)json.get("port");
+        String webAppName=(String)json.get("webAppName");
+        String username=(String)json.get("username");
+        String password=KettleEncr.encryptPassword((String)json.get("password"));
+        String master1=(String)json.get("master");
+        char master;
+        if(master1.equals("Y"))
+            master='Y';
+        else
+            master='N';
+        String proxyHostname=(String)json.get("proxy_hostname");
+        String proxy_port=(String)json.get("proxy_port");
+        String nonproxyHosts=(String)json.get("non_proxy_hosts");
+        //判断是否该节点是否已经配置
+        List<SlaveEntity> items=slaveDao.getAllSlave("");
+        for(SlaveEntity item:items){
+            if(item.getHostName().equals(hostname) && item.getPort().equals(port)){
+                result="N";
+                return result;
+            }
+        }
+        Integer typeId=Integer.valueOf(request.getParameter("userType"));
+        SlaveEntity slave=new SlaveEntity();
+        Integer id=slaveDao.selectMaxId();
+        if(null==id)
+            id=1;
+        else
+            id+=1;
+        slave.setSlaveId(id);
+        slave.setName(name);
+        slave.setHostName(hostname);
+        slave.setPort(port);
+        slave.setWebappName(webAppName);
+        slave.setUsername(username);
+        slave.setPassword(password);
+        slave.setMaster(master);
+        slave.setProxyHostname(proxyHostname);
+        slave.setProxyPort(proxy_port);
+        slave.setNonproxyHosts(nonproxyHosts);
+        //判断添加节点的是admin还是普通管理员
+        slaveDao.addSlave(slave);
+        if(typeId==1){
+            UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
+            String userGroupName=attr.getUserGroupName();
+            SlaveUserRelationEntity sr=new SlaveUserRelationEntity();
+            sr.setSlaveId(id);
+            sr.setUserGroupName(userGroupName);
+            userGroupDao.addUserSlaveRelation(sr);
+        }else{
+            String[] userGroupNameArray=request.getParameterValues("userGroupArray");
+            if(null!=userGroupNameArray && userGroupNameArray.length>0){
+                for(String userGroupName:userGroupNameArray){
+                    if(!StringDateUtil.isEmpty(userGroupName)){
+                        SlaveUserRelationEntity sr=new SlaveUserRelationEntity();
+                        sr.setSlaveId(id);
+                        sr.setUserGroupName(userGroupName);
+                        userGroupDao.addUserSlaveRelation(sr);
+                    }
+                }
+            }
+        }
+        return result;
     }
 }

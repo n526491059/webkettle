@@ -11,8 +11,8 @@
           r.ID_SLAVE as slaveId,
           r.HOST_NAME as hostName,
           r.`PORT` as port,
-          r.USERNAME as slaveUsername,
-          r.PASSWORD as slavePassword
+          r.USERNAME as username,
+          r.PASSWORD as password
         from r_slave r where r.ID_SLAVE=#{id}
     </select>
 
@@ -21,8 +21,8 @@
         r.ID_SLAVE as slaveId,
         r.HOST_NAME as hostName,
         r.`PORT` as port,
-        r.USERNAME as slaveUsername,
-        r.PASSWORD as slavePassword
+        r.USERNAME as username,
+        r.PASSWORD as password
         from r_slave r where r.HOST_NAME=#{hostName}
     </select>
 
@@ -31,8 +31,8 @@
         r.ID_SLAVE as slaveId,
         r.HOST_NAME as hostName,
         r.`PORT` as port,
-        r.USERNAME as slaveUsername,
-        r.PASSWORD as slavePassword
+        r.USERNAME as username,
+        r.PASSWORD as password
         from r_slave r WHERE 1=1
         <if test='_parameter!=null and _parameter!=""'>
             AND r.ID_SLAVE IN
@@ -48,8 +48,8 @@
         r.ID_SLAVE as slaveId,
         r.HOST_NAME as hostName,
         r.`PORT` as port,
-        r.USERNAME as slaveUsername,
-        r.PASSWORD as slavePassword
+        r.USERNAME as username,
+        r.PASSWORD as password
         from r_slave r WHERE 1=1
         <if test='param3!=null and param3!=""'>
             AND r.ID_SLAVE IN
@@ -61,4 +61,11 @@
          limit #{0},#{1}
     </select>
 
+    <insert id="addSlave" parameterType="org.sxdata.jingwei.entity.SlaveEntity">
+      INSERT INTO r_slave VALUES (#{slaveId},#{name},#{hostName},#{port},#{webappName},#{username},#{password},#{proxyHostname},#{proxyPort},#{nonproxyHosts},#{master})
+    </insert>
+
+    <select id="selectMaxId" resultType="java.lang.Integer">
+      select MAX(r.ID_SLAVE) from r_slave r
+    </select>
 </mapper>

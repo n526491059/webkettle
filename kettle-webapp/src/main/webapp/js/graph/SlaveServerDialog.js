@@ -67,7 +67,7 @@ SlaveServerDialog = Ext.extend(Ext.Window, {
 						password: wPassword.getValue(),
 						master: wMaster.getValue() ? 'Y' : 'N',
 						sslMode: 'N',
-						
+
 						proxy_hostname: wProxyHost.getValue(),
 						proxy_port: wProxyPort.getValue(),
 						non_proxy_hosts: wNonProxyHosts.getValue()
@@ -133,7 +133,6 @@ SlaveServersDialog = Ext.extend(Ext.Window, {
 			}],
 			store: getActiveGraph().getSlaveServerStore()
 		});
-		
 		SlaveServersDialog.superclass.initComponent.call(this);
 	}
 });

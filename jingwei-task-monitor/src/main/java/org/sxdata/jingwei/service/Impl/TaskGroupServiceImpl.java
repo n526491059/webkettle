@@ -14,6 +14,7 @@ import org.sxdata.jingwei.service.TaskGroupService;
 import org.sxdata.jingwei.service.TransService;
 import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,19 +44,54 @@ public class TaskGroupServiceImpl implements TaskGroupService{
 
     @Override
     //添加任务组以及任务组下的明细
-    public void addTaskGroup(TaskGroupEntity taskGroupEntity, List<TaskGroupAttributeEntity> attributes,String userGroupName){
-        taskGroupDao.addTaskGroup(taskGroupEntity);
+    public void addTaskGroup(HttpServletRequest request){
+        //任务组对象
+        String taskGroupDesc=request.getParameter("taskGroupDesc");
+        String taskGroupName=request.getParameter("taskGroupName").trim();
+        TaskGroupEntity taskGroup=new TaskGroupEntity();
+        taskGroup.setTaskGroupName(taskGroupName);
+        taskGroup.setTaskGroupDesc(taskGroupDesc);
+        taskGroupDao.addTaskGroup(taskGroup);
+        //任务组成员对象 任务组下的任务
+        String taskArray=request.getParameter("taskArray");
+        //获取前台传递的json数组 每一个json存放 任务ID 任务类型
+        if (!StringDateUtil.isEmpty(taskArray)) {
+            JSONArray jsons=JSONArray.fromObject(taskArray);
+            for(int i=0;i<jsons.size();i++){
+                JSONObject json=jsons.getJSONObject(i);
+                TaskGroupAttributeEntity item=new TaskGroupAttributeEntity();
+                item.setType((String) json.get("type"));
+                item.setTaskId(Integer.valueOf((String) json.get("taskId")));
+                item.setTaskPath((String) json.get("taskPath"));
+                item.setTaskName((String) json.get("taskName"));
+                item.setTaskGroupName(taskGroupName);
+                taskGroupDao.addTaskGroupAttribute(item);
+            }
+        }
+
+        //获取当前用户所在的用户组
+        UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
+        String userGroupName=attr.getUserGroupName();
         //添加用户组-任务组关系表记录 如果用户组名不为空则代表不是admin用户 默认该用户组可见
         if(!StringDateUtil.isEmpty(userGroupName)){
             TaskUserRelationEntity ur=new TaskUserRelationEntity();
             ur.setUserGroupName(userGroupName);
-            ur.setTaskGroupName(taskGroupEntity.getTaskGroupName());
+            ur.setTaskGroupName(taskGroupName);
             userGroupDao.addTaskUserRelation(ur);
+        }else{
+            String[] userGroupNameArray=request.getParameterValues("userGroupNameArray");
+            if(!StringDateUtil.isEmpty(userGroupNameArray)){
+                for(String th:userGroupNameArray){
+                    if(StringDateUtil.isEmpty(th))
+                        continue;
+                    TaskUserRelationEntity ur=new TaskUserRelationEntity();
+                    ur.setUserGroupName(th);
+                    ur.setTaskGroupName(taskGroupName);
+                    userGroupDao.addTaskUserRelation(ur);
+                }
+            }
         }
-        //添加任务组下所有的任务记录
-        for(TaskGroupAttributeEntity item:attributes){
-            taskGroupDao.addTaskGroupAttribute(item);
-        }
+
     }
 
     @Override

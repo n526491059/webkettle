@@ -220,4 +220,19 @@ public class UserGroupController {
 
         }
     }
+
+    //获取所有用户组的列表
+    @RequestMapping(value="/beforeAdd")
+    @ResponseBody
+    protected  void beforeAddSlave(HttpServletResponse response,HttpServletRequest request){
+        try{
+            List<UserGroupEntity> items=userGroupService.getAllUserGroup();
+            PrintWriter out=response.getWriter();
+            out.write(net.sf.json.JSONArray.fromObject(items).toString());
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 }
