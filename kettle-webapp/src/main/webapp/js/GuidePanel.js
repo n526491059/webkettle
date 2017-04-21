@@ -257,11 +257,12 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				animate: false,
 				listeners: {
 					afterrender: function(node) {
-						fristGuidePanel.expandAll();
+						//fristGuidePanel.expandAll();
 						var rootnodes = fristGuidePanel.getRootNode().childNodes;   //获取主节点
 						for(var i=0;i<rootnodes.length;i++){  //从节点中取出子节点依次遍历
 							var rootnode = rootnodes[i];
 							if(rootnode.id=="taskIdTwo"){
+								rootnode.expand();
 								var leafNodes=rootnode.childNodes;
 								for(var k=0;k<leafNodes.length;k++){
 									var leafNode=leafNodes[k];

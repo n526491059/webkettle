@@ -247,6 +247,7 @@ function  transCompositionImg(){
 
 //编辑转换
 function editorTrans(){
+
     var grid=Ext.getCmp("transPanel");
     var secondGuidePanel=Ext.getCmp("secondGuidePanel");
     var path=grid.getSelectionModel().getSelected().get("directoryName");
@@ -283,10 +284,7 @@ function editorTrans(){
                     items: [transComponentTree, graphPanel]
                 });
                 secondGuidePanel.doLayout();
-
                 activeGraph = graphPanel;
-
-
                 var xmlDocument = mxUtils.parseXml(decodeURIComponent(response.responseText));
                 var decoder = new mxCodec(xmlDocument);
                 var node = xmlDocument.documentElement;
