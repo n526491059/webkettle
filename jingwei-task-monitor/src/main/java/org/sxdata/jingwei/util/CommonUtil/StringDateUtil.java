@@ -11,6 +11,8 @@ import java.util.*;
  *
  */
 public class StringDateUtil {
+
+
     //为json-lib日期返回正常的指定格式
     public static JsonConfig configJson(String datePattern) {
         JsonConfig config = new JsonConfig();

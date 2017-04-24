@@ -24,4 +24,5 @@ public interface UserService {
 
     public void allotUserGroup(UserGroupAttributeEntity attr);
 
+    public List<UserEntity> getUsers(String userGroupName);
 }

@@ -124,4 +124,10 @@ public class UserServiceImpl implements UserService{
     public void allotUserGroup(UserGroupAttributeEntity attr) {
         userGroupDao.updateUserGroupAttrByName(attr);
     }
+
+    @Override
+    //获取某个用户组下的所有用户 不分页
+    public List<UserEntity> getUsers(String userGroupName) {
+        return userDao.getUsers(userGroupName);
+    }
 }

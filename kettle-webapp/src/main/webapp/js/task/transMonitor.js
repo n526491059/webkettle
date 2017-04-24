@@ -42,7 +42,8 @@ function generateTrans(secondGuidePanel){
         {name:"createDate",type:"string",mapping:"createDate"},
         {name:"modifiedUser",type:"string",mapping:"modifiedUser"},
         {name:"modifiedDate",type:"string",mapping:"modifiedDate"},
-        {name:"belongToTaskGroup",type:"string",mapping:"belongToTaskGroup"}
+        {name:"belongToTaskGroup",type:"string",mapping:"belongToTaskGroup"},
+
     ])
     var reader=new Ext.data.JsonReader({totalProperty:"totalProperty",root:"root"},human);
 

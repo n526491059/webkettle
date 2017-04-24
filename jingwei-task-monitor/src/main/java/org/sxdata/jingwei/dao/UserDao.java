@@ -27,4 +27,6 @@ public interface UserDao {
 
     public Integer selectMaxId();
 
+    public List<UserEntity> getUsers(String userGroupName);
+
 }

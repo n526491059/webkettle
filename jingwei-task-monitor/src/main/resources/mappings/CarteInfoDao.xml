@@ -63,7 +63,7 @@
         select al.c_slave_id,al.thisHour as xHour,
         MAX(al.c_load_avg) as loadAvg,
         MAX(SUBSTRING(al.c_host_cpu_usage,1,LENGTH(al.c_host_cpu_usage)-1)) as hostCpuUsage,
-        MAX(SUBSTRING(al.c_host_free_mem,1,LENGTH(al.c_host_free_mem)-2)),
+        MAX(SUBSTRING(al.c_host_free_mem,1,LENGTH(al.c_host_free_mem)-2)) as hostFreeMem,
         MAX(SUBSTRING(al.c_host_free_disk,1,LENGTH(al.c_host_free_disk)-2)) as hostFreeDisk,
         MAX(al.c_thread_num) as threadNum,
         MAX(al.c_trans_num) as transNum,

@@ -263,12 +263,6 @@ function deleteUserGroup(){
             var password=Ext.decode(response.responseText).user.password;
             var onePassword="";
             var repeatPassword="";
-            //设置密码框格式
-            var dlg = Ext.Msg.getDialog();
-            var t = Ext.get(dlg.body).select('.ext-mb-input');
-            t.each(function (el) {
-                el.dom.type = "password";
-            });
             //删除前进行两次密码验证
             Ext.MessageBox.prompt("输入框","为保证数据安全,请验证登录密码:",function(btn,txt){
                 if(btn=="ok"){
@@ -310,12 +304,14 @@ function userGroupInfo(){
     //根据被选中的用户组名获取当前用户组下的节点、任务组列表
     var slavePanel=getSlaveByThis(chooseUserGroupName);
     var taskGroupPanel=getTaskGroupByThis(chooseUserGroupName);
+    var userPanel=getUserByThis(chooseUserGroupName);
     var infoTabPanel=new Ext.TabPanel({
         width:575,
         height:510
     })
     infoTabPanel.add(slavePanel);
     infoTabPanel.add(taskGroupPanel);
+    infoTabPanel.add(userPanel);
     infoTabPanel.setActiveTab(slavePanel);
     var userGroupInfoWindow=new Ext.Window({
         id: "userGroupInfoWindow",
@@ -854,5 +850,70 @@ function getSlaveByThis(chooseUserGroupName){
     slaveGridPanel.getColumnModel().setHidden(1,true);
 
     return slaveGridPanel;
+}
+
+//获取当前用户组下的所有用户
+function getUserByThis(chooseUserGroupName){
+    //列模型
+    var cm=new Ext.grid.ColumnModel([
+        new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
+        {header:"type",dataIndex:"userType",menuDisabled:true,align:"center",
+            renderer:function(v){
+                if(v==1){
+                    return "管理员";
+                }else{
+                    return "普通用户";
+                }
+            }
+        },
+        {header:"描述",dataIndex:"description"},
+        {header:"用户名",dataIndex:"login"},
+        {header:"任务组权限",dataIndex:"taskGroupPower",menuDisabled:true,align:"center",
+            renderer:function(v){
+                if(v==1){
+                    return "可操作";
+                }else{
+                    return "只读";
+                }
+            }
+        },
+        {header:"节点权限",dataIndex:"slavePower",menuDisabled:true,align:"center",
+            renderer:function(v){
+                if(v==1){
+                    return "可操作";
+                }else{
+                    return "只读";
+                }
+            }
+        }
+    ]);
+    var proxy=new Ext.data.HttpProxy({url:"/user/getUsersByInfo.do"});
+    //Record定义记录结果
+    var human=Ext.data.Record.create([
+        {name:"userType",type:"int",mapping:"userType"},
+        {name:"description",type:"string",mapping:"description"},
+        {name:"login",type:"string",mapping:"login"},
+        {name:"taskGroupPower",type:"int",mapping:"taskGroupPower"},
+        {name:"slavePower",type:"int",mapping:"slavePower"}
+    ])
+    var reader=new Ext.data.JsonReader({},human);
+
+    var store=new Ext.data.Store({
+        proxy:proxy,
+        reader:reader
+    })
+    store.load({params:{userGroupName:chooseUserGroupName}});
+    var grid=new Ext.grid.GridPanel({
+        id:"usersPanel",
+        title:"用户",
+        height:500,
+        cm:cm,      //列模型
+        store:store,
+        viewConfig : {
+            forceFit : true //让grid的列自动填满grid的整个宽度，不用一列一列的设定宽度
+        },
+        closable:true
+    });
+    return grid;
 }
 
