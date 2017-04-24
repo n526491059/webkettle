@@ -12,7 +12,7 @@
    </appender>
 
    <root>
-      <priority value="error" />
+      <priority value="info" />
       <appender-ref ref="PENTAHOCONSOLE"/>
    </root>
 

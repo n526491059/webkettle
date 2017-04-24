@@ -57,7 +57,6 @@ public class JobGraphController {
 		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
 		JobMeta jobMeta = (JobMeta) codec.decode(graphXml);
 		String xml = XMLHandler.getXMLHeader() + jobMeta.getXML();
-		
 		JsonUtils.responseXml(xml);
 	}
 	
