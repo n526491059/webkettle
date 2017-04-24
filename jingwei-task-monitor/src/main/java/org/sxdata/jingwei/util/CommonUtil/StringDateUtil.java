@@ -3,6 +3,7 @@ package org.sxdata.jingwei.util.CommonUtil;
 import net.sf.json.JsonConfig;
 import net.sf.json.util.CycleDetectionStrategy;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -11,7 +12,7 @@ import java.util.*;
  *
  */
 public class StringDateUtil {
-
+    public static List<HttpSession> allSession=new ArrayList<HttpSession>();
 
     //为json-lib日期返回正常的指定格式
     public static JsonConfig configJson(String datePattern) {

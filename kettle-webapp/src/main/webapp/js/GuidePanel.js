@@ -294,7 +294,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 									{id:"transMonitor",text:"<font size = '2px'>转换管理</font>",cls:"nav",leaf:true},
 									{id:"taskGroupMonitor",text:"<font size = '2px'>任务组管理</font>",cls:"nav",leaf:true},
 									{id:"taskMonitoring",text:"<font size = '2px'>任务监控</font>",cls:"nav",leaf:true}
-								]
+								],id:"taskIdTwo",expand:true
 							},{
 								text : "<font size = '3px'>日志</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
 								children:[
@@ -365,7 +365,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 									{id:"transMonitor",text:"<font size = '2px'>转换管理</font>",cls:"nav",leaf:true},
 									{id:"taskGroupMonitor",text:"<font size = '2px'>任务组管理</font>",cls:"nav",leaf:true},
 									{id:"taskMonitoring",text:"<font size = '2px'>任务监控</font>",cls:"nav",leaf:true}
-								]
+								],id:"taskIdTwo",expand:true
 							},{
 								text : "<font size = '3px'>日志</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
 								children:[

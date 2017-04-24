@@ -35,7 +35,9 @@ public class UserServiceImpl implements UserService{
     @Override
     public void updateUser(UserEntity user,UserGroupAttributeEntity attr){
         //修改用户
-        userDao.updateUser(user);
+        if(!StringDateUtil.isEmpty(user.getDescription())){
+            userDao.updateUser(user);
+        }
         //修改用户与用户组关系表中 节点任务组的权限
         if(null!=attr){
             userGroupDao.updateUserGroupAttrByName(attr);
