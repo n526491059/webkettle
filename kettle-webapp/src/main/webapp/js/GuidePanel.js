@@ -533,7 +533,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 						addTaskGroupWindow.show(secondGuidePanel);
 				    }
 				});
-			} else if(node.text == "<font size = '2px'>作业管理</font>") {
+			}else if(node.text == "<font size = '2px'>作业管理</font>") {
 				generateJobPanel(secondGuidePanel);
 			}else if(node.text == "<font size = '2px'>转换管理</font>") {
 				generateTrans(secondGuidePanel);
