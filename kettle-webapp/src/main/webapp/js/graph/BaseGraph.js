@@ -534,7 +534,7 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		
 		return store;
 	},
-	
+
 	showSlaves: function() {
 		var dialog = new SlaveServersDialog();
 		dialog.show();

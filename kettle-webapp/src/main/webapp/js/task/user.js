@@ -8,7 +8,15 @@ function showUserPanel(secondGuidePanel){
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
         sm,
         {header:"id",dataIndex:"userId"},
-        {header:"type",dataIndex:"userType"},
+        {header:"type",dataIndex:"userType",menuDisabled:true,align:"center",
+            renderer:function(v){
+                if(v==1){
+                    return "管理员";
+                }else{
+                    return "普通用户";
+                }
+            }
+        },
         {header:"password",dataIndex:"password"},
         {header:"描述",dataIndex:"description"},
         {header:"用户名",dataIndex:"login"},
@@ -36,10 +44,12 @@ function showUserPanel(secondGuidePanel){
                 if(loginUserName=="admin"){
                     return "<input type='button' onclick='deleteUser()' value='删除'>&nbsp;"+
                         "<input type='button' onclick='updateUser()' value='修改'>&nbsp;"+
+                        "<input type='button' onclick='updatePassword()' value='修改密码' id='updatePwd'>&nbsp;"+
                         "<input type='button' onclick='allotUserGroup()' value='修改用户组'>&nbsp;";
                 }else{
                     return "<input type='button' onclick='' value='删除'>&nbsp;"+
-                        "<input type='button' onclick='updateUser()' value='修改'>&nbsp;";
+                        "<input type='button' onclick='updateUser()' value='修改'>&nbsp;"+
+                        "<input type='button' onclick='updatePassword()' value='修改密码' id='updatePwd'>&nbsp;";
                 }
             }
         }
@@ -112,7 +122,7 @@ function updateUser(){
     var slavePower=record.get("slavePower");
     var taskGroupPower=record.get("taskGroupPower");
     var userType=record.get("userType");
-    var updateForm=userformForUpdate(login,description,password,slavePower,taskGroupPower,userType);
+    var updateForm=userformForUpdate(login,description,slavePower,taskGroupPower,userType);
     //生成修改窗口
     var updateUserWindow=new Ext.Window({
         title:"修改用户",
@@ -388,6 +398,7 @@ function generateUserInfoField(userTypeValue,inputUserName,inputDesc,inputPasswo
         fieldLabel: "密码",
         width:150,
         allowBlank:false,
+        inputType: 'password',
         value:inputPassword,
         regex:/^[a-zA-Z0-9]{6,10}$/,
         invalidText:"密码必须在6-10字符",
@@ -495,7 +506,7 @@ function generateUserGroupSelect(userGroupChoose){
 }
 
 //修改用户所需要的表单
-function userformForUpdate(inputUserName,inputDesc,inputPassword,slavePowerChoose,taskGroupPowerChoose,userType){
+function userformForUpdate(inputUserName,inputDesc,slavePowerChoose,taskGroupPowerChoose,userType){
     var itemArray=new Array();
     //登录名 login输入框
     var userLoginInput=new Ext.form.TextField({
@@ -514,19 +525,8 @@ function userformForUpdate(inputUserName,inputDesc,inputPassword,slavePowerChoos
         height:100,
         value:inputDesc
     });
-    var passwordInput=new Ext.form.TextField({
-        name: "userPassword",
-        fieldLabel: "密码",
-        width:150,
-        allowBlank:false,
-        value:inputPassword,
-        regex:/^[a-zA-Z0-9]{6,10}$/,
-        invalidText:"密码必须在6-10字符",
-        validateOnBlur:true
-    });
     itemArray.push(userLoginInput);
     itemArray.push(userDescriptionInput);
-    itemArray.push(passwordInput);
     if(userType!=1){
         var radioWriteSlave=new Ext.form.Radio({
             name:"rdaSlavePower",
@@ -763,6 +763,110 @@ function deleteUser(){
             Ext.MessageBox.alert("error","服务器异常,请稍后尝试");
         },
         params:{username:username,userId:userId}
+    })
+}
+
+//修改密码
+function updatePassword(){
+    var usersPanel=Ext.getCmp("usersPanel");
+    var userId=usersPanel.getSelectionModel().getSelected().get("userId");
+    Ext.Ajax.request({
+        url:"/user/getLoginUser.do",
+        success:function(response,config){
+            var password=Ext.decode(response.responseText).user.password;
+            Ext.MessageBox.prompt("密码","为保证数据安全,请验证登录密码:",function(btn,txt){
+                if(btn=="ok" && txt==password){
+                    var passwordInput=new Ext.form.TextField({
+                        name: "password",
+                        fieldLabel: "新密码",
+                        inputType: 'password',
+                        width:150,
+                        allowBlank:false,
+                        regex:/^[a-zA-Z0-9]{6,10}$/,
+                        invalidText:"密码必须在6-10字符",
+                        validateOnBlur:true
+                    });
+                    var repeatPasswordInput=new Ext.form.TextField({
+                        name: "repeatPassword",
+                        fieldLabel: "确认密码",
+                        inputType: 'password',
+                        width:150,
+                        allowBlank:false,
+                        regex:/^[a-zA-Z0-9]{6,10}$/,
+                        invalidText:"密码必须在6-10字符",
+                        validateOnBlur:true
+                    });
+                    //表单
+                    var userInfoForm=new Ext.form.FormPanel({
+                        url:"/user/updatePassword.do",
+                        width:300,
+                        height:120,
+                        frame:true,
+                        labelWidth:70,
+                        labelAlign:"right",
+                        items:[
+                            {
+                                layout:"form",  //从上往下布局
+                                items:[passwordInput,repeatPasswordInput]
+                            }
+                        ]
+                    });
+                    var updatePasswordWindow=new Ext.Window({
+                        title: "修改密码",
+                        modal: true,
+                        bodyStyle: "background-color:white",
+                        width: 300,
+                        height: 135,
+                        items: [userInfoForm],
+                        tbar:new Ext.Toolbar({buttons:[
+                            {
+                                text:"修改",
+                                handler:function(){
+
+                                    if(userInfoForm.getForm().isValid()){
+                                        if(passwordInput.getValue()==repeatPasswordInput.getValue()){
+                                            //表单所有控件作为提交参数
+                                            var userIdHidden=new Ext.form.Hidden({
+                                                name:"userId",
+                                                value:userId
+                                            });
+                                            userInfoForm.items.add(userIdHidden);
+                                            userInfoForm.doLayout();
+                                            userInfoForm.baseParams=userInfoForm.getForm().getValues();
+                                            userInfoForm.getForm().submit({
+                                                success:function(form,action){
+                                                    Ext.MessageBox.alert("成功","密码修改成功!");
+                                                    updatePasswordWindow.close();
+                                                    showUserPanel(Ext.getCmp("secondGuidePanel"));
+                                                },
+                                                failure:function(){
+                                                    Ext.MessageBox.alert("失败","服务器异常,请稍后再试!");
+                                                }
+                                            })
+                                        }else{
+                                            Ext.MessageBox.alert("提交失败","两次密码不一致!");
+                                            passwordInput.setValue("");
+                                            repeatPasswordInput.setValue("");
+                                        }
+                                    }else{
+                                        Ext.MessageBox.alert("提交失败","表单存在不规范填写,请再次确认后提交!");
+                                    }
+                                }
+                            }
+                        ]})
+                    })
+                    updatePasswordWindow.show(usersPanel);
+                }else{
+                    if(btn=="ok"){
+                        Ext.MessageBox.alert("","密码有误,请再次确认!",function(){
+                            Ext.getDom("updatePwd").click();
+                        });
+                    }
+                }
+            });
+        },
+        failure:function(){},
+        params:{}
     })
 }
 

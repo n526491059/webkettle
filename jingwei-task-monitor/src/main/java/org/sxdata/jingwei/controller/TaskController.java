@@ -196,7 +196,6 @@ public class TaskController {
         }
     }
 
-
     //查询作业;包括条件查询
     @RequestMapping(value="/getJobs.do")
     @ResponseBody

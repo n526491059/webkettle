@@ -1,5 +1,6 @@
 package org.sxdata.jingwei.controller;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Created by cRAZY on 2017/3/28.
@@ -83,7 +85,6 @@ public class UserController {
             UserGroupAttributeEntity attr=new UserGroupAttributeEntity();
             //接收参数
             String description=request.getParameter("userDescription");
-            String password=request.getParameter("userPassword");
             Integer userId=Integer.valueOf(request.getParameter("userId"));
             String username=request.getParameter("userLogin");
             //
@@ -98,7 +99,6 @@ public class UserController {
             }
             //组装用户对象
             UserEntity user=new UserEntity();
-            user.setPassword(KettleEncr.encryptPassword(password));
             user.setDescription(description);
             user.setUserId(userId);
             //添加 - -返回结果
@@ -194,7 +194,7 @@ public class UserController {
             UserGroupAttributeEntity userInfo=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
             JSONObject json=new JSONObject();
             json.put("user",loginUser);
-            json.put("userInfo",userInfo);
+            json.put("userInfo", userInfo);
             PrintWriter out=response.getWriter();
             out.write(json.toString());
             out.flush();
@@ -210,9 +210,34 @@ public class UserController {
     protected void loginOut(HttpServletResponse response,HttpServletRequest request){
         try{
            request.getSession().invalidate();
-            response.sendRedirect(request.getContextPath()+"/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
         }catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    //获取某个用户组下的用户
+    @RequestMapping(value="/getUsersByInfo")
+    @ResponseBody
+    protected void getUsersByInfo(HttpServletResponse response,HttpServletRequest request,@RequestParam String userGroupName){
+        try{
+            List<UserEntity> users=userService.getUsers(userGroupName);
+            PrintWriter out=response.getWriter();
+            out.write(JSONArray.fromObject(users).toString());
+            out.flush();
+            out.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    //修改密码
+    @RequestMapping(value="/updatePassword")
+    @ResponseBody
+    protected void updatePassword(@RequestParam String password,@RequestParam String userId){
+        UserEntity user=new UserEntity();
+        user.setUserId(Integer.valueOf(userId));
+        user.setPassword(KettleEncr.encryptPassword(password));
+        userService.updateUser(user,null);
     }
 }

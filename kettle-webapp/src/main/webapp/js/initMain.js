@@ -6,7 +6,7 @@ function checkUserSessionStatus(conn,response,options){
 	var status = response.getResponseHeader("sessionstatus");
 	//Ext重新封装了response对象
 	if(status=="timeout"){
-		Ext.MessageBox.alert("超时","会话已经失效,请重新登录");
+		alert("会话超时或用户状态发生改变,请重新登录!");
 		window.location.href="/login.jsp";
 	}
 }
@@ -18,7 +18,12 @@ function loginOut(){
 }
 
 Ext.onReady(function() {
-
+	//设置密码框格式
+	var dlg = Ext.Msg.getDialog();
+	var t = Ext.get(dlg.body).select('.ext-mb-input');
+	t.each(function (el) {
+		el.dom.type = "password";
+	});
 	Ext.QuickTips.init();
 	Ext.MessageBox.buttonText.yes = '确定';
 	Ext.MessageBox.buttonText.ok = '好的';

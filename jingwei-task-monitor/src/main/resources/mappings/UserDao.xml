@@ -31,9 +31,31 @@
         <if test='param3!=null and param3!=""'>
             AND r.LOGIN IN
               (select a.USER_NAME from
-              d_user_group_member_attribute a where a.USER_GROUP_NAME=#{userGroupName})
+              d_user_group_member_attribute a where a.USER_GROUP_NAME=#{2})
         </if>
          limit #{0},#{1}
+    </select>
+
+    <select id="getUsers" resultType="org.sxdata.jingwei.entity.UserEntity">
+        select
+        r.DESCRIPTION as description,
+        r.ID_USER as userId,
+        r.LOGIN as login,
+        r.`PASSWORD` as password,
+        r.`NAME` as name,
+        r.ENABLED as enabled,
+        d.USER_GROUP_NAME as belongToUserGroup,
+        d.SLAVE_PERMISSION_TYPE as slavePower,
+        d.TASK_PERMISSION_TYPE as taskGroupPower,
+        d.USER_TYPE as userType
+        from r_user r INNER JOIN d_user_group_member_attribute d
+        ON r.LOGIN=d.USER_NAME
+        WHERE 1=1
+        <if test='_parameter!=null and _parameter!=""'>
+            AND r.LOGIN IN
+            (select a.USER_NAME from
+            d_user_group_member_attribute a where a.USER_GROUP_NAME=#{userGroupName})
+        </if>
     </select>
 
     <!--获取用户的总数量-->
@@ -52,8 +74,12 @@
     <update id="updateUser" parameterType="org.sxdata.jingwei.entity.UserEntity">
       update r_user
         <trim prefix="set" suffixOverrides=",">
-            r_user.DESCRIPTION=#{description},
-            r_user.`PASSWORD`=#{password}
+            <if test='password!=null and password!=""'>
+                r_user.`PASSWORD`=#{password},
+            </if>
+            <if test='description!=null and description!=""'>
+                r_user.DESCRIPTION=#{description}
+            </if>
         </trim>
       where r_user.ID_USER=#{userId}
     </update>

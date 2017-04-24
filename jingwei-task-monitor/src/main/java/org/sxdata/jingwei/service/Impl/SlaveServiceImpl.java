@@ -640,20 +640,26 @@ public class SlaveServiceImpl implements SlaveService {
     //选择一个负载指数最低的节点
     public SlaveEntity getSlaveByLoadAvg(List<SlaveEntity> slaves) throws Exception {
         SlaveEntity minSlave=null;
+        List<SlaveEntity> errorSlaves=new ArrayList<SlaveEntity>();
         if(slaves!=null && slaves.size()>0){
-            //把不正常的节点移除
+            //获取不正常节点
             for(int i=0;i<slaves.size();i++){
                 if (slaves.get(i).getLoadAvg()==0){
-                    slaves.remove(i);
+                    errorSlaves.add(slaves.get(i));
                 }
             }
+            //移除不正常节点
+            for(SlaveEntity errorSlave:errorSlaves){
+                slaves.remove(errorSlave);
+            }
+            //从正常节点中获取负载指数最低的节点
             if(slaves.size()==1){
                 minSlave=slaves.get(0);
             }else if(slaves.size()>1){
                 minSlave=slaves.get(0);
                 for(int i=0;i<slaves.size();i++){
                     if (slaves.get(i).getLoadAvg()<minSlave.getLoadAvg()){
-                        minSlave=slaves.get(i+1);
+                        minSlave=slaves.get(i);
                     }
                 }
             }
