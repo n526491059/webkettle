@@ -31,7 +31,7 @@
         <if test='param3!=null and param3!=""'>
             AND r.LOGIN IN
               (select a.USER_NAME from
-              d_user_group_member_attribute a where a.USER_GROUP_NAME=#{userGroupName})
+              d_user_group_member_attribute a where a.USER_GROUP_NAME=#{2})
         </if>
          limit #{0},#{1}
     </select>

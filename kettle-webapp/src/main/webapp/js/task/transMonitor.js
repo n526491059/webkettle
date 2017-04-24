@@ -139,7 +139,7 @@ function generateTrans(secondGuidePanel){
                            params: {taskName: path,type:'trans'},
                            success: function(response) {
                                var resObj = Ext.decode(response.responseText);
-                               var graphPanel = Ext.create({border: false, Executable: true }, resObj.GraphType);
+                               var graphPanel = Ext.create({border: false, Executable: true },"TransGraphY");
                                var dialog = new LogDetailDialog({
                                    items: graphPanel
                                });
