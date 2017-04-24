@@ -13,6 +13,7 @@ import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,9 +36,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public void updateUser(UserEntity user,UserGroupAttributeEntity attr){
         //修改用户
-        if(!StringDateUtil.isEmpty(user.getDescription())){
-            userDao.updateUser(user);
-        }
+        userDao.updateUser(user);
         //修改用户与用户组关系表中 节点任务组的权限
         if(null!=attr){
             userGroupDao.updateUserGroupAttrByName(attr);
@@ -110,6 +109,19 @@ public class UserServiceImpl implements UserService{
             }else{
                 if(null==request.getSession().getAttribute("login")){
                     user.setPassword(KettleEncr.decryptPasswd(users.get(0).getPassword()));
+                    //使用不同浏览器重复登录\清除缓冲\关闭浏览器后再打开可能造成存在两个username属性相同的session
+                    //如果之前该用户session已存在 则先移除以前的session
+                    for(HttpSession session:StringDateUtil.allSession){
+                        if(null!=session.getAttribute("login")){
+                            UserEntity iUser=(UserEntity)session.getAttribute("login");
+                            if(!iUser.getLogin().equals(userName)){
+                                continue;
+                            }else{
+                                StringDateUtil.allSession.remove(session);
+                                session.invalidate();
+                            }
+                        }
+                    }
                     request.getSession().setAttribute("login", user);
                     UserGroupAttributeEntity attribute=userGroupDao.getInfoByUserName(userName);
                     if(null==attribute){
@@ -127,9 +139,15 @@ public class UserServiceImpl implements UserService{
         userGroupDao.updateUserGroupAttrByName(attr);
     }
 
+
     @Override
     //获取某个用户组下的所有用户 不分页
     public List<UserEntity> getUsers(String userGroupName) {
         return userDao.getUsers(userGroupName);
+    }
+
+    @Override
+    public void updatePassword(UserEntity user) {
+        userDao.updateUser(user);
     }
 }
