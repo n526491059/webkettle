@@ -307,9 +307,9 @@ GuidePanel = Ext.extend(Ext.Panel, {
 									{id:"slaveMonitoring",text:"<font size = '2px'>节点监控</font>",cls:"nav",leaf:true},
 								]
 							},{
-								text : "<font size = '3px'>调度</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
+								text : "<font size = '3px'>定时调度</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
 								children:[
-									{id:"schedulerMonitor",text:"<font size = '2px'>调度管理</font>",cls:"nav",leaf:true},
+									{id:"schedulerMonitor",text:"<font size = '2px'>定时调度管理</font>",cls:"nav",leaf:true},
 								]
 							}
 						]
@@ -378,9 +378,9 @@ GuidePanel = Ext.extend(Ext.Panel, {
 									{id:"slaveMonitoring",text:"<font size = '2px'>节点监控</font>",cls:"nav",leaf:true},
 								]
 							},{
-								text : "<font size = '3px'>调度</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
+								text : "<font size = '3px'>定时调度</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
 								children:[
-									{id:"schedulerMonitor",text:"<font size = '2px'>调度管理</font>",cls:"nav",leaf:true},
+									{id:"schedulerMonitor",text:"<font size = '2px'>定时调度管理</font>",cls:"nav",leaf:true},
 								]
 							},{
 								text : "<font size = '3px'>用户</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
@@ -537,7 +537,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				generateJobPanel(secondGuidePanel);
 			}else if(node.text == "<font size = '2px'>转换管理</font>") {
 				generateTrans(secondGuidePanel);
-			}else if(node.text == "<font size = '2px'>调度管理</font>") {
+			}else if(node.text == "<font size = '2px'>定时调度管理</font>") {
 				generateSchedulerMonitorPanel(secondGuidePanel);
 			}else if(node.text=="<font size = '2px'>任务监控</font>"){
 				secondGuidePanel.removeAll(true);

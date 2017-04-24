@@ -62,7 +62,7 @@ function showTaskGroupPanel(secondGuidePanel){
                     }
                 },"-",
                 {
-                    text:"查看",
+                    text:"任务组详情",
                     handler:function(){
                         beforeSelectTaskGroupDetail(taskGroupPanel);
                     }
