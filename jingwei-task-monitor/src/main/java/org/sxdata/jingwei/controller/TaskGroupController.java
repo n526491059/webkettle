@@ -37,7 +37,10 @@ public class TaskGroupController {
             String type=request.getParameter("type");
             //获取当前用户所在的用户组
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
+            String userGroupName="";
+            if(null!=attr){
+                userGroupName=attr.getUserGroupName();
+            }
             List<TaskGroupEntity> items=taskGroupService.isContainsTask(taskName,type,userGroupName);
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
@@ -108,7 +111,10 @@ public class TaskGroupController {
             Integer limit=Integer.valueOf(request.getParameter("limit"));
             //获取当前用户所在的用户组
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
+            String userGroupName="";
+            if(null!=attr){
+                userGroupName=attr.getUserGroupName();
+            }
             String result=taskGroupService.getAllTaskGroupByLogin(start, limit, userGroupName);
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
@@ -134,7 +140,10 @@ public class TaskGroupController {
         try{
             //获取当前用户所在的用户组
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
+            String userGroupName="";
+            if(null!=attr){
+                userGroupName=attr.getUserGroupName();
+            }
             String taskList=taskGroupService.getAllTaskBeforeAdd(userGroupName);
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
@@ -212,7 +221,10 @@ public class TaskGroupController {
         try{
             //获取当前用户所在的用户组
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
+            String userGroupName="";
+            if(null!=attr){
+                userGroupName=attr.getUserGroupName();
+            }
             List<TaskGroupEntity> items=taskGroupService.AllTaskGroupBeforeAdd(userGroupName);
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();

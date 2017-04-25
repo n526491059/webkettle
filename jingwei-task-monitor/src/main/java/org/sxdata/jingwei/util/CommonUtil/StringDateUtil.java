@@ -12,7 +12,7 @@ import java.util.*;
  *
  */
 public class StringDateUtil {
-    public static List<HttpSession> allSession=new ArrayList<HttpSession>();
+    public static Map<String,HttpSession> allSession=new HashMap<String,HttpSession>();
 
     //为json-lib日期返回正常的指定格式
     public static JsonConfig configJson(String datePattern) {

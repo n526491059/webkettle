@@ -50,7 +50,10 @@ public class TaskSchedulerController {
             String jobName=request.getParameter("jobName");
             //获取当前用户所在的用户组
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
+            String userGroupName="";
+            if(null!=attr){
+                userGroupName=attr.getUserGroupName();
+            }
             PageforBean bean=schedulerService.getAllSchedulerByPage(start,limit,typeId,hostName,jobName,userGroupName);
             //输出结果返回给客户端
             response.setContentType("text/html;charset=utf-8");

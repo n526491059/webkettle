@@ -37,7 +37,10 @@ public class SlaveController {
     protected void getJobs(HttpServletResponse response,HttpServletRequest request) {
         try{
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
+            String userGroupName="";
+            if(null!=attr){
+                userGroupName=attr.getUserGroupName();
+            }
             List<SlaveEntity> result=slaveService.getAllSlave(userGroupName);
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
@@ -56,7 +59,10 @@ public class SlaveController {
         try{
             StringBuffer sbf=new StringBuffer("[");
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
+            String userGroupName="";
+            if(null!=attr){
+                userGroupName=attr.getUserGroupName();
+            }
             List<SlaveEntity> slaves=slaveService.getAllSlave(userGroupName);
             for(int i=0;i<slaves.size();i++){
                 String thisSlaveJson="";
@@ -88,7 +94,10 @@ public class SlaveController {
         try{
             //获取当前用户所在的用户组
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
+            String userGroupName="";
+            if(null!=attr){
+                userGroupName=attr.getUserGroupName();
+            }
             String result=slaveService.allSlaveQuato(userGroupName);
             PrintWriter out=response.getWriter();
             out.write(result);
@@ -108,7 +117,10 @@ public class SlaveController {
             Integer start=Integer.valueOf(request.getParameter("start"));
             Integer limit=Integer.valueOf(request.getParameter("limit"));
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
+            String userGroupName="";
+            if(null!=attr){
+                userGroupName=attr.getUserGroupName();
+            }
             PageforBean result=slaveService.findSlaveByPageInfo(start, limit, userGroupName);
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
@@ -162,7 +174,10 @@ public class SlaveController {
             String maxOrAvg=request.getParameter("maxOrAvg");
             //默认使用折线图作为展现方式
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
+            String userGroupName="";
+            if(null!=attr){
+                userGroupName=attr.getUserGroupName();
+            }
             String result=slaveService.slaveQuatoByCondition(quatoType, "折线图", maxOrAvg, chooseDate, userGroupName);
 
             if(null==result){

@@ -118,7 +118,7 @@ function showTaskControlPanel(){
         ]})
     });
     grid.getColumnModel().setHidden(2,true);
-    if(loginUserName!="admin" && loginUserType!=1){
+    if(loginUserName!="admin" && loginUserTaskGroupPower!=1){
         Ext.getCmp("pushOrStart").hide();
         Ext.getCmp("endTaskByRunning").hide();
     }

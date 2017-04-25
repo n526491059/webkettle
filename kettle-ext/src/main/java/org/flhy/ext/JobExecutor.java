@@ -235,7 +235,7 @@ public class JobExecutor implements Runnable {
 			try {
 				trace.setEndTime(new Date());
 				trace.setJobName(jobMeta.getName());
-				trace.setStatus("程序错误");
+				trace.setStatus("系统调度失败");
 				trace.setExecutionLog(ExceptionUtils.toString(e));
 				//任务类型
 				trace.setType("trans");

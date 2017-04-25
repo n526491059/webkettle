@@ -432,6 +432,12 @@ GuidePanel = Ext.extend(Ext.Panel, {
 			}
 			if(node.text == "<font size = '2px'>新建转换</font>")
 			{
+				//设置文本框格式
+				var dlg = Ext.Msg.getDialog();
+				var t = Ext.get(dlg.body).select('.ext-mb-input');
+				t.each(function (el) {
+					el.dom.type = "text";
+				});
 				secondGuidePanel.removeAll(true);
 				Ext.Msg.prompt('系统提示', '请输入转换名称:', function(btn, text){
 				    if (btn == 'ok' && text != '') {
@@ -485,6 +491,12 @@ GuidePanel = Ext.extend(Ext.Panel, {
 			else if(node.text == "<font size = '2px'>新建作业</font>")
 			{
 				secondGuidePanel.removeAll(true);
+				//设置文本框格式
+				var dlg = Ext.Msg.getDialog();
+				var t = Ext.get(dlg.body).select('.ext-mb-input');
+				t.each(function (el) {
+					el.dom.type = "text";
+				});
 				Ext.Msg.prompt('系统提示', '请输入作业名称:', function(btn, text){
 				    if (btn == 'ok' && text != '') {
 						var taskGroupPanel=getAllTaskGroupBeforeCreate();

@@ -35,8 +35,7 @@ function showTaskGroupPanel(secondGuidePanel){
     store.load({params:{start:0,limit:10}});
 
     var t_bar="";
-
-    if(loginUserType==1 || loginUserName=="admin"){
+    if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
         t_bar=new Ext.Toolbar({
             buttons: [
                 {
