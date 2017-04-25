@@ -13,8 +13,10 @@ import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by cRAZY on 2017/3/28.
@@ -37,6 +39,25 @@ public class UserServiceImpl implements UserService{
         //修改用户
         if(!StringDateUtil.isEmpty(user.getDescription())){
             userDao.updateUser(user);
+            //被修改的用户需要重新登录 使其session失效
+            List<String> invalidSession=new ArrayList<String>();
+            Set<String> set=StringDateUtil.allSession.keySet();
+            for(String sessionId:set){
+                HttpSession session=StringDateUtil.allSession.get(sessionId);
+                if(null!=session.getAttribute("login")){
+                    UserEntity iUser=(UserEntity)session.getAttribute("login");
+                    if(!iUser.getUserId().equals(user.getUserId())){
+                        continue;
+                    }else{
+                        invalidSession.add(session.getId());
+                    }
+                }
+            }
+            for(String invalid:invalidSession){
+                HttpSession hsession=StringDateUtil.allSession.get(invalid);
+                StringDateUtil.allSession.remove(invalid);
+                hsession.invalidate();
+            }
         }
         //修改用户与用户组关系表中 节点任务组的权限
         if(null!=attr){
@@ -97,6 +118,8 @@ public class UserServiceImpl implements UserService{
         return userDao.getUserbyName(login);
     }
 
+    @Override
+    //登录
     public String login(String userName, String password,HttpServletRequest request) {
         String result="success";
         List<UserEntity> users=this.getUserByName(userName);
@@ -110,12 +133,35 @@ public class UserServiceImpl implements UserService{
             }else{
                 if(null==request.getSession().getAttribute("login")){
                     user.setPassword(KettleEncr.decryptPasswd(users.get(0).getPassword()));
+                    //使用不同浏览器重复登录\清除缓冲再登录\关闭浏览器后再打开可能造成存在两个username属性相同的session
+                    //如果之前该用户session已存在 则先移除以前的session
+                    List<String> invalidSession=new ArrayList<String>();
+                    Set<String> set=StringDateUtil.allSession.keySet();
+                    for(String sessionId:set){
+                        HttpSession session=StringDateUtil.allSession.get(sessionId);
+                        if(null!=session.getAttribute("login")){
+                            UserEntity iUser=(UserEntity)session.getAttribute("login");
+                            if(!iUser.getLogin().equals(userName)){
+                                continue;
+                            }else{
+                                invalidSession.add(session.getId());
+                            }
+                        }
+                    }
+                    //从内存中移除 并且使会话失效
+                    for(String invalid:invalidSession){
+                        HttpSession hsession=StringDateUtil.allSession.get(invalid);
+                        StringDateUtil.allSession.remove(invalid);
+                        hsession.invalidate();
+                    }
+                    //登录信息存放在当前session
                     request.getSession().setAttribute("login", user);
                     UserGroupAttributeEntity attribute=userGroupDao.getInfoByUserName(userName);
                     if(null==attribute){
                         attribute=new UserGroupAttributeEntity();
                     }
                     request.getSession().setAttribute("userInfo",attribute);
+                    StringDateUtil.allSession.put(request.getSession().getId(), request.getSession());
                 }
             }
         }
@@ -123,13 +169,39 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    //给用户分配用户组
     public void allotUserGroup(UserGroupAttributeEntity attr) {
         userGroupDao.updateUserGroupAttrByName(attr);
+        //用户状态发生改变使session失效
+        List<String> invalidSession=new ArrayList<String>();
+        Set<String> set=StringDateUtil.allSession.keySet();
+        for(String sessionId:set){
+            HttpSession session=StringDateUtil.allSession.get(sessionId);
+            if(null!=session.getAttribute("login")){
+                UserEntity iUser=(UserEntity)session.getAttribute("login");
+                if(!iUser.getLogin().equals(attr.getUserName())){
+                    continue;
+                }else{
+                    invalidSession.add(session.getId());
+
+                }
+            }
+        }
+        for(String invalid:invalidSession){
+            HttpSession hsession=StringDateUtil.allSession.get(invalid);
+            StringDateUtil.allSession.remove(invalid);
+            hsession.invalidate();
+        }
     }
 
     @Override
     //获取某个用户组下的所有用户 不分页
     public List<UserEntity> getUsers(String userGroupName) {
         return userDao.getUsers(userGroupName);
+    }
+
+    @Override
+    public void updatePassword(UserEntity user) {
+        userDao.updateUser(user);
     }
 }

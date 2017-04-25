@@ -92,6 +92,10 @@
 	<session-config>
 		<session-timeout>15</session-timeout>
 	</session-config>
+	
+	<listener>
+		<listener-class>org.sxdata.jingwei.util.CommonUtil.SessionLis</listener-class>
+	</listener>
 
 	<welcome-file-list>
 		<welcome-file>login.jsp</welcome-file>

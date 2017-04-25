@@ -35,7 +35,10 @@ public class LogController {
             String taskName="";
             //获取当前用户所在的用户组
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
+            String userGroupName="";
+            if(null!=attr){
+                userGroupName=attr.getUserGroupName();
+            }
 
             //获取查询参数
             String search=request.getParameter("search");

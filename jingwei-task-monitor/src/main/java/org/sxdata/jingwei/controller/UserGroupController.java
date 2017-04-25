@@ -32,8 +32,6 @@ public class UserGroupController {
     @Autowired
     SlaveService slaveService;
 
-
-
     //添加用户组前  判断用户组名是否已存在
     @RequestMapping(value="/decideGroupNameExist")
     @ResponseBody
@@ -50,7 +48,7 @@ public class UserGroupController {
         }
     }
 
-    //分页形式获取用户集合
+    //分页形式获取用户组集合
     @RequestMapping(value="/getUserGroupOfThisPage")
     @ResponseBody
     protected void getUserGroupOfThisPage(HttpServletResponse response,HttpServletRequest request){

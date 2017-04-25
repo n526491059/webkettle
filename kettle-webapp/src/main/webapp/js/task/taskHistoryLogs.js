@@ -92,14 +92,19 @@ function showLogInfo(){
     Ext.Ajax.request({
         url:"/log/getTraceById.do",
         success:function(response,config){
-            var trace=response.responseText;
-            var executionLog=Ext.decode(trace).executionLog
-            var logJSON=eval("("+executionLog+")");
+            var trace=Ext.decode(response.responseText);
+            var executionLog=trace.executionLog;
+            var status=trace.status;
             var windowHTML="";
-            for(var item in logJSON){
-                if(item=="log"){
-                    windowHTML+=item+":"+"<br/>"+logJSON[item]+"<br/><br/>";
+            if(status!="程序错误"){
+                var logJSON=eval("("+executionLog+")");
+                for(var item in logJSON){
+                    if(item=="log"){
+                        windowHTML+=item+":"+"<br/>"+logJSON[item]+"<br/><br/>";
+                    }
                 }
+            }else{
+                windowHTML+=executionLog;
             }
             var logDetailWindow=new Ext.Window({
                 title:"日志详情",

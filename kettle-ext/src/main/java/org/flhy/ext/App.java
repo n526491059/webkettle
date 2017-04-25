@@ -175,8 +175,6 @@ public class App implements ApplicationContextAware {
 			repository.init(meta);
 			repository.connect("admin", "admin");
 			this.repository = repository;
-			
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

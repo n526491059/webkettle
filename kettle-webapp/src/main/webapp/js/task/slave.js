@@ -234,7 +234,7 @@ function slaveManager(secondGuidePanel){
             emptyMsg:"没有记录"
         })
     })
-    if(loginUserName!="admin" && loginUserType!=1){
+    if(loginUserName!="admin" && loginUserSlavePower!=1){
         Ext.getCmp("deleteSlaveButton").hide();
         Ext.getCmp("addSlaveButton").hide();
     }

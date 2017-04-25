@@ -263,6 +263,12 @@ function deleteUserGroup(){
             var password=Ext.decode(response.responseText).user.password;
             var onePassword="";
             var repeatPassword="";
+            //设置密码框格式
+            var dlg = Ext.Msg.getDialog();
+            var t = Ext.get(dlg.body).select('.ext-mb-input');
+            t.each(function (el) {
+                el.dom.type = "password";
+            });
             //删除前进行两次密码验证
             Ext.MessageBox.prompt("输入框","为保证数据安全,请验证登录密码:",function(btn,txt){
                 if(btn=="ok"){

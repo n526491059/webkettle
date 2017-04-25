@@ -17,13 +17,115 @@ function loginOut(){
 	window.location.href = 'user/loginOut.do';
 }
 
+//修改当前用户密码
+function updateThisPwd(){
+	Ext.Ajax.request({
+		url:"/user/getLoginUser.do",
+		success:function(response,config){
+			var loginUser=Ext.decode(response.responseText).user
+			var password=loginUser.password;
+			var userId=loginUser.userId;
+			//设置密码框格式
+			var dlg = Ext.Msg.getDialog();
+			var t = Ext.get(dlg.body).select('.ext-mb-input');
+			t.each(function (el) {
+				el.dom.type = "password";
+			});
+			Ext.MessageBox.prompt("密码","为保证数据安全,请验证登录密码:",function(btn,txt){
+				if(btn=="ok" && txt==password){
+					var passwordInput=new Ext.form.TextField({
+						name: "password",
+						fieldLabel: "新密码",
+						inputType: 'password',
+						width:150,
+						allowBlank:false,
+						regex:/^[a-zA-Z0-9]{6,10}$/,
+						invalidText:"密码必须在6-10字符",
+						validateOnBlur:true
+					});
+					var repeatPasswordInput=new Ext.form.TextField({
+						name: "repeatPassword",
+						fieldLabel: "确认密码",
+						inputType: 'password',
+						width:150,
+						allowBlank:false,
+						regex:/^[a-zA-Z0-9]{6,10}$/,
+						invalidText:"密码必须在6-10字符",
+						validateOnBlur:true
+					});
+					//表单
+					var userInfoForm=new Ext.form.FormPanel({
+						url:"/user/updatePassword.do",
+						width:300,
+						height:120,
+						frame:true,
+						labelWidth:70,
+						labelAlign:"right",
+						items:[
+							{
+								layout:"form",  //从上往下布局
+								items:[passwordInput,repeatPasswordInput]
+							}
+						]
+					});
+					var updatePasswordWindow=new Ext.Window({
+						title: "修改密码",
+						modal: true,
+						bodyStyle: "background-color:white",
+						width: 300,
+						height: 135,
+						items: [userInfoForm],
+						tbar:new Ext.Toolbar({buttons:[
+							{
+								text:"修改",
+								handler:function(){
+									if(userInfoForm.getForm().isValid()){
+										if(passwordInput.getValue()==repeatPasswordInput.getValue()){
+											//表单所有控件作为提交参数
+											var userIdHidden=new Ext.form.Hidden({
+												name:"userId",
+												value:userId
+											});
+											userInfoForm.items.add(userIdHidden);
+											userInfoForm.doLayout();
+											userInfoForm.baseParams=userInfoForm.getForm().getValues();
+											userInfoForm.getForm().submit({
+												success:function(form,action){
+													Ext.MessageBox.alert("成功","密码修改成功!");
+													updatePasswordWindow.close();
+												},
+												failure:function(){
+													Ext.MessageBox.alert("失败","服务器异常,请稍后再试!");
+												}
+											})
+										}else{
+											Ext.MessageBox.alert("提交失败","两次密码不一致!");
+											passwordInput.setValue("");
+											repeatPasswordInput.setValue("");
+										}
+									}else{
+										Ext.MessageBox.alert("提交失败","表单存在不规范填写,请再次确认后提交!");
+									}
+								}
+							}
+						]})
+					})
+					updatePasswordWindow.show(Ext.getCmp("secondGuidePanel"));
+				}else{
+					if(btn=="ok"){
+						Ext.MessageBox.alert("","密码有误,请再次确认!",function(){
+							Ext.getDom("updateThisPw").click();
+						});
+					}
+				}
+			});
+		},
+		failure:function(){},
+		params:{}
+	})
+}
+
 Ext.onReady(function() {
-	//设置密码框格式
-	var dlg = Ext.Msg.getDialog();
-	var t = Ext.get(dlg.body).select('.ext-mb-input');
-	t.each(function (el) {
-		el.dom.type = "password";
-	});
 	Ext.QuickTips.init();
 	Ext.MessageBox.buttonText.yes = '确定';
 	Ext.MessageBox.buttonText.ok = '好的';
@@ -39,8 +141,9 @@ Ext.onReady(function() {
 //		});
 
 		var username=document.getElementById("loginUsername").value;
-		var loginInfo="<div style='margin-left: 80%;margin-top: 1%'>欢迎您：<h3 style='display: inline-block;'>"
-			+username+"</h3>&nbsp;&nbsp;<input type='button' value='登 出' onclick='loginOut();'></div>";
+		var loginInfo="<div style='margin-left: 70%;margin-top: 1%'>欢迎您：<h3 style='display: inline-block;'>"
+			+username+"</h3>&nbsp;&nbsp;<input type='button' value='登 出' onclick='loginOut();'>&nbsp;&nbsp;" +
+			"<input type='button' value='修改密码' onclick='updateThisPwd();' id='updateThisPw'></div>";
 		var navigationPanel = new Ext.Panel({
 			id: 'navigationPanel',
 			region: 'north',

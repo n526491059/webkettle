@@ -179,7 +179,10 @@ public class TaskController {
         try{
 
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
+            String userGroupName="";
+            if(null!=attr){
+                userGroupName=attr.getUserGroupName();
+            }
             List<TaskControlEntity> jobItems=controlService.getAllRunningJob(userGroupName);
             for(TaskControlEntity item:controlService.getAllRunningTrans(userGroupName)){
                 jobItems.add(item);
@@ -199,7 +202,7 @@ public class TaskController {
     //查询作业;包括条件查询
     @RequestMapping(value="/getJobs.do")
     @ResponseBody
-    protected void getJobs(HttpServletResponse response,HttpServletRequest request) {
+    protected void getJobs(HttpServletResponse response,HttpServletRequest request){
         try{
             //获取前台传递的分页参数
             int start=Integer.parseInt(request.getParameter("start"));
@@ -209,7 +212,10 @@ public class TaskController {
             String createDate=request.getParameter("date");
             //获取当前用户所在的用户组
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
+            String userGroupName="";
+            if(null!=attr){
+                userGroupName=attr.getUserGroupName();
+            }
             JSONObject result=jobService.findJobs(start, limit, name, createDate,userGroupName);
 
             response.setContentType("text/html;charset=utf-8");
@@ -256,7 +262,10 @@ public class TaskController {
             String createDate=request.getParameter("date");
             //获取当前用户所在的用户组
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-            String userGroupName=attr.getUserGroupName();
+            String userGroupName="";
+            if(null!=attr){
+                userGroupName=attr.getUserGroupName();
+            }
 
             JSONObject result=transService.findTrans(start, limit, transName, createDate,userGroupName);
             //输出结果返回给客户端
@@ -304,7 +313,10 @@ public class TaskController {
         String flag=request.getParameter("powerFlag");
         //在所有节点中获取负载最低的节点
         UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
-        String userGroupName=attr.getUserGroupName();
+        String userGroupName="";
+        if(null!=attr){
+            userGroupName=attr.getUserGroupName();
+        }
         SlaveEntity minSlave=slaveService.getSlaveByLoadAvg(slaveService.getAllSlave(userGroupName));
         String config="{\"exec_local\":\"N\",\"exec_remote\":\"Y\",\"pass_export\":\"N\","
                 +"\"exec_cluster\":\"N\",\"cluster_post\":\"Y\",\"cluster_prepare\":\"Y\",\"cluster_start\":\"Y\","

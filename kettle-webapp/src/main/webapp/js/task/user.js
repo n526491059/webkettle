@@ -774,6 +774,12 @@ function updatePassword(){
         url:"/user/getLoginUser.do",
         success:function(response,config){
             var password=Ext.decode(response.responseText).user.password;
+            //设置密码框格式
+            var dlg = Ext.Msg.getDialog();
+            var t = Ext.get(dlg.body).select('.ext-mb-input');
+            t.each(function (el) {
+                el.dom.type = "password";
+            });
             Ext.MessageBox.prompt("密码","为保证数据安全,请验证登录密码:",function(btn,txt){
                 if(btn=="ok" && txt==password){
                     var passwordInput=new Ext.form.TextField({

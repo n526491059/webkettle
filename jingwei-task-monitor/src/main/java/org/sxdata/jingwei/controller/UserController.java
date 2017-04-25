@@ -238,6 +238,6 @@ public class UserController {
         UserEntity user=new UserEntity();
         user.setUserId(Integer.valueOf(userId));
         user.setPassword(KettleEncr.encryptPassword(password));
-        userService.updateUser(user,null);
+        userService.updatePassword(user);
     }
 }
