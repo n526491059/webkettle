@@ -1,7 +1,6 @@
 package org.sxdata.jingwei.controller;
 
 import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,7 +10,6 @@ import org.sxdata.jingwei.entity.TaskGroupEntity;
 import org.sxdata.jingwei.entity.UserGroupAttributeEntity;
 import org.sxdata.jingwei.service.TaskGroupService;
 import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -109,13 +107,18 @@ public class TaskGroupController {
         try{
             Integer start=Integer.valueOf(request.getParameter("start"));
             Integer limit=Integer.valueOf(request.getParameter("limit"));
+            //查询条件
+            String createDate=request.getParameter("createDate");
+            if(!StringDateUtil.isEmpty(createDate))
+                createDate=createDate.replace("T"," ");
+            String taskGroupName=request.getParameter("taskGroupName");
             //获取当前用户所在的用户组
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
             String userGroupName="";
             if(null!=attr){
                 userGroupName=attr.getUserGroupName();
             }
-            String result=taskGroupService.getAllTaskGroupByLogin(start, limit, userGroupName);
+            String result=taskGroupService.getAllTaskGroupByLogin(start, limit, userGroupName,taskGroupName,createDate);
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
             out.write(result);

@@ -15,17 +15,28 @@ JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 		var wExecRemote = new Ext.form.Radio({name: 'execMethod', fieldLabel: '远程执行'});
 		var wRemoteHost = null;
 		if(this.runMode == 'normal') {
+			var proxy=new Ext.data.HttpProxy({url:"/slave/getSlaveSelect.do"});
+			var hostName=Ext.data.Record.create([
+				{name:"hostId",type:"String",mapping:"hostId"},
+				{name:"hostName",type:"String",mapping:"hostName"},
+			]);
+			var reader=new Ext.data.JsonReader({},hostName);
+			var store=new Ext.data.Store({
+				proxy:proxy,
+				reader:reader
+			});
 			wRemoteHost = new Ext.form.ComboBox({
 				fieldLabel: '远程主机',
 				anchor: '-20',
-				displayField: 'name',
-				valueField: 'name',
+				displayField: 'hostId',
+				valueField: 'hostName',
 				typeAhead: true,
-		        mode: 'local',
+		        mode: 'remote',
 		        forceSelection: true,
 		        triggerAction: 'all',
 		        selectOnFocus:true,
-		        store: getActiveGraph().getSlaveServerStore()
+		        //store: getActiveGraph().getSlaveServerStore()
+				store:store
 			});
 		} else {
 			wRemoteHost = new Ext.form.TextField({fieldLabel: '远程主机', anchor: '-20', readOnly: true});
@@ -113,6 +124,7 @@ JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 			
 			if(me.fireEvent('beforestart', data) !== false) {
 				me.setDisabled(true);
+				alert(data.remote_server);
 				Ext.Ajax.request({
 					url: GetUrl('job/run.do'),
 					params: {graphXml: getActiveGraph().toXml(), executionConfiguration: Ext.encode(data)},
@@ -123,7 +135,6 @@ JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 							me.close();
 							setTimeout(function() {
 //								getActiveGraph().fireEvent('doRun', resObj.message);
-								
 								getActiveGraph().toRun(resObj.message);
 								
 							}, 500);
@@ -282,17 +293,28 @@ JobExecutionConfigurationScheduler = Ext.extend(Ext.Window, {
 		var wExecRemote = new Ext.form.Radio({name: 'execMethod', fieldLabel: '远程执行'});
 		var wRemoteHost = null;
 		if(this.runMode == 'normal') {
+			var proxy=new Ext.data.HttpProxy({url:"/slave/getSlaveSelect.do"});
+			var hostName=Ext.data.Record.create([
+				{name:"hostId",type:"String",mapping:"hostId"},
+				{name:"hostName",type:"String",mapping:"hostName"},
+			]);
+			var reader=new Ext.data.JsonReader({},hostName);
+			var store=new Ext.data.Store({
+				proxy:proxy,
+				reader:reader
+			});
 			wRemoteHost = new Ext.form.ComboBox({
 				fieldLabel: '远程主机',
 				anchor: '-20',
-				displayField: 'name',
-				valueField: 'name',
+				displayField: 'hostId',
+				valueField: 'hostName',
 				typeAhead: true,
-				mode: 'local',
+				mode: 'remote',
 				forceSelection: true,
 				triggerAction: 'all',
 				selectOnFocus:true,
-				store: getActiveGraph().getSlaveServerStore()
+				//store: getActiveGraph().getSlaveServerStore()
+				store:store
 			});
 		} else {
 			wRemoteHost = new Ext.form.TextField({fieldLabel: '远程主机', anchor: '-20', readOnly: true});

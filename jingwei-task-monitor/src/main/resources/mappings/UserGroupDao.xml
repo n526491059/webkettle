@@ -87,8 +87,8 @@
 
     <!-- 添加用户组成员表(即添加该用户组下有哪些用户) -->
     <insert id="addUserGroupAttribute" parameterType="org.sxdata.jingwei.entity.UserGroupAttributeEntity">
-        insert into d_user_group_member_attribute(USER_GROUP_NAME,USER_NAME,SLAVE_PERMISSION_TYPE,TASK_PERMISSION_TYPE,USER_TYPE)
-         values(#{userGroupName},#{userName},#{slavePremissonType},#{taskPremissionType},#{userType})
+        insert into d_user_group_member_attribute(USER_GROUP_NAME,USER_NAME,SLAVE_PERMISSION_TYPE,TASK_PERMISSION_TYPE,USER_TYPE,CREATE_DATE)
+         values(#{userGroupName},#{userName},#{slavePremissonType},#{taskPremissionType},#{userType},#{createDate})
     </insert>
 
     <!-- 添加用户组可见的节点记录 -->

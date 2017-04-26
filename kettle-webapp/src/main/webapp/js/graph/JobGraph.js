@@ -586,3 +586,231 @@ JobGraphScheduler = Ext.extend(BaseGraph, {
 });
 
 Ext.reg('JobGraphScheduler',JobGraphScheduler);
+
+JobGraphNo = Ext.extend(BaseGraph, {
+	iconCls: 'job',
+
+	initComponent: function() {
+
+		var resultPanel = new JobResult({hidden: !this.showResult});
+
+		if(this.readOnly === false && this.Executable===false ) {
+
+			var jobExecutor = this.jobExecutor = new JobExecutor();
+			jobExecutor.on('beforerun', function(executor,defaultExecutionConfig) {
+				var dialog = new JobExecutionConfigurationDialog();
+				dialog.show(null, function() {
+					dialog.initData(defaultExecutionConfig);
+				});
+			});
+			jobExecutor.on('result', this.doResult, this);
+
+			this.tbar = [{
+				iconCls: 'save', scope: this, tooltip: '保存这个任务', handler: this.save
+			}, '-', {
+				iconCls: 'run', scope: this, tooltip: '运行这个任务', handler: this.run
+			}, {
+				iconCls: 'stop', scope: this, tooltip: '停止这个任务', handler: this.stop
+			}, {
+				iconCls: 'SQLbutton', scope: this, tooltip: '产生需要运行这个转换的SQL', handler: this.getSQL
+			}/*, '-', {
+			 iconCls: 'SlaveServer', scope: this, handler: this.showSlaves
+			 }*/, '-', {
+				iconCls: 'show-results', scope: this, handler: this.showResultPanel
+			}];
+		}else if(this.Executable===true&&this.readOnly === false){
+			var jobExecutor = this.jobExecutor = new JobExecutor();
+			jobExecutor.on('beforerun', function(executor,defaultExecutionConfig) {
+				var dialog = new JobExecutionConfigurationDialog();
+				dialog.show(null, function() {
+					dialog.initData(defaultExecutionConfig);
+				});
+			});
+			jobExecutor.on('result', this.doResult, this);
+			this.tbar = [{
+				iconCls: 'run', scope: this, tooltip: '运行这个任务', handler: this.run
+			}, {
+				iconCls: 'stop', scope: this, tooltip: '停止这个任务', handler: this.stop
+			}];
+		}
+		this.items = [resultPanel];
+
+
+		JobGraph.superclass.initComponent.call(this);
+
+
+		this.on('load', function() {
+			var graph = this.getGraph();
+			var root = graph.getDefaultParent();
+
+			graph.getModel().addListener(mxEvent.CHANGE, function(sender, evt){
+				Ext.each(evt.getProperty('edit').changes, function(change) {
+					if (change.constructor == mxCellAttributeChange && change.cell != null)    {
+						var cell = change.cell;
+						if(cell.isVertex() && cell.value.nodeName == 'JobEntry' && change.attribute == 'label') {
+
+							graph.getModel().beginUpdate();
+							try
+							{
+
+								Ext.each(graph.getOutgoingEdges(cell), function(edge) {
+									var edit = new mxCellAttributeChange(edge, 'from', change.value);
+									graph.getModel().execute(edit);
+								});
+
+								Ext.each(graph.getIncomingEdges(cell), function(edge) {
+									var edit = new mxCellAttributeChange(edge, 'to', change.value);
+									graph.getModel().execute(edit);
+								});
+							} finally{
+								graph.getModel().endUpdate();
+							}
+						}
+					}
+				});
+			});
+
+		}, this);
+	},
+
+	doResult: function(result) {
+		var resultPanel = this.layout.south.panel;
+		resultPanel.loadLocal(result);
+	},
+
+	toRun: function(executionId) {
+		var resultPanel = this.layout.south.panel;
+		if(!resultPanel.isVisible())
+			this.showResultPanel();
+
+		this.jobExecutor.fireEvent('run', executionId);
+	},
+
+	save: function() {
+		Ext.Ajax.request({
+			url: GetUrl('job/save.do'),
+			params: {graphXml: encodeURIComponent(this.toXml())},
+			method: 'POST',
+			success: function(response) {
+				decodeResponse(response, function(resObj) {
+					Ext.Msg.show({
+						title: '系统提示',
+						msg: resObj.message,
+						buttons: Ext.Msg.OK,
+						icon: Ext.MessageBox.INFO
+					});
+				});
+			},
+			failure: failureResponse
+		});
+	},
+
+	run: function() {
+		var jobExecutor = this.jobExecutor;
+		if(jobExecutor.isRunning()) {
+			Ext.Msg.alert('系统提示', '任务正在执行，请稍后...');
+			return;
+		}
+
+		// 获取执行参数
+		Ext.Ajax.request({
+			url: GetUrl('job/initRun.do'),
+			method: 'POST',
+			params: {graphXml: this.toXml()},
+			success: function(response) {
+				var resObj = Ext.decode(response.responseText);
+				jobExecutor.fireEvent('beforerun', jobExecutor, resObj);
+			},
+			failure: failureResponse
+		});
+
+	},
+
+	showResultPanel: function() {
+		var resultPanel = this.layout.south.panel;
+
+		resultPanel.setVisible( !resultPanel.isVisible() );
+		this.doLayout();
+	},
+
+	initContextMenu: function(menu, cell, evt) {
+		var graph = this.getGraph(), me = this;
+	},
+
+	newStep: function(node, x, y, w, h) {
+		var graph = this.getGraph();
+		Ext.Ajax.request({
+			url: GetUrl('job/newJobEntry.do'),
+			params: {graphXml: this.toXml(), pluginId: node.attributes.pluginId, name: encodeURIComponent(node.text)},
+			method: 'POST',
+			success: function(response) {
+				var doc = response.responseXML;
+				graph.getModel().beginUpdate();
+				try
+				{
+					var cell = graph.insertVertex(graph.getDefaultParent(), null, doc.documentElement, x, y, w, h, "icon;image=" + node.attributes.dragIcon);
+					graph.setSelectionCells([cell]);
+				} finally
+				{
+					graph.getModel().endUpdate();
+				}
+			}
+		});
+	},
+
+	newHop: function(cell) {
+		var doc = mxUtils.createXmlDocument();
+		var hop = doc.createElement('JobHop');
+
+		hop.setAttribute('from', cell.source.getAttribute('label'));
+		hop.setAttribute('to', cell.target.getAttribute('label'));
+		hop.setAttribute('from_nr', cell.source.getAttribute('nr'));
+		hop.setAttribute('to_nr', cell.target.getAttribute('nr'));
+		cell.setValue(hop);
+
+		var graph = this.getGraph();
+
+		graph.getModel().beginUpdate();
+		try
+		{
+			var edit = new mxCellAttributeChange(cell, 'enabled', 'Y');
+			graph.getModel().execute(edit);
+			edit = new mxCellAttributeChange(cell, 'evaluation', 'Y');
+			graph.getModel().execute(edit);
+			if(cell.source.getAttribute('ctype') == 'SPECIAL' && cell.source.getAttribute('start') == 'Y') {
+				edit = new mxCellAttributeChange(cell, 'unconditional', 'Y');
+				graph.getModel().execute(edit);
+			} else {
+				edit = new mxCellAttributeChange(cell, 'unconditional', 'N');
+				graph.getModel().execute(edit);
+			}
+		} finally
+		{
+			graph.getModel().endUpdate();
+		}
+	},
+
+	getEntries: function(cb) {
+		var store = new Ext.data.JsonStore({
+			idProperty: 'name',
+			fields: ['name'],
+			proxy: new Ext.data.HttpProxy({
+				url: GetUrl('job/entries.do'),
+				method: 'POST'
+			})
+		});
+
+		store.on('load', function() {
+			if(Ext.isFunction(cb))
+				cb(store);
+		});
+
+		store.baseParams.graphXml = this.toXml();
+		store.load();
+
+		return store;
+	}
+
+});
+
+Ext.reg('JobGraphNo', JobGraphNo);

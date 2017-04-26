@@ -158,9 +158,7 @@ public class SchedulerServiceImpl implements SchedulerService {
         return flag;
     }
 
-
     @Override
-    @Transactional
     //移除被选中的定时任务
     public void deleteScheduler(String[] taskIdArray) throws org.quartz.SchedulerException{
         SchedulerFactory factory=new StdSchedulerFactory();

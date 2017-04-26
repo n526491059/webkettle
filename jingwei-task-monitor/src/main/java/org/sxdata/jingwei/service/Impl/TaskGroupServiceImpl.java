@@ -16,6 +16,7 @@ import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -33,13 +34,13 @@ public class TaskGroupServiceImpl implements TaskGroupService{
     protected UserGroupDao userGroupDao;
 
     @Override
-    public String getAllTaskGroupByLogin(int start, int limit,String userGroupName) throws Exception {
-        List<TaskGroupEntity> taskGroups=taskGroupDao.getAllTaskGroup(start, limit,userGroupName);
+    public String getAllTaskGroupByLogin(int start, int limit,String userGroupName,String taskGroupName,String createDate) throws Exception {
+        List<TaskGroupEntity> taskGroups=taskGroupDao.getAllTaskGroup(start, limit,userGroupName,taskGroupName,createDate);
         Integer totalCount=taskGroupDao.getTotalCountTaskGroup(userGroupName);
         PageforBean pageBean=new PageforBean();
         pageBean.setTotalProperty(totalCount);
         pageBean.setRoot(taskGroups);
-        return JSONObject.fromObject(pageBean).toString();
+        return JSONObject.fromObject(pageBean,StringDateUtil.configJson("yyyy-MM-dd HH:mm:ss")).toString();
     }
 
     @Override
@@ -51,6 +52,7 @@ public class TaskGroupServiceImpl implements TaskGroupService{
         TaskGroupEntity taskGroup=new TaskGroupEntity();
         taskGroup.setTaskGroupName(taskGroupName);
         taskGroup.setTaskGroupDesc(taskGroupDesc);
+        taskGroup.setCreateDate(new Date());
         taskGroupDao.addTaskGroup(taskGroup);
         //任务组成员对象 任务组下的任务
         String taskArray=request.getParameter("taskArray");

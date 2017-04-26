@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Repository
 public interface TaskGroupDao {
-    public List<TaskGroupEntity> getAllTaskGroup(int start,int limit,String userGroupName);
+    public List<TaskGroupEntity> getAllTaskGroup(int start,int limit,String userGroupName,String taskGroupName,String createDate);
 
     public Integer getTotalCountTaskGroup(String userGroupName);
 

@@ -240,7 +240,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 						},{
 							text : "<font size = '3px'>调度</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
 							children:[
-								{id:"schedulerMonitor",text:"<font size = '2px'>调度管理</font>",cls:"nav",leaf:true},
+								{id:"schedulerMonitor",text:"<font size = '2px'>定时调度管理</font>",cls:"nav",leaf:true},
 							]
 						},{
 							text : "<font size = '3px'>用户</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
@@ -535,7 +535,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 												failure: failureResponse
 											});
 										}else{
-											Ext.MessageBox.alert("提示","必须为该转换分配至少一个任务组");
+											Ext.MessageBox.alert("提示","必须为该作业分配至少一个任务组");
 											return;
 										}
 									}

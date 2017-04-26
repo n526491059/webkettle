@@ -1,6 +1,5 @@
 //展示用户信息
 function showUserPanel(secondGuidePanel){
-    secondGuidePanel.removeAll(true);
     //为表格添加一行复选框用于选择行
     var sm=new Ext.grid.CheckboxSelectionModel();
     //列模型
@@ -18,6 +17,7 @@ function showUserPanel(secondGuidePanel){
             }
         },
         {header:"password",dataIndex:"password"},
+        {header:"创建时间",dataIndex:"createDate",format:"y-M-d H:m:s"},
         {header:"描述",dataIndex:"description"},
         {header:"用户名",dataIndex:"login"},
         {header:"所属用户组",dataIndex:"belongToUserGroup"},
@@ -60,6 +60,7 @@ function showUserPanel(secondGuidePanel){
         {name:"userId",type:"string",mapping:"userId"},
         {name:"userType",type:"int",mapping:"userType"},
         {name:"password",type:"string",mapping:"password"},
+        {name:"createDate",type:"string",mapping:"createDate"},
         {name:"description",type:"string",mapping:"description"},
         {name:"login",type:"string",mapping:"login"},
         {name:"belongToUserGroup",type:"string",mapping:"belongToUserGroup"},
@@ -70,9 +71,50 @@ function showUserPanel(secondGuidePanel){
 
     var store=new Ext.data.Store({
         proxy:proxy,
-        reader:reader
+        reader:reader,
+        listeners: {
+            "beforeload": function(store) {
+                var usernameTo="";
+                var usertypeTo="";
+                var usergroupTo="";
+                if(Ext.getCmp("userTypeCombox"))
+                    usertypeTo=Ext.getCmp("userTypeCombox").getValue();
+                if(Ext.getCmp("userNameField"))
+                    usernameTo=Ext.getCmp("userNameField").getValue();
+                if(Ext.getCmp("userGroupCombox"))
+                    userGroupTo=Ext.getCmp("userGroupCombox").getValue();
+                store.baseParams = {
+                    username:usernameTo,
+                    usertype:usertypeTo,
+                    usergroup:usergroupTo
+                }
+            }
+        }
     })
     store.load({params:{start:0,limit:10}});
+    var inputUsername="";
+    var chooseUsertype="";
+    var chooseUsergroup="";
+
+    if(Ext.getCmp("userTypeCombox"))
+        chooseUsertype=Ext.getCmp("userTypeCombox").getValue();
+    if(Ext.getCmp("userNameField"))
+        inputUsername=Ext.getCmp("userNameField").getValue();
+    if(Ext.getCmp("userGroupCombox"))
+        chooseUsergroup=Ext.getCmp("userGroupCombox").getValue();
+
+    //用户名搜索框
+    var usernameField=new Ext.form.TextField({
+        id:"userNameField",
+        name: "username",
+        fieldLabel: "用户名",
+        width:150,
+        value:inputUsername,
+        emptyText:"请输入用户名.."
+    });
+
+    var userGroupCom=userGroupCombobox(chooseUsergroup);
+    var userTypeCom=userTypeCombobox(chooseUsertype);
     var grid=new Ext.grid.GridPanel({
         id:"usersPanel",
         title:"用户管理",
@@ -86,6 +128,15 @@ function showUserPanel(secondGuidePanel){
         closable:true,
         tbar:new Ext.Toolbar({
             buttons:[
+                userGroupCom,
+                userTypeCom,
+                usernameField,"-",
+                {
+                    text:"搜索",
+                    handler:function(){
+                        showUserPanel(secondGuidePanel);
+                    }
+                },
                 {
                     text:"添加",
                     handler:function(){
@@ -105,8 +156,13 @@ function showUserPanel(secondGuidePanel){
     grid.getColumnModel().setHidden(2,true);
     //grid.getColumnModel().setHidden(3,true);
     grid.getColumnModel().setHidden(4,true);
+    secondGuidePanel.removeAll(true);
     secondGuidePanel.add(grid);
     secondGuidePanel.doLayout();
+    if(loginUserName!="admin"){
+        Ext.getCmp("userGroupCombox").hide();
+        Ext.getCmp("userTypeCombox").hide();
+    }
 }
 
 //修改用户
@@ -876,3 +932,87 @@ function updatePassword(){
     })
 }
 
+//用户组选择下拉框
+function userGroupCombobox(userGroupName){
+    var proxy=new Ext.data.HttpProxy({url:"/userGroup/getUserGrouupSelect.do"});
+
+    var hostName=Ext.data.Record.create([
+        {name:"id",type:"String",mapping:"id"},
+        {name:"name",type:"String",mapping:"name"},
+    ]);
+
+    var reader=new Ext.data.JsonReader({},hostName);
+
+    var store=new Ext.data.Store({
+        proxy:proxy,
+        reader:reader
+    });
+
+    var userGroupCom=new Ext.form.ComboBox({
+        id:"userGroupCombox",
+        triggerAction:"all",
+        store:store,
+        displayField:"id",
+        valueField:"name",
+        mode:"remote",
+        emptyText:"用户组选择",
+        listeners:{
+            //index是被选中的下拉项在整个列表中的下标 从0开始
+            'select':function(combo,record,index){
+                var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+                showUserPanel(secondGuidePanel);
+            }
+        }
+    })
+    if(userGroupName!=undefined && userGroupName!=""){
+        userGroupCom.setValue(userGroupName);
+        userGroupCom.setRawValue(userGroupName);
+    }
+
+    return userGroupCom;
+}
+
+//用户类型下拉框
+function userTypeCombobox(type){
+    var userType=[
+        ["管理员","管理员"],
+        ["普通用户","普通用户"]
+    ]
+    var userTypeProxy=new Ext.data.MemoryProxy(userType);
+
+    //下拉列表的数据结构
+    var userTypeRecord=Ext.data.Record.create([
+        {name:"typeId",type:"string",mapping:0},
+        {name:"typeName",type:"string",mapping:1}
+    ])
+    var reader=new Ext.data.ArrayReader({},userTypeRecord);
+
+    var store=new Ext.data.Store({
+        proxy:userTypeProxy,
+        reader:reader,
+        autoLoad:true
+    });
+    var typeChooseCom=new Ext.form.ComboBox({
+        id:"userTypeCombox",
+        triggerAction:"all",
+        store:store,
+        displayField:"typeName",
+        valueField:"typeId",
+        mode:"local",
+        autoLoad:true,
+        emptyText:"用户类型",
+        listeners:{
+            //index是被选中的下拉项在整个列表中的下标 从0开始
+            'select':function(combo,record,index){
+                var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+                showUserPanel(secondGuidePanel);
+            }
+        }
+    })
+    if(type!=undefined && type!=""){
+        typeChooseCom.setValue(type);
+        typeChooseCom.setRawValue(type);
+    }
+    return typeChooseCom;
+
+}

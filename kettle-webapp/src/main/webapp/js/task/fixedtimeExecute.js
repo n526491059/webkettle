@@ -388,6 +388,7 @@ function generateToolButton(flag){
                         var path=jobInfo[2];
                         targetForm.getForm().submit({
                             success:function(form,action){
+                                alert(action.result.isSuccess);
                                 if(action.result.isSuccess==false){
                                     Ext.MessageBox.alert("失败","该作业已经存在相同执行周期的调度计划");
                                 }else{

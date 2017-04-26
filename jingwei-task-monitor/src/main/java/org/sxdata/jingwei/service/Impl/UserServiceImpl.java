@@ -15,6 +15,7 @@ import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -67,12 +68,18 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public synchronized boolean addUser(UserEntity user,UserGroupAttributeEntity attribute) {
+        attribute.setCreateDate(new Date());
         List<UserEntity> allUser=userDao.getAllUsers();
         for(UserEntity item:allUser){
             if(item.getLogin().equals(user.getLogin()))
                 return false;
         }
-        user.setUserId(userDao.selectMaxId() + 1);
+        Integer userId=userDao.selectMaxId();
+        if(null!=userId)
+            userId+=1;
+        else
+            userId=0;
+        user.setUserId(userId);
         userDao.addUser(user);
         userGroupDao.addUserGroupAttribute(attribute);
         return true;
@@ -80,13 +87,27 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public String getUsersLimit(int start, int limit,HttpServletRequest request) {
+        String username=request.getParameter("username");
+        String userType=request.getParameter("usertype");
+        String userGroup=request.getParameter("usergroup");
         //获取当前用户所在的用户组
         UserGroupAttributeEntity userAttribute=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
         String userGroupName=userAttribute.getUserGroupName();
+        //如果是admin用户则把查询条件赋给该值
+        if(StringDateUtil.isEmpty(userGroupName))
+            userGroupName=userGroup;
+        //获取用户类型
+        Integer userTypeI=null;
+        if(userType.equals("管理员"))
+            userTypeI=1;
+        else if(userType.equals("普通用户"))
+            userTypeI=2;
+
+
         //获取用户集合    总记录数
         List<UserEntity> users=new ArrayList<>();
         Integer count= userDao.getUserCount(userGroupName);
-        users=userDao.getUsersLimit(start, limit,userGroupName);
+        users=userDao.getUsersLimit(start,limit,userGroupName,username,userTypeI);
         //如果不是是admin用户 把该用户组下面所有用户权限为1的用户移除
         if(!StringDateUtil.isEmpty(userGroupName)){
             List<UserEntity> adminUserArray=new ArrayList<>();
@@ -110,7 +131,7 @@ public class UserServiceImpl implements UserService{
         PageforBean bean=new PageforBean();
         bean.setRoot(users);
         bean.setTotalProperty(count);
-        return JSONObject.fromObject(bean).toString();
+        return JSONObject.fromObject(bean,StringDateUtil.configJson("yyyy-MM-dd HH:mm:ss")).toString();
     }
 
     @Override

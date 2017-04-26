@@ -235,8 +235,8 @@ function slaveManager(secondGuidePanel){
         })
     })
     if(loginUserName!="admin" && loginUserSlavePower!=1){
-        Ext.getCmp("deleteSlaveButton").hide();
         Ext.getCmp("addSlaveButton").hide();
+        Ext.getCmp("deleteSlaveButton").hide();
     }
     slaveGridPanel.getColumnModel().setHidden(2,true);
     secondGuidePanel.removeAll(true);

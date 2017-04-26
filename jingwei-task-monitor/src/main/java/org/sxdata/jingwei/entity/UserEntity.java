@@ -1,5 +1,7 @@
 package org.sxdata.jingwei.entity;
 
+import java.util.Date;
+
 /**
  * Created by cRAZY on 2017/2/17.
  */
@@ -14,6 +16,15 @@ public class UserEntity {
     private Integer taskGroupPower;
     private String belongToUserGroup;
     private Integer userType;
+    private Date createDate;
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
 
     public Integer getUserType() {
         return userType;

@@ -1,15 +1,24 @@
 function generateSchedulerMonitorPanel(secondGuidePanel){
-
     var sm=new Ext.grid.CheckboxSelectionModel();
     //定时作业列模型
     var cm=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
         sm,
-        {header:"定时id",width:100,dataIndex:"idJobtask"},
-        {header:"作业名",width:150,dataIndex:"jobName"},
-        {header:"执行节点",width:150,dataIndex:"hostName"},
-        {header:"周期",width:300,dataIndex:"timerInfo"},
-        {header:"资源库",width:300,dataIndex:"repoId"}
+        {header:"定时id",dataIndex:"idJobtask"},
+        {header:"作业名",dataIndex:"jobName"},
+        {header:"执行节点",dataIndex:"hostName"},
+        {header:"周期",dataIndex:"timerInfo"},
+        {header:"资源库",dataIndex:"repoId"},
+        {header:"操作",dataIndex:"",menuDisabled:true,align:"center",
+            renderer:function(v){
+                if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
+                    return "<input type='button' onclick='deleteSchedueler()' value='删除'>&nbsp;"+
+                        "<input type='button' onclick='updateScheduler()' value='修改'>&nbsp;";
+                }else{
+                    return "";
+                }
+            }
+        }
     ]);
     //proxy从后台获取数据
     var proxy=new Ext.data.HttpProxy({url:"/scheduler/getAllJobScheduler.do"});
@@ -71,14 +80,17 @@ function generateSchedulerMonitorPanel(secondGuidePanel){
         value:inputJobName
     })
 
-    jobSchedulerGrid=new Ext.grid.GridPanel({
+    var jobSchedulerGrid=new Ext.grid.GridPanel({
         id:"schedulergrid",
-        title:"scheduler",
+        title:"定时调度",
         width:1000,
         height:600,
         cm:cm,      //列模型
         sm:sm,
         store:store,
+        viewConfig : {
+            forceFit : true //让grid的列自动填满grid的整个宽度，不用一列一列的设定宽度
+        },
         closable:true,
         tbar:new Ext.Toolbar({
             buttons:[
@@ -87,137 +99,6 @@ function generateSchedulerMonitorPanel(secondGuidePanel){
                     text:"查询",
                     handler:function(){
                         generateSchedulerMonitorPanel(secondGuidePanel);
-                    }
-                },'-',
-                {
-                    id:"deleteSchedulerButton",
-                    text:"删除",
-                    handler:function(){
-                        var view=jobSchedulerGrid.getView();
-                        //获得行选择模型
-                        var rsm=jobSchedulerGrid.getSelectionModel();
-                        //定义存放所选的定时作业的id
-                        var taskIdArray=new Array();
-                        for(var i=0;i<view.getRows().length;i++){
-                            if(rsm.isSelected(i)){
-                                taskIdArray.push(jobSchedulerGrid.getStore().getAt(i).get("idJobtask"));
-                            }
-                        }
-                        if(taskIdArray.length>0){
-                            Ext.MessageBox.confirm("确认","确认删除所选中记录?",function(btn){
-                                if(btn=="yes"){
-                                    Ext.Ajax.request({
-                                        url:"/scheduler/deleteScheduler.do",
-                                        success:function(response,config){
-                                            generateSchedulerMonitorPanel(secondGuidePanel);
-                                            Ext.MessageBox.alert("提示","移除定时作业成功~!");
-                                        },
-                                        failure:function(){
-                                            Ext.MessageBox.alert("result","内部错误,删除失败!")
-                                        },
-                                        params:{taskIdArray:taskIdArray}
-                                    })
-                                }else{
-                                    return;
-                                }
-                            })
-                        }else{
-                            Ext.MessageBox.alert("提示","请先选需要一或多行需要移除的定时任务!")
-                        }
-                    }
-                },'-',
-                {
-                    text:"修改",
-                    id:"updateSchedulerButton",
-                    handler:function(){
-                        var view=jobSchedulerGrid.getView();
-                        //获得行选择模型
-                        var rsm=jobSchedulerGrid.getSelectionModel();
-                        //获取所需要修改的定时作业id
-                        var taskIdArray=new Array();
-                        for(var i=0;i<view.getRows().length;i++){
-                            if(rsm.isSelected(i)){
-                                taskIdArray.push(jobSchedulerGrid.getStore().getAt(i).get("idJobtask"));
-                            }
-                        }
-                        if(taskIdArray.length<1){
-                            Ext.MessageBox.alert("请选中一行需要修改的数据");
-                            return;
-                        }else if(taskIdArray.length>1){
-                            Ext.MessageBox.alert("只能选中一行数据进行修改");
-                            return;
-                        }else{
-                            Ext.Ajax.request({
-                                url:"/scheduler/beforeUpdateScheduler.do",
-                                success:function(response,config){
-                                    var results=Ext.util.JSON.decode(response.responseText);
-                                    //生成修改的弹窗
-                                    var formElementArray=new Array();
-                                    //根据用户需要修改的定时任务类型生成表单 并且填充修改前的值
-                                    var typeChooseCombox=Ext.getCmp("typeChoose");
-                                    if(results.schedulertype==1){
-                                        formElementArray.push(IntevalMinuteTextField());
-                                    }else if(results.schedulertype==2){
-                                        formElementArray.push(MinuteTextField());
-                                        formElementArray.push(HourTextField());
-                                    }else if(results.schedulertype==3){
-                                        formElementArray.push(MinuteTextField());
-                                        formElementArray.push(HourTextField());
-                                        formElementArray.push(generateDayChooseByWeek());
-                                    }else{
-                                        formElementArray.push(MinuteTextField());
-                                        formElementArray.push(HourTextField());
-                                        formElementArray.push(generateDayChooseByMonth());
-                                    }
-                                    var thisWindow=fixedExecuteWindow("修改",formElementArray,"/scheduler/updateJobScheduler.do");
-                                    thisWindow.show(jobSchedulerGrid);
-                                    //给表单中填入用户修改前的数值
-                                    switch(results.schedulertype)
-                                    {
-                                        case 1:
-                                            Ext.getCmp("intervalminute").setValue(results.intervalminutes);
-                                            Ext.getCmp("typeChoose").setValue("间隔重复");
-                                            break;
-                                        case 2:
-                                            Ext.getCmp("minuteField").setValue(results.minutes);
-                                            Ext.getCmp("hourField").setValue(results.hour);
-                                            Ext.getCmp("typeChoose").setValue("每天执行");
-                                            break;
-                                        case 3:
-                                            Ext.getCmp("minuteField").setValue(results.minutes);
-                                            Ext.getCmp("hourField").setValue(results.hour);
-                                            var weekdayValue="";
-                                            if(results.weekday==1){
-                                                weekdayValue="周日";
-                                            }else if(results.weekday==2){
-                                                weekdayValue="周一";
-                                            }else if(results.weekday==3){
-                                                weekdayValue="周二";
-                                            }else if(results.weekday==4){
-                                                weekdayValue="周三";
-                                            }else if(results.weekday==5){
-                                                weekdayValue="周四";
-                                            }else if(results.weekday==6){
-                                                weekdayValue="周五";
-                                            }else if(results.weekday==7){
-                                                weekdayValue="周六";
-                                            }
-                                            Ext.getCmp("weekChoose").setValue(weekdayValue);
-                                            Ext.getCmp("typeChoose").setValue("每周执行");
-                                            break;
-                                        case 4:
-                                            Ext.getCmp("minuteField").setValue(results.minutes);
-                                            Ext.getCmp("hourField").setValue(results.hour);
-                                            Ext.getCmp("monthChoose").setValue(results.dayofmonth+"号");
-                                            Ext.getCmp("typeChoose").setValue("每月执行");
-                                            break;
-                                        default:
-                                            return;
-                                    }
-                                },
-                                params:{taskId:taskIdArray[0]}
-                            })
-                        }
                     }
                 }
             ]
@@ -303,7 +184,7 @@ function generateSchedulerTypeSelect(typeId){
 
 }
 
-//生成节点ip的下拉列表 访问后台获取数据
+//生成节点ip的下拉列表
 function generateSlaveHostNameSelect(hostNameValue){
     var proxy=new Ext.data.HttpProxy({url:"/slave/getSlaveSelect.do"});
 
@@ -332,7 +213,6 @@ function generateSlaveHostNameSelect(hostNameValue){
             'select':function(combo,record,index){
                 var secondGuidePanel=Ext.getCmp("secondGuidePanel");
                 generateSchedulerMonitorPanel(secondGuidePanel);
-
             }
         }
     })
@@ -341,6 +221,137 @@ function generateSlaveHostNameSelect(hostNameValue){
     }
 
     return hostNameCom;
+}
+
+//删除定时
+function deleteSchedueler(){
+    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+    var jobSchedulerGrid=Ext.getCmp("schedulergrid");
+    var view=jobSchedulerGrid.getView();
+    //获得行选择模型
+    var rsm=jobSchedulerGrid.getSelectionModel();
+    //定义存放所选的定时作业的id
+    var taskIdArray=new Array();
+    for(var i=0;i<view.getRows().length;i++){
+        if(rsm.isSelected(i)){
+            taskIdArray.push(jobSchedulerGrid.getStore().getAt(i).get("idJobtask"));
+        }
+    }
+    if(taskIdArray.length>0){
+        Ext.MessageBox.confirm("确认","确认删除所选中记录?",function(btn){
+            if(btn=="yes"){
+                Ext.Ajax.request({
+                    url:"/scheduler/deleteScheduler.do",
+                    success:function(response,config){
+                        generateSchedulerMonitorPanel(secondGuidePanel);
+                        Ext.MessageBox.alert("提示","移除定时作业成功~!");
+                    },
+                    failure:function(){
+                        Ext.MessageBox.alert("result","内部错误,删除失败!")
+                    },
+                    params:{taskIdArray:taskIdArray}
+                })
+            }else{
+                return;
+            }
+        })
+    }else{
+        Ext.MessageBox.alert("提示","请先选需要一或多行需要移除的定时任务!")
+    }
+}
+
+//修改定时
+function updateScheduler(){
+    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+    var jobSchedulerGrid=Ext.getCmp("schedulergrid");
+    var view=jobSchedulerGrid.getView();
+    //获得行选择模型
+    var rsm=jobSchedulerGrid.getSelectionModel();
+    //获取所需要修改的定时作业id
+    var taskIdArray=new Array();
+    for(var i=0;i<view.getRows().length;i++){
+        if(rsm.isSelected(i)){
+            taskIdArray.push(jobSchedulerGrid.getStore().getAt(i).get("idJobtask"));
+        }
+    }
+    if(taskIdArray.length<1){
+        Ext.MessageBox.alert("请选中一行需要修改的数据");
+        return;
+    }else if(taskIdArray.length>1){
+        Ext.MessageBox.alert("只能选中一行数据进行修改");
+        return;
+    }else{
+        Ext.Ajax.request({
+            url:"/scheduler/beforeUpdateScheduler.do",
+            success:function(response,config){
+                var results=Ext.util.JSON.decode(response.responseText);
+                //生成修改的弹窗
+                var formElementArray=new Array();
+                //根据用户需要修改的定时任务类型生成表单 并且填充修改前的值
+                var typeChooseCombox=Ext.getCmp("typeChoose");
+                if(results.schedulertype==1){
+                    formElementArray.push(IntevalMinuteTextField());
+                }else if(results.schedulertype==2){
+                    formElementArray.push(MinuteTextField());
+                    formElementArray.push(HourTextField());
+                }else if(results.schedulertype==3){
+                    formElementArray.push(MinuteTextField());
+                    formElementArray.push(HourTextField());
+                    formElementArray.push(generateDayChooseByWeek());
+                }else{
+                    formElementArray.push(MinuteTextField());
+                    formElementArray.push(HourTextField());
+                    formElementArray.push(generateDayChooseByMonth());
+                }
+                var thisWindow=fixedExecuteWindow("修改",formElementArray,"/scheduler/updateJobScheduler.do");
+                thisWindow.show(jobSchedulerGrid);
+                //给表单中填入用户修改前的数值
+                switch(results.schedulertype)
+                {
+                    case 1:
+                        Ext.getCmp("intervalminute").setValue(results.intervalminutes);
+                        Ext.getCmp("typeChoose").setValue("间隔重复");
+                        break;
+                    case 2:
+                        Ext.getCmp("minuteField").setValue(results.minutes);
+                        Ext.getCmp("hourField").setValue(results.hour);
+                        Ext.getCmp("typeChoose").setValue("每天执行");
+                        break;
+                    case 3:
+                        Ext.getCmp("minuteField").setValue(results.minutes);
+                        Ext.getCmp("hourField").setValue(results.hour);
+                        var weekdayValue="";
+                        if(results.weekday==1){
+                            weekdayValue="周日";
+                        }else if(results.weekday==2){
+                            weekdayValue="周一";
+                        }else if(results.weekday==3){
+                            weekdayValue="周二";
+                        }else if(results.weekday==4){
+                            weekdayValue="周三";
+                        }else if(results.weekday==5){
+                            weekdayValue="周四";
+                        }else if(results.weekday==6){
+                            weekdayValue="周五";
+                        }else if(results.weekday==7){
+                            weekdayValue="周六";
+                        }
+                        Ext.getCmp("weekChoose").setValue(weekdayValue);
+                        Ext.getCmp("typeChoose").setValue("每周执行");
+                        break;
+                    case 4:
+                        Ext.getCmp("minuteField").setValue(results.minutes);
+                        Ext.getCmp("hourField").setValue(results.hour);
+                        Ext.getCmp("monthChoose").setValue(results.dayofmonth+"号");
+                        Ext.getCmp("typeChoose").setValue("每月执行");
+                        break;
+                    default:
+                        return;
+                }
+            },
+            params:{taskId:taskIdArray[0]}
+        })
+    }
 }
 
 

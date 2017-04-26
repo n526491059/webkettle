@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface TaskGroupService {
     //TODO 获取当前登录用户的所有任务组信息 分页形式    用户模块暂无
-    public String getAllTaskGroupByLogin(int start,int limit,String userGroupName) throws Exception;
+    public String getAllTaskGroupByLogin(int start,int limit,String userGroupName,String taskGroupName,String createDate) throws Exception;
 
     public void addTaskGroup(HttpServletRequest request);
 

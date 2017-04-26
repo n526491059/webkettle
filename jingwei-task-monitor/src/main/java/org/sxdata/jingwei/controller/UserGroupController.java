@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.sxdata.jingwei.entity.SlaveEntity;
 import org.sxdata.jingwei.entity.TaskGroupEntity;
+import org.sxdata.jingwei.entity.UserGroupAttributeEntity;
 import org.sxdata.jingwei.entity.UserGroupEntity;
 import org.sxdata.jingwei.service.SlaveService;
 import org.sxdata.jingwei.service.TaskGroupService;
@@ -268,6 +269,38 @@ public class UserGroupController {
             out.close();
         }catch (Exception e){
             e.printStackTrace();
+        }
+    }
+
+    //获取所有用户组 以下拉列表形式展现
+    @RequestMapping(value="/getUserGrouupSelect")
+    @ResponseBody
+    protected void getUserGrouupSelect(HttpServletResponse response,HttpServletRequest request){
+        try{
+            StringBuffer sbf=new StringBuffer("[");
+            UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
+
+            List<UserGroupEntity> items=userGroupService.getAllUserGroup();
+            for(int i=0;i<items.size();i++){
+                String thisJson="";
+                String val="\""+items.get(i).getUserGroupName()+"\"";
+                String id="\""+"id"+"\"";
+                String name="\""+"name"+"\"";
+                if(i!=items.size()-1){
+                    thisJson="{"+id+":"+val+","+name+":"+val+"},";
+                }else{
+                    thisJson="{"+id+":"+val+","+name+":"+val+"}";
+                }
+                sbf.append(thisJson);
+            }
+            sbf.append("]");
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write(sbf.toString());
+            out.flush();
+            out.close();
+        }catch(Exception e){
+
         }
     }
 }

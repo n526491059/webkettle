@@ -7,7 +7,6 @@ TaskEntity=function(taskId,type,taskPath,taskName){
 
 //任务组管理主面板  展示所有任务组(当前登录用户可见的任务组)
 function showTaskGroupPanel(secondGuidePanel){
-    secondGuidePanel.removeAll(true);
     var sm2=new Ext.grid.CheckboxSelectionModel();
     //节点列模型
     var taskGroupModel=new Ext.grid.ColumnModel([
@@ -15,7 +14,19 @@ function showTaskGroupPanel(secondGuidePanel){
         sm2,
         {header:"任务组ID",dataIndex:"taskGroupId"},
         {header:"任务组名",dataIndex:"taskGroupName"},
-        {header:"任务组描述",dataIndex:"taskGroupDesc"}
+        {header:"任务组描述",dataIndex:"taskGroupDesc"},
+        {header:"创建时间",dataIndex:"createDate",format:"y-M-d H:m:s"},
+        {header:"操作",dataIndex:"",menuDisabled:true,align:"center",
+            renderer:function(v){
+                if(loginUserName=="admin" || loginUserTaskGroupPower==1){
+                    return "<input type='button' onclick='deleteTaskGroupAndAttributes()' value='删除'>&nbsp;"+
+                        "<input type='button' onclick='beforeUpdateTaskGroup()' value='编辑'>&nbsp;"+
+                        "<input type='button' onclick='beforeSelectTaskGroupDetail()' value='任务组详情'>&nbsp;";
+                }else{
+                    return "<input type='button' onclick='beforeSelectTaskGroupDetail()' value='任务组详情'>";
+                }
+            }
+        }
     ]);
 
     var proxy=new Ext.data.HttpProxy({url:"/taskGroup/AlltaskGroup.do"});
@@ -23,64 +34,53 @@ function showTaskGroupPanel(secondGuidePanel){
     var taskGroupRecord=Ext.data.Record.create([
         {name:"taskGroupId",type:"string",mapping:"taskGroupId"},
         {name:"taskGroupName",type:"string",mapping:"taskGroupName"},
-        {name:"taskGroupDesc",type:"string",mapping:"taskGroupDesc"}
+        {name:"taskGroupDesc",type:"string",mapping:"taskGroupDesc"},
+        {name:"createDate",type:"string",mapping:"createDate"}
     ])
     //totalProperty代表总条数 root代表当页的数据
     var reader=new Ext.data.JsonReader({totalProperty:"totalProperty",root:"root"},taskGroupRecord);
 
     var store=new Ext.data.Store({
         proxy:proxy,
-        reader:reader
+        reader:reader,
+        listeners: {
+            "beforeload": function(store) {
+                var inputname="";
+                var choosedate="";
+                if(Ext.getCmp("taskGroupNameField"))
+                    inputname=Ext.getCmp("taskGroupNameField").getValue();
+                if(Ext.getCmp("createDateByTG"))
+                    choosedate=Ext.getCmp("createDateByTG").getValue();
+                store.baseParams = {
+                    taskGroupName:inputname,
+                    createDate:choosedate
+                }
+            }
+        }
     })
     store.load({params:{start:0,limit:10}});
 
-    var t_bar="";
-    if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
-        t_bar=new Ext.Toolbar({
-            buttons: [
-                {
-                    text:"新增",
-                    handler:function(){
-                        var addTaskGroupWindow=Ext.getCmp("addTaskGroupWindow");
-                        if(addTaskGroupWindow)
-                            addTaskGroupWindow.show();
-                        else
-                            addWindowByInfo();
-                    }
-                },"-",
-                {
-                    text:"删除",
-                    handler:function(){
-                        deleteTaskGroupAndAttributes(taskGroupPanel);
-                    }
-                },"-",
-                {
-                    text:"编辑",
-                    handler:function(){
-                        beforeUpdateTaskGroup(taskGroupPanel);
-                    }
-                },"-",
-                {
-                    text:"任务组详情",
-                    handler:function(){
-                        beforeSelectTaskGroupDetail(taskGroupPanel);
-                    }
-                }
-            ]
-        })
-    }else{
-        t_bar=new Ext.Toolbar({
-            buttons: [
-                {
-                    text:"查看",
-                    handler:function(){
-                        beforeSelectTaskGroupDetail(taskGroupPanel);
-                    }
-                }
-            ]
-        })
-    }
-
+    var inputTaskGroupName="";
+    if(Ext.getCmp("taskGroupNameField"))
+        inputTaskGroupName=Ext.getCmp("taskGroupNameField").getValue();
+    var chooseCreateDate="";
+    if(Ext.getCmp("createDateByTG"))
+        chooseCreateDate=Ext.getCmp("createDateByTG").getValue();
+    //搜索条件
+    var taskGroupNameField=new Ext.form.TextField({
+        id:"taskGroupNameField",
+        fieldLabel: "用户组名",
+        width:120,
+        value:inputTaskGroupName,
+        emptyText:"请输入用户组名.."
+    })
+    var createDateByTG=new Ext.form.DateField({
+        id: "createDateByTG",
+        fieldLabel: "创建日期",
+        width: 100,
+        value:chooseCreateDate,
+        format: "Y-m-d"
+    })
     var taskGroupPanel=new Ext.grid.GridPanel({
         id:"taskGroupPanel",
         title:"任务组",
@@ -93,7 +93,28 @@ function showTaskGroupPanel(secondGuidePanel){
         viewConfig : {
             forceFit : true //让grid的列自动填满grid的整个宽度，不用一列一列的设定宽度
         },
-        tbar:t_bar,
+        tbar:new Ext.Toolbar({
+            buttons: [
+                taskGroupNameField,"-",createDateByTG,
+                {
+                    text:"搜索",
+                    handler:function(){
+                       showTaskGroupPanel(secondGuidePanel);
+                    }
+                },"-",
+                {
+                    text:"新增",
+                    id:"addTaskGroupButton",
+                    handler:function(){
+                        var addTaskGroupWindow=Ext.getCmp("addTaskGroupWindow");
+                        if(addTaskGroupWindow)
+                            addTaskGroupWindow.show();
+                        else
+                            addWindowByInfo();
+                    }
+                }
+            ]
+        }),
         bbar:new Ext.PagingToolbar({
             store:store,
             pageSize:10,
@@ -104,12 +125,17 @@ function showTaskGroupPanel(secondGuidePanel){
     });
     taskGroupPanel.getColumnModel().setHidden(2,true);
 
+    secondGuidePanel.removeAll(true);
     secondGuidePanel.add(taskGroupPanel);
     secondGuidePanel.doLayout();
+    if(loginUserTaskGroupPower!=1 && loginUserName!="admin"){
+        Ext.getCmp("addTaskGroupButton").hide();
+    }
 }
 
 //删除功能  删除任务组并且移除任务组中的所有任务
-function deleteTaskGroupAndAttributes(taskGroupPanel){
+function deleteTaskGroupAndAttributes(){
+    var taskGroupPanel=Ext.getCmp("taskGroupPanel");
     var view=taskGroupPanel.getView();
     var rsm=taskGroupPanel.getSelectionModel();
     var taskGroupNames=new Array();
@@ -137,7 +163,8 @@ function deleteTaskGroupAndAttributes(taskGroupPanel){
 }
 
 //查看功能  查看前先获取唯一选中行的任务组名
-function beforeSelectTaskGroupDetail(taskGroupPanel){
+function beforeSelectTaskGroupDetail(){
+    var taskGroupPanel=Ext.getCmp("taskGroupPanel");
     var view=taskGroupPanel.getView();
     var rsm=taskGroupPanel.getSelectionModel();
     var flag=0;
@@ -217,7 +244,8 @@ function showSelectTaskGroupPanel(taskGroupName){
 }
 
 //修改功能  修改前
-function beforeUpdateTaskGroup(taskGroupPanel){
+function beforeUpdateTaskGroup(){
+    var taskGroupPanel=Ext.getCmp("taskGroupPanel");
     var view=taskGroupPanel.getView();
     var rsm=taskGroupPanel.getSelectionModel();
     var taskGroupName="";
