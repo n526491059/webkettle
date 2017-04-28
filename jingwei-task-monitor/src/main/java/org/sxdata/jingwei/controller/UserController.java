@@ -30,24 +30,29 @@ public class UserController {
     //分配用户组
     @RequestMapping(value="/allotUserGroup")
     @ResponseBody
-    protected void allotUserGroup(HttpServletResponse response,HttpServletRequest request){
-        UserGroupAttributeEntity attr=new UserGroupAttributeEntity();
-        Integer userType=Integer.valueOf(request.getParameter("rdaUserType"));
-        String username=request.getParameter("username");
-        String userGroupName=request.getParameter("userGroupCombobox");
-        attr.setUserType(userType);
-        attr.setUserGroupName(userGroupName);
-        attr.setUserName(username);
-        if(userType==1){
-            attr.setSlavePremissonType(1);
-            attr.setTaskPremissionType(1);
-        }else{
-            Integer slavePower=Integer.valueOf(request.getParameter("rdaSlavePower"));
-            Integer taskGroupPower=Integer.valueOf(request.getParameter("rdaTaskGroup"));
-            attr.setSlavePremissonType(slavePower);
-            attr.setTaskPremissionType(taskGroupPower);
+    protected void allotUserGroup(HttpServletResponse response,HttpServletRequest request) throws Exception{
+        try {
+            UserGroupAttributeEntity attr=new UserGroupAttributeEntity();
+            Integer userType=Integer.valueOf(request.getParameter("rdaUserType"));
+            String username=request.getParameter("username");
+            String userGroupName=request.getParameter("userGroupCombobox");
+            attr.setUserType(userType);
+            attr.setUserGroupName(userGroupName);
+            attr.setUserName(username);
+            if(userType==1){
+                attr.setSlavePremissonType(1);
+                attr.setTaskPremissionType(1);
+            }else{
+                Integer slavePower=Integer.valueOf(request.getParameter("rdaSlavePower"));
+                Integer taskGroupPower=Integer.valueOf(request.getParameter("rdaTaskGroup"));
+                attr.setSlavePremissonType(slavePower);
+                attr.setTaskPremissionType(taskGroupPower);
+            }
+            userService.allotUserGroup(attr);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
-        userService.allotUserGroup(attr);
     }
 
     //分页形式获取用户集合
@@ -63,7 +68,7 @@ public class UserController {
             out.write(result);
             out.flush();
             out.close();
-        }catch (IOException e){
+        }catch (Exception e){
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
