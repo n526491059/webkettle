@@ -171,7 +171,6 @@ public class App implements ApplicationContextAware {
 			meta.setId("defaultRepository");
 			meta.setConnection(dbMeta);
 			
-			
 			repository.init(meta);
 			repository.connect("admin", "admin");
 			this.repository = repository;

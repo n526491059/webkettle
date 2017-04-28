@@ -42,14 +42,14 @@ function showUserPanel(secondGuidePanel){
         {header:"操作",width:280,dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(loginUserName=="admin"){
-                    return "<input type='button' onclick='deleteUser()' value='删除'>&nbsp;"+
-                        "<input type='button' onclick='updateUser()' value='修改'>&nbsp;"+
-                        "<input type='button' onclick='updatePassword()' value='修改密码' id='updatePwd'>&nbsp;"+
-                        "<input type='button' onclick='allotUserGroup()' value='修改用户组'>&nbsp;";
+                    return  "<img src='../../ui/images/i_delete.png' class='imgCls' onclick='deleteUser()' title='删除用户'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_editor.png' class='imgCls' onclick='updateUser()' title='修改用户'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_updatePwd.png' class='imgCls' onclick='updatePassword()' title='修改密码'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_updateUG.png' class='imgCls' onclick='allotUserGroup()' title='变更用户组'/>&nbsp;&nbsp;";
                 }else{
-                    return "<input type='button' onclick='' value='删除'>&nbsp;"+
-                        "<input type='button' onclick='updateUser()' value='修改'>&nbsp;"+
-                        "<input type='button' onclick='updatePassword()' value='修改密码' id='updatePwd'>&nbsp;";
+                    return "<img src='../../ui/images/i_delete.png' class='imgCls' onclick='deleteUser()' title='删除用户'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_editor.png' class='imgCls' onclick='updateUser()' title='修改用户'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_updatePwd.png' class='imgCls' onclick='updatePassword()' title='修改密码'/>&nbsp;&nbsp;";
                 }
             }
         }
@@ -132,13 +132,15 @@ function showUserPanel(secondGuidePanel){
                 userTypeCom,
                 usernameField,"-",
                 {
-                    text:"搜索",
+                    iconCls:"searchCls",
+                    tooltip: '搜索',
                     handler:function(){
                         showUserPanel(secondGuidePanel);
                     }
                 },
                 {
-                    text:"添加",
+                    iconCls:"addCls",
+                    tooltip: '新增用户',
                     handler:function(){
                         beforeAddUser();
                     }
@@ -208,9 +210,7 @@ function updateUser(){
                                 updateUserWindow.close();
                                 showUserPanel(secondGuidePanel);
                             },
-                            failure:function(){
-                                Ext.MessageBox.alert("失败","服务器异常,请稍后再试!");
-                            }
+                            failure:failureResponse
                         })
                     }else{
                         Ext.MessageBox.alert("提交失败","表单存在不规范填写,请再次确认后提交!");
@@ -338,10 +338,7 @@ function userAddFormByAdmin(userTypeValue,inputUserName,inputPassword,inputDesc,
                                         f.getForm().findField("userLogin").setValue("");
                                     }
                                 },
-                                failure:function(){
-                                    Ext.MessageBox.alert("error","服务器异常,请稍后尝试");
-
-                                },
+                                failure:failureResponse,
                                 params:{username:inputUserName,password:inputPassword, desc:inputDesc,
                                 slavePower:slavePowerChoose,taskGroupPower:taskGroupPowerChoose,
                                 userType:userTypeValue,userGroupName:userGroupChoose}
@@ -407,10 +404,7 @@ function createUserByCommonAdmin(){
                                 f.getForm().findField("userLogin").setValue("");
                             }
                         },
-                        failure:function(){
-                            Ext.MessageBox.alert("error","服务器异常,请稍后尝试");
-
-                        },
+                        failure:failureResponse,
                         params:{username:inputUserName,password:inputPassword, desc:inputDesc,
                             slavePower:slavePowerChoose,taskGroupPower:taskGroupPowerChoose,
                             userType:2,userGroupName:belongToUserGroup}
@@ -785,9 +779,7 @@ function allotUserGroup(){
                                 allotWindow.close();
                                 showUserPanel(secondGuidePanel);
                             },
-                            failure:function(){
-                                Ext.MessageBox.alert("失败","服务器异常,请稍后再试!");
-                            }
+                            failure:failureResponse
                         })
                     }else{
                         Ext.MessageBox.alert("提交失败","表单存在不规范填写,请再次确认后提交!");
@@ -815,9 +807,7 @@ function deleteUser(){
             var secondGuidePanel=Ext.getCmp("secondGuidePanel");
             showUserPanel(secondGuidePanel);
         },
-        failure:function(){
-            Ext.MessageBox.alert("error","服务器异常,请稍后尝试");
-        },
+        failure:failureResponse,
         params:{username:username,userId:userId}
     })
 }
@@ -901,9 +891,7 @@ function updatePassword(){
                                                     updatePasswordWindow.close();
                                                     showUserPanel(Ext.getCmp("secondGuidePanel"));
                                                 },
-                                                failure:function(){
-                                                    Ext.MessageBox.alert("失败","服务器异常,请稍后再试!");
-                                                }
+                                                failure:failureResponse
                                             })
                                         }else{
                                             Ext.MessageBox.alert("提交失败","两次密码不一致!");

@@ -212,14 +212,14 @@ GuidePanel = Ext.extend(Ext.Panel, {
 						{
 							id:'task',
 							cls:'nav-node',
-							icon:'ui/images/folder.svg?scale=32',
+							icon:'ui/images/i_model.png',
 							text : "<font size = '3px'>模型</font>",
 							children:[
 								{id:"newTrans",text:"<font size = '2px'>新建转换</font>",cls:"nav",leaf:true},
 								{id:"newJob",text:"<font size = '2px'>新建作业</font>",cls:"nav",leaf:true}
 							]
 						},{
-							text : "<font size = '3px'>任务</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
+							text : "<font size = '3px'>任务</font>",icon:'ui/images/i_task.png', cls:'nav-node',
 							children:[
 								{id:"jobMonitor",text:"<font size = '2px'>作业管理</font>",cls:"nav",leaf:true},
 								{id:"transMonitor",text:"<font size = '2px'>转换管理</font>",cls:"nav",leaf:true},
@@ -227,26 +227,26 @@ GuidePanel = Ext.extend(Ext.Panel, {
 								{id:"taskMonitoring",text:"<font size = '2px'>任务监控</font>",cls:"nav",leaf:true}
 							],id:"taskIdTwo",expand:true
 						},{
-							text : "<font size = '3px'>日志</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
+							text : "<font size = '3px'>日志</font>",icon:'ui/images/i_log.png', cls:'nav-node',
 							children:[
-								{id:"taskLog",text:"<font size = '2px'>任务历史日志</font>",cls:"nav",leaf:true},
+								{id:"taskLog",text:"<font size = '2px'>任务历史日志</font>",cls:"nav",leaf:true,icon:'ui/images/i_tasklog.png'},
 							]
 						},{
-							text : "<font size = '3px'>节点</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
+							text : "<font size = '3px'>节点</font>",icon:'ui/images/i_slave.png', cls:'nav-node',
 							children:[
-								{id:"slaveMonitor",text:"<font size = '2px'>节点管理</font>",cls:"nav",leaf:true},
-								{id:"slaveMonitoring",text:"<font size = '2px'>节点监控</font>",cls:"nav",leaf:true},
+								{id:"slaveMonitor",text:"<font size = '2px'>节点管理</font>",cls:"nav",leaf:true,icon:'ui/images/i_slaveManager.png'},
+								{id:"slaveMonitoring",text:"<font size = '2px'>节点监控</font>",cls:"nav",leaf:true,icon:'ui/images/i_slaveCon.png'},
 							]
 						},{
-							text : "<font size = '3px'>调度</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
+							text : "<font size = '3px'>调度</font>",icon:'ui/images/i_scheduler.png', cls:'nav-node',
 							children:[
-								{id:"schedulerMonitor",text:"<font size = '2px'>定时调度管理</font>",cls:"nav",leaf:true},
+								{id:"schedulerMonitor",text:"<font size = '2px'>定时调度管理</font>",cls:"nav",leaf:true,icon:'ui/images/i_timerManager.png'},
 							]
 						},{
-							text : "<font size = '3px'>用户</font>",icon:'ui/images/folder.svg?scale=32', cls:'nav-node',
+							text:"<font size = '3px'>用户</font>",icon:'ui/images/i_user.png', cls:'nav-node',
 							children:[
-								{id:"userMonitor",text:"<font size = '2px'>用户管理</font>",cls:"nav",leaf:true},
-								{id:"userGroupMonitor",text:"<font size = '2px'>用户组管理</font>",cls:"nav",leaf:true},
+								{id:"userMonitor",text:"<font size = '2px'>用户管理</font>",cls:"nav",leaf:true,icon:'ui/images/i_userManager.png'},
+								{id:"userGroupMonitor",text:"<font size = '2px'>用户组管理</font>",cls:"nav",leaf:true,icon:'ui/images/i_userGroupManager.png'},
 							]
 						}
 					]

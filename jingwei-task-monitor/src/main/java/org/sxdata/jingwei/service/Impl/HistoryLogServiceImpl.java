@@ -28,7 +28,7 @@ public class HistoryLogServiceImpl implements HistoryLogService{
     private TaskGroupDao groupDao;
 
     @Override
-    public String getAllHistoryLog(int start, int limit,String statu,String type,String startDate,String taskName,String userGroupName) {
+    public String getAllHistoryLog(int start, int limit,String statu,String type,String startDate,String taskName,String userGroupName) throws Exception{
         List<ExecutionTraceEntity> traces=executionTraceDao.getAllLogByPage(start,limit,statu,type,startDate,taskName,userGroupName);
         for(ExecutionTraceEntity trace:traces){
             if(trace.getStatus().equals("成功")){
@@ -46,7 +46,7 @@ public class HistoryLogServiceImpl implements HistoryLogService{
     }
 
     @Override
-    public String getExecutionTraceById(Integer id) {
+    public String getExecutionTraceById(Integer id) throws Exception{
         ExecutionTraceEntity trace=executionTraceDao.getTraceById(id);
         //增加所属任务组属性
         String config=trace.getExecutionConfiguration();

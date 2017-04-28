@@ -16,14 +16,14 @@ function showHistoryLogPanel(secondGuidePanel){
         {header:"结束时间",dataIndex:"endTime",format:"y-M-d H:m:s"},
         {header:"执行方式",dataIndex:"execMethod"},
         {header:"状态",dataIndex:"status",align:"center"},
-        {header:"参数信息",dataIndex:"executionConfiguration",
+        {header:"参数信息",dataIndex:"executionConfiguration",align:"center",
             renderer:function(v){
-                return "<input type='button' onclick='showConfigInfo()' value='详情'>&nbsp;";
+                return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='showConfigInfo()' title='详细信息'/>&nbsp;&nbsp;";
             }
         },
-        {header:"日志详情",dataIndex:"executionLog",
+        {header:"日志详情",dataIndex:"executionLog",align:"center",
             renderer:function(v){
-                return "<input type='button' onclick='showLogInfo()' value='详情'>&nbsp;";
+                return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='showLogInfo()' title='详细信息'/>&nbsp;&nbsp;";
             }
         },
 
@@ -96,7 +96,7 @@ function showLogInfo(){
             var executionLog=trace.executionLog;
             var status=trace.status;
             var windowHTML="";
-            if(status!="程序错误"){
+            if(status!="系统调度失败"){
                 var logJSON=eval("("+executionLog+")");
                 for(var item in logJSON){
                     if(item=="log"){
@@ -118,9 +118,7 @@ function showLogInfo(){
             });
             logDetailWindow.show(historyLogPanel);
         },
-        failure:function(){
-            Ext.MessageBox.alert("result","内部错误,请稍后再试");
-        },
+        failure:failureResponse,
         params:{id:id}
     });
 
@@ -183,9 +181,7 @@ function showConfigInfo(){
             });
             configDetailWindow.show(historyLogPanel);
         },
-        failure:function(){
-            Ext.MessageBox.alert("result","内部错误,请稍后再试");
-        },
+        failure:failureResponse,
         params:{id:id}
     });
 
@@ -209,8 +205,8 @@ function getTbarForHistoryLog(statu,type,taskName){
         format: "Y-m-d"
     });
     var searchButton=new Ext.Button({
-        text:'查找',
-        width:50,
+        iconCls:"searchCls",
+        tooltip: '查询',
         style:'margin:1px 5px 1px 5px;',
         handler:function(){
             var secondGuidePanel=Ext.getCmp("secondGuidePanel");
@@ -258,7 +254,8 @@ function getTbarForHistoryLog(statu,type,taskName){
 function logStatuSelect(){
     var logStatuData=[
         ["成功","成功"],
-        ["失败","失败"]
+        ["失败","失败"],
+        ["系统调度失败","系统调度失败"]
     ];
     var proxy=new Ext.data.MemoryProxy(logStatuData);
     var reader=new Ext.data.ArrayReader({},[

@@ -8,12 +8,11 @@ function generateSchedulerMonitorPanel(secondGuidePanel){
         {header:"作业名",dataIndex:"jobName"},
         {header:"执行节点",dataIndex:"hostName"},
         {header:"周期",dataIndex:"timerInfo"},
-        {header:"资源库",dataIndex:"repoId"},
         {header:"操作",dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
-                    return "<input type='button' onclick='deleteSchedueler()' value='删除'>&nbsp;"+
-                        "<input type='button' onclick='updateScheduler()' value='修改'>&nbsp;";
+                    return "<img src='../../ui/images/i_delete.png' class='imgCls' onclick='deleteSchedueler()' title='删除定时'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_editor.png' class='imgCls' onclick='updateScheduler()' title='修改定时'/>";
                 }else{
                     return "";
                 }
@@ -29,7 +28,6 @@ function generateSchedulerMonitorPanel(secondGuidePanel){
         {name:"jobName",type:"string",mapping:"jobName"},
         {name:"hostName",type:"string",mapping:"hostName"},
         {name:"timerInfo",type:"string",mapping:"timerInfo"},
-        {name:"repoId",type:"string",mapping:"repoId"},
     ])
     var reader=new Ext.data.JsonReader({totalProperty:"totalProperty",root:"root"},jobSchedulerRecord);
 
@@ -96,7 +94,8 @@ function generateSchedulerMonitorPanel(secondGuidePanel){
             buttons:[
                 typeSelect,"-",hostNameSelect,"-",JobNameField,
                 {
-                    text:"查询",
+                    iconCls:"searchCls",
+                    tooltip: '查询',
                     handler:function(){
                         generateSchedulerMonitorPanel(secondGuidePanel);
                     }
@@ -246,9 +245,7 @@ function deleteSchedueler(){
                         generateSchedulerMonitorPanel(secondGuidePanel);
                         Ext.MessageBox.alert("提示","移除定时作业成功~!");
                     },
-                    failure:function(){
-                        Ext.MessageBox.alert("result","内部错误,删除失败!")
-                    },
+                    failure:failureResponse,
                     params:{taskIdArray:taskIdArray}
                 })
             }else{

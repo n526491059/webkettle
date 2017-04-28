@@ -30,15 +30,13 @@ function showTaskControlPanel(){
         {header:"操作",width:280,dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
-                    return "<input type='button' onclick='refreshControlPanel()' value='刷新'>&nbsp;"+
-                        "<input type='button' onclick='collectData()' value='日志明细'>&nbsp;"+
-                        "<input type='button' onclick='showTransDetailWindow()' value='转换详情'>&nbsp;"+
-                        "<input type='button' onclick='stopJobOrTrans()' value='结束'>&nbsp;"+
-                        "<input type='button' onclick='pauseOrStart()' value='暂停/开始'>&nbsp;";
+                    return "<img src='../../ui/images/i_execute.png' class='imgCls' onclick='collectData()' title='日志明细'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_timer.png' class='imgCls' onclick='showTransDetailWindow()' title='转换详情'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_assigned.png' class='imgCls' onclick='stopJobOrTrans()' title='结束'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_power.png' class='imgCls' onclick='pauseOrStart()' title='暂停/开始'/>&nbsp;&nbsp;";
                 }else{
-                    return "<input type='button' onclick='refreshControlPanel()' value='刷新'>&nbsp;"+
-                        "<input type='button' onclick='collectData()' value='日志明细'>&nbsp;"+
-                        "<input type='button' onclick='showTransDetailWindow()' value='转换详情'>&nbsp;";
+                    return "<img src='../../ui/images/i_execute.png' class='imgCls' onclick='collectData()' title='日志明细'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_timer.png' class='imgCls' onclick='showTransDetailWindow()' title='转换详情'/>&nbsp;&nbsp;";
                 }
             }
         }
@@ -117,9 +115,7 @@ function pauseOrStart(){
             secondGuidePanel.add(showTaskControlPanel());
             secondGuidePanel.doLayout();
         },
-        failure:function(){
-            Ext.MessageBox.alert("result","内部错误,暂停/开始失败!");
-        },
+        failure:failureResponse,
         params:{idArray:idArray,hostArray:hostArray}
     });
 
@@ -144,9 +140,7 @@ function stopJobOrTrans(){
             secondGuidePanel.add(showTaskControlPanel());
             secondGuidePanel.doLayout();
         },
-        failure:function(){
-            Ext.MessageBox.alert("result","内部错误,删除失败!");
-        },
+        failure:failureResponse,
         params:{idArray:idArray,typeArray:typeArray,hostArray:hostNameArray}
     });
 
@@ -334,9 +328,7 @@ function refreshHTML(){
             var windowDom=logWindow.body.dom;
             windowDom.scrollTop=windowDom.scrollHeight- windowDom.offsetHeight;
         },
-        failure:function(){
-            Ext.MessageBox.alert("result","内部错误,暂时无法查看,请稍后尝试!")
-        },
+        failure:failureResponse,
         params:{id:carteId,type:type,hostName:conHostName}
     });
 }

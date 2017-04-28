@@ -15,7 +15,7 @@ public interface TransService {
 
     public void executeTransformation(String path,Integer slaveId) throws Exception;
 
-    public List<TransformationEntity> getTransPath(List<TransformationEntity> items);
+    public List<TransformationEntity> getTransPath(List<TransformationEntity> items) throws Exception;
 
-    public TransformationEntity getTransByName(String transName);
+    public TransformationEntity getTransByName(String transName) throws Exception;
 }

@@ -12,9 +12,9 @@ import java.util.Map;
 public interface SchedulerService {
     public PageforBean getAllSchedulerByPage(int start,int limit,Integer typeId,String slaves,String jobName, String userGroupName) throws Exception;
 
-    public void deleteScheduler(String[] taskIdArray) throws org.quartz.SchedulerException;
+    public void deleteScheduler(String[] taskIdArray) throws Exception;
 
-    public JSONObject beforeUpdate(String taskId);
+    public JSONObject beforeUpdate(String taskId) throws Exception;
 
     public boolean updateSchedulerJob(Map<String,Object> params,HttpServletRequest request) throws Exception;
 }

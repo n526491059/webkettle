@@ -25,7 +25,7 @@ public class LogController {
     //获得所有的任务历史日志
     @RequestMapping(value="/getAllHistoryLog")
     @ResponseBody
-    protected void getAllHistoryLog(HttpServletResponse response,HttpServletRequest request){
+    protected void getAllHistoryLog(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             Integer start=Integer.valueOf(request.getParameter("start"));
             Integer limit=Integer.valueOf(request.getParameter("limit"));
@@ -60,13 +60,14 @@ public class LogController {
         }catch (Exception e){
             String errorMessage=e.getMessage();
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //根据Id获取某个日志
     @RequestMapping(value="/getTraceById")
     @ResponseBody
-    protected void getTraceById(HttpServletResponse response,HttpServletRequest request){
+    protected void getTraceById(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             Integer id=Integer.valueOf(request.getParameter("id"));
             String result=logService.getExecutionTraceById(id);
@@ -76,8 +77,8 @@ public class LogController {
             out.flush();
             out.close();
         }catch (Exception e){
-            String errorMessage=e.getMessage();
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 }

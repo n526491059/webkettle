@@ -23,7 +23,7 @@ public class UserGroupServiceImpl implements UserGroupService{
 
     @Override
     //分页形式获取用户组
-    public String getUserGroupByPage(int start, int limit, String userGroupName) {
+    public String getUserGroupByPage(int start, int limit, String userGroupName) throws Exception{
         PageforBean page=new PageforBean();
         List<UserGroupEntity> groups=userGroupDao.selectUserGroupByPage(start,limit,userGroupName);
         Integer count=userGroupDao.userGroupConut(userGroupName);
@@ -34,7 +34,7 @@ public class UserGroupServiceImpl implements UserGroupService{
 
     @Override
     //判断传递用户组名是否已存在
-    public String decideGroupNameExist(String name) {
+    public String decideGroupNameExist(String name) throws Exception{
         String result="N";
         UserGroupEntity items=userGroupDao.selectUserGroupByNameOrId(name, null);
         if(null!=items){
@@ -45,7 +45,7 @@ public class UserGroupServiceImpl implements UserGroupService{
 
     @Override
     //新增用户组(以及关联表)
-    public void addUserGroup(String[] taskGroupNameArray, String[] slaveIdArray, String userGroupName, String userGroupDesc) {
+    public void addUserGroup(String[] taskGroupNameArray, String[] slaveIdArray, String userGroupName, String userGroupDesc) throws Exception{
         //添加用户组
         UserGroupEntity userGroup=new UserGroupEntity();
         userGroup.setUserGroupDesc(userGroupDesc);
@@ -79,7 +79,7 @@ public class UserGroupServiceImpl implements UserGroupService{
 
     @Override
     //分配任务组前 先获取该用户组下可见的任务组
-    public String[] beforeAssignedTaskGroup(String userGroupName) {
+    public String[] beforeAssignedTaskGroup(String userGroupName) throws Exception{
         String[] taskGroupNameArray=null;
         List<TaskUserRelationEntity> items=userGroupDao.getTaskGroupsByUserGroupName(userGroupName);
         if(null!=items && items.size()>0){
@@ -95,7 +95,7 @@ public class UserGroupServiceImpl implements UserGroupService{
 
     @Override
     //分配节点前 先获取该用户组下可见的节点
-    public String[] beforeAssignedSlave(String userGroupName) {
+    public String[] beforeAssignedSlave(String userGroupName) throws Exception{
         String[] slaveIdArray=null;
         List<SlaveUserRelationEntity> items=userGroupDao.getSlavesByUserGroupName(userGroupName);
         if(null!=items && items.size()>0){
@@ -112,7 +112,7 @@ public class UserGroupServiceImpl implements UserGroupService{
 
     @Override
     //为用户组分配可见节点
-    public void assignedSlave(String[] slaveIdArray, String userGroupName) {
+    public void assignedSlave(String[] slaveIdArray, String userGroupName) throws Exception{
         userGroupDao.deleteSlaveRelationByGroupName(userGroupName);
         if(null!=slaveIdArray && slaveIdArray.length>0){
             for(String slaveId:slaveIdArray){
@@ -129,7 +129,7 @@ public class UserGroupServiceImpl implements UserGroupService{
 
     @Override
     //为用户组分配可见任务组
-    public void assignedTaskGroup(String[] taskGroupNameArray, String userGroupName) {
+    public void assignedTaskGroup(String[] taskGroupNameArray, String userGroupName) throws Exception{
         userGroupDao.deleteTaskRelationByGroupName(userGroupName);
         if(null!=taskGroupNameArray && taskGroupNameArray.length>0){
             for(String taskGroupName:taskGroupNameArray){
@@ -145,7 +145,7 @@ public class UserGroupServiceImpl implements UserGroupService{
     }
 
     @Override
-    public String updateUserGroup(Integer userGroupId, String userGroupName, String userGroupDesc) {
+    public String updateUserGroup(Integer userGroupId, String userGroupName, String userGroupDesc) throws Exception{
         String result="N";
         UserGroupEntity items=userGroupDao.selectUserGroupByNameOrId(userGroupName, null);
         //判断该用户组名是否已存在
@@ -172,7 +172,7 @@ public class UserGroupServiceImpl implements UserGroupService{
     }
 
     @Override
-    public void deleteUserGroup(String userGroupName) {
+    public void deleteUserGroup(String userGroupName) throws Exception{
         userGroupDao.deleteTaskRelationByGroupName(userGroupName);
         userGroupDao.deleteSlaveRelationByGroupName(userGroupName);
         userGroupDao.deleteUserAttributeByGroupName(userGroupName);
@@ -180,7 +180,7 @@ public class UserGroupServiceImpl implements UserGroupService{
     }
 
     @Override
-    public  List<UserGroupEntity> getAllUserGroup() {
+    public  List<UserGroupEntity> getAllUserGroup() throws Exception{
        return userGroupDao.allUserGroup();
     }
 

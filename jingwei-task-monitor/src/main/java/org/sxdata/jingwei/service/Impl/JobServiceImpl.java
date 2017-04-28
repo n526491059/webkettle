@@ -58,17 +58,17 @@ public class JobServiceImpl implements JobService{
     protected SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
-    public JobEntity getJobById(Integer jobId) {
+    public JobEntity getJobById(Integer jobId) throws Exception{
         return jobDao.getJobById(jobId);
     }
 
     @Override
-    public List<JobTimeSchedulerEntity> getAllTimerJob() {
+    public List<JobTimeSchedulerEntity> getAllTimerJob() throws Exception{
         return jobSchedulerDao.getAllTimerJob();
     }
 
     @Override
-    public List<JobEntity> getJobPath(List<JobEntity> jobs){
+    public List<JobEntity> getJobPath(List<JobEntity> jobs) throws Exception{
         List<JobEntity> resultJobs=new ArrayList<JobEntity>();
         //根据作业的id来查找该作业在资源库的绝对目录
         for (JobEntity job:jobs){
@@ -403,7 +403,7 @@ public class JobServiceImpl implements JobService{
     }
 
     @Override
-    public JobEntity getJobByName(String jobName) {
+    public JobEntity getJobByName(String jobName) throws Exception{
         JobEntity job=jobDao.getJobByName(jobName);
         List<JobEntity> jobs=new ArrayList<JobEntity>();
         jobs.add(job);

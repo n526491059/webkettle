@@ -42,7 +42,7 @@ public class SchedulerServiceImpl implements SchedulerService {
     UserDao userDao;
 
     //判断是否在数据库中已经存在相同类型 相同执行周期的同一个作业
-    public boolean judgeJobIsAlike(JobTimeSchedulerEntity willAddJobTimer){
+    public boolean judgeJobIsAlike(JobTimeSchedulerEntity willAddJobTimer) throws Exception{
         boolean flag=false;
         List<JobTimeSchedulerEntity> jobs=schedulerDao.getAllTimerJob();
 
@@ -160,7 +160,7 @@ public class SchedulerServiceImpl implements SchedulerService {
 
     @Override
     //移除被选中的定时任务
-    public void deleteScheduler(String[] taskIdArray) throws org.quartz.SchedulerException{
+    public void deleteScheduler(String[] taskIdArray) throws Exception{
         SchedulerFactory factory=new StdSchedulerFactory();
         Scheduler scheduler=factory.getScheduler();
         for(String taskId:taskIdArray){
@@ -211,7 +211,7 @@ public class SchedulerServiceImpl implements SchedulerService {
     }
 
     @Override
-    public JSONObject beforeUpdate(String taskId) {
+    public JSONObject beforeUpdate(String taskId) throws Exception{
         JobTimeSchedulerEntity schedulerJob=schedulerDao.getSchedulerBytaskId(Long.valueOf(taskId));
         return JSONObject.fromObject(schedulerJob);
     }

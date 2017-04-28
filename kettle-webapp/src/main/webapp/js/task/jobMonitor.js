@@ -18,17 +18,17 @@ function generateJobPanel(secondGuidePanel){
         {header:"操作",width:280,dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
-                    return "<input type='button' onclick='showOneJobDetail()' value='作业属性'>&nbsp;"+
-                        "<input type='button' onclick='deleteJobByJobPath()' value='删除'>&nbsp;"+
-                        "<input type='button' onclick='editorJob()' value='编辑'>&nbsp;"+
-                        "<input type='button' onclick='jobCompositionImg()' value='结构图'>&nbsp;"+
-                        "<input type='button' onclick='executeJob()' value='执行作业配置'>&nbsp;"+
-                        "<input type='button' onclick='beforeSchedulerJob()' value='定时执行'>&nbsp;"+
-                        "<input type='button' onclick='beforeAssignedTaskGroup()' value='分配任务组'>&nbsp;"+
-                        "<input type='button' onclick='jobPowerExecute()' value='智能执行'>&nbsp;";
+                    return "<img src='../../ui/images/i_delete.png' class='imgCls' onclick='deleteJobByJobPath()' title='删除作业'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='showOneJobDetail()' title='作业属性'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_editor.png' class='imgCls' onclick='editorJob()' title='编辑'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_compositionImg.png' class='imgCls' onclick='jobCompositionImg()'  title='结构图'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_execute.png' class='imgCls' onclick='executeJob()' title='执行作业配置'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_timer.png' class='imgCls' onclick='beforeSchedulerJob()' title='定时执行'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_assigned.png' class='imgCls' onclick='beforeAssignedTaskGroup()' title='分配任务组'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_power.png' class='imgCls' onclick='jobPowerExecute()' title='智能执行'/>&nbsp;&nbsp;";
                 }else{
-                    return "<input type='button' onclick='showOneJobDetail()' value='作业属性'>&nbsp;"+
-                            "<input type='button' onclick='jobCompositionImg()' value='结构图'>&nbsp;";
+                    return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='showOneJobDetail()' title='作业属性'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_compositionImg.png' class='imgCls' onclick='jobCompositionImg()' title='结构图'/>";
                 }
             }
         }
@@ -118,7 +118,8 @@ function generateJobPanel(secondGuidePanel){
             buttons:[
                 f ,"-",
                 {
-                    text:"查询",
+                    iconCls:"searchCls",
+                    tooltip: '查询',
                     handler:function(){
                         generateJobPanel(secondGuidePanel);
                     }
@@ -157,7 +158,7 @@ function executeJob(){
         params: {taskName: path,type:'job'},
         success: function(response) {
             var resObj = Ext.decode(response.responseText);
-            var graphPanel = Ext.create({border: false, Executable: true },"JobGraphNo");
+            var graphPanel = Ext.create({border: false, Executable: true },resObj.GraphType);
             var dialog = new LogDetailDialog({
                 items: graphPanel
             });
@@ -287,9 +288,7 @@ function deleteJobByJobPath(){
                     generateJobPanel(secondGuidePanel);
                     Ext.MessageBox.alert("提示","删除作业成功~!");
                 },
-                failure:function(){
-                    Ext.MessageBox.alert("result","内部错误,删除失败!")
-                },
+                failure:failureResponse,
                 params:{path:jobPath,flag:"job"}
             })
         }
@@ -463,26 +462,21 @@ function assignedTaskGroup(jobId,jobName,jobPath,taskGroupPanelByAssigned){
             taskGroupNameArray.push(taskGroupPanelByAssigned.getStore().getAt(i).get("taskGroupName"));
         }
     }
-    Ext.MessageBox.confirm("确认","确认按照如下选择分配该任务组?",function(btn){
-        if(btn=="yes"){
-            Ext.Ajax.request({
-                url:"/taskGroup/assignedTaskGroup.do",
-                success:function(response,config){
-                    Ext.MessageBox.alert("任务组分配成功!");
-                    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
-                    Ext.getCmp("taskGroupAssignedWindow").close();
-                    generateJobPanel(secondGuidePanel);
-                },
-                failure:function(){
-                    Ext.MessageBox.alert("result","服务器异常,任务组分配失败!");
-
-                },
-                params:{taskId:jobId,taskName:jobName,taskPath:jobPath,type:"job",taskGroupNameArray:taskGroupNameArray}
-            })
-        }else{
-            return;
-        }
-    })
+    if(taskGroupNameArray.length>0){
+        Ext.Ajax.request({
+            url:"/taskGroup/assignedTaskGroup.do",
+            success:function(response,config){
+                Ext.MessageBox.alert("任务组分配成功!");
+                var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+                Ext.getCmp("taskGroupAssignedWindow").close();
+                generateJobPanel(secondGuidePanel);
+            },
+            failure:failureResponse,
+            params:{taskId:jobId,taskName:jobName,taskPath:jobPath,type:"job",taskGroupNameArray:taskGroupNameArray}
+        })
+    }else{
+        Ext.MessageBox.alert("必须为该作业分配至少一个任务组");
+    }
 }
 
 

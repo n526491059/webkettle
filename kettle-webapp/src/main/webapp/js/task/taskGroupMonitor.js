@@ -19,11 +19,11 @@ function showTaskGroupPanel(secondGuidePanel){
         {header:"操作",dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(loginUserName=="admin" || loginUserTaskGroupPower==1){
-                    return "<input type='button' onclick='deleteTaskGroupAndAttributes()' value='删除'>&nbsp;"+
-                        "<input type='button' onclick='beforeUpdateTaskGroup()' value='编辑'>&nbsp;"+
-                        "<input type='button' onclick='beforeSelectTaskGroupDetail()' value='任务组详情'>&nbsp;";
+                    return "<img src='../../ui/images/i_delete.png' class='imgCls' onclick='deleteTaskGroupAndAttributes()' title='删除任务组'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_assigned.png' class='imgCls' onclick='beforeUpdateTaskGroup()' title='编辑'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='beforeSelectTaskGroupDetail()' title='任务组详情'/>&nbsp;&nbsp;";
                 }else{
-                    return "<input type='button' onclick='beforeSelectTaskGroupDetail()' value='任务组详情'>";
+                    return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='beforeSelectTaskGroupDetail()' title='任务组详情'/>&nbsp;&nbsp;";
                 }
             }
         }
@@ -97,13 +97,15 @@ function showTaskGroupPanel(secondGuidePanel){
             buttons: [
                 taskGroupNameField,"-",createDateByTG,
                 {
-                    text:"搜索",
+                    iconCls:"searchCls",
+                    tooltip: '查询',
                     handler:function(){
                        showTaskGroupPanel(secondGuidePanel);
                     }
                 },"-",
                 {
-                    text:"新增",
+                    iconCls:"addCls",
+                    tooltip: '添加任务组',
                     id:"addTaskGroupButton",
                     handler:function(){
                         var addTaskGroupWindow=Ext.getCmp("addTaskGroupWindow");
@@ -154,9 +156,7 @@ function deleteTaskGroupAndAttributes(){
                 Ext.MessageBox.alert("result","删除成功!");
                 showTaskGroupPanel(Ext.getCmp("secondGuidePanel"));
             },
-            failure:function(){
-                Ext.MessageBox.alert("result","服务器异常删除失败,请稍后尝试");
-            },
+            failure:failureResponse,
             params:{name:taskGroupNames}
         })
     }
@@ -332,9 +332,9 @@ function showUpdateWindow(taskGroupPanel,taskGroupId,taskGroupName,taskGroupDesc
                                     updateTaskGroup(taskGroupId,inputGroupName,inputGroupDesc,updateTaskGroupWindow);
                                 }
                             },
-                            failure:function(){
-                                Ext.MessageBox.alert("result","服务器异常,请稍后尝试");
+                            failure:function(response){
                                 updateTaskGroupWindow.close();
+                                failureResponse(response);
                             },
                             params:{name:inputGroupName}
                         })
@@ -355,9 +355,9 @@ function updateTaskGroup(taskGroupId,inputGroupName,inputGroupDesc,updateTaskGro
             updateTaskGroupWindow.close();
             showTaskGroupPanel(Ext.getCmp("secondGuidePanel"));
         },
-        failure:function(){
-            Ext.MessageBox.alert("result","服务器异常,修改失败!请稍后尝试");
+        failure:function(response){
             updateTaskGroupWindow.close();
+            failureResponse(response);
         },
         params:{id:taskGroupId,name:inputGroupName,desc:inputGroupDesc}
     })
@@ -430,9 +430,9 @@ function addWindowByInfo(){
                                     }
                                 }
                             },
-                            failure:function(){
-                                Ext.MessageBox.alert("result","服务器异常,请稍后尝试");
+                            failure:function(response){
                                 addTaskGroupWindow.close();
+                                failureResponse(response);
                             },
                             params:{name:taskGroupNameValue}
                         })
@@ -663,9 +663,7 @@ function addTaskGroupEnd(flag){
             var secondGuidePanel=Ext.getCmp("secondGuidePanel");
             showTaskGroupPanel(secondGuidePanel);
         },
-        failure:function(){
-            Ext.MessageBox.alert("创建失败!");
-        },
+        failure:failureResponse,
         params:{taskGroupName:taskGroupName,taskGroupDesc:taskGroupDesc,
             taskArray:JSON.stringify(taskArray),userGroupNameArray:userGroupNameArray}
     })

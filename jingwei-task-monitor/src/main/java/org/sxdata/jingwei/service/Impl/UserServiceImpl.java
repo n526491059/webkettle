@@ -30,13 +30,13 @@ public class UserServiceImpl implements UserService{
     private UserGroupDao userGroupDao;
 
     @Override
-    public void deleteUser(Integer id,String username){
+    public void deleteUser(Integer id,String username) throws Exception{
         userGroupDao.deleteUserAttributeByName(username);
         userDao.deleteUser(id);
     }
 
     @Override
-    public void updateUser(UserEntity user,UserGroupAttributeEntity attr){
+    public void updateUser(UserEntity user,UserGroupAttributeEntity attr) throws Exception{
         //修改用户
         if(!StringDateUtil.isEmpty(user.getDescription())){
             userDao.updateUser(user);
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public synchronized boolean addUser(UserEntity user,UserGroupAttributeEntity attribute) {
+    public synchronized boolean addUser(UserEntity user,UserGroupAttributeEntity attribute) throws Exception{
         attribute.setCreateDate(new Date());
         List<UserEntity> allUser=userDao.getAllUsers();
         for(UserEntity item:allUser){
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public String getUsersLimit(int start, int limit,HttpServletRequest request) {
+    public String getUsersLimit(int start, int limit,HttpServletRequest request) throws Exception{
         String username=request.getParameter("username");
         String userType=request.getParameter("usertype");
         String userGroup=request.getParameter("usergroup");
@@ -135,13 +135,13 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<UserEntity> getUserByName(String login) {
+    public List<UserEntity> getUserByName(String login) throws Exception{
         return userDao.getUserbyName(login);
     }
 
     @Override
     //登录
-    public String login(String userName, String password,HttpServletRequest request) {
+    public String login(String userName, String password,HttpServletRequest request) throws Exception{
         String result="success";
         List<UserEntity> users=this.getUserByName(userName);
         if(users.size()==0){
@@ -191,7 +191,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     //给用户分配用户组
-    public void allotUserGroup(UserGroupAttributeEntity attr) {
+    public void allotUserGroup(UserGroupAttributeEntity attr) throws Exception{
         userGroupDao.updateUserGroupAttrByName(attr);
         //用户状态发生改变使session失效
         List<String> invalidSession=new ArrayList<String>();
@@ -204,7 +204,6 @@ public class UserServiceImpl implements UserService{
                     continue;
                 }else{
                     invalidSession.add(session.getId());
-
                 }
             }
         }
@@ -217,12 +216,12 @@ public class UserServiceImpl implements UserService{
 
     @Override
     //获取某个用户组下的所有用户 不分页
-    public List<UserEntity> getUsers(String userGroupName) {
+    public List<UserEntity> getUsers(String userGroupName) throws Exception{
         return userDao.getUsers(userGroupName);
     }
 
     @Override
-    public void updatePassword(UserEntity user) {
+    public void updatePassword(UserEntity user) throws Exception{
         userDao.updateUser(user);
     }
 }
