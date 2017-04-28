@@ -57,6 +57,7 @@ import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositorySecurityProvider;
+import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
 import org.pentaho.di.trans.TransExecutionConfiguration;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.TransPreviewFactory;
@@ -81,7 +82,7 @@ public class TransGraphController {
 
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/engineXml")
-	protected void engineXml(HttpServletRequest request, HttpServletResponse response, @RequestParam String graphXml) throws Exception {
+	protected void engineXml(HttpServletRequest request, HttpServletResponse response,@RequestParam String graphXml) throws Exception {
 		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
 		AbstractMeta transMeta = codec.decode(graphXml);
 		String xml = XMLHandler.getXMLHeader() + transMeta.getXML();
@@ -95,7 +96,6 @@ public class TransGraphController {
 	protected void database(@RequestParam String graphXml, String name) throws Exception {
 		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
 		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
-		
 		DatabaseMeta databaseMeta = transMeta.findDatabase(name);
 		if(databaseMeta == null)
 			databaseMeta = new DatabaseMeta();
@@ -107,35 +107,40 @@ public class TransGraphController {
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/save")
 	protected void save(@RequestParam String graphXml) throws Exception {
+		Repository repository=null;
+		try {
+			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+			AbstractMeta transMeta = codec.decode(StringEscapeHelper.decode(graphXml));
+			 repository= App.getInstance().getRepository();
+			ObjectId existingId = repository.getTransformationID( transMeta.getName(), transMeta.getRepositoryDirectory() );
+			if(transMeta.getCreatedDate() == null)
+                transMeta.setCreatedDate(new Date());
+			if(transMeta.getObjectId() == null)
+                transMeta.setObjectId(existingId);
+			transMeta.setModifiedDate(new Date());
 
-
-		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
-		AbstractMeta transMeta = codec.decode(StringEscapeHelper.decode(graphXml));
-		Repository repository = App.getInstance().getRepository();
-		ObjectId existingId = repository.getTransformationID( transMeta.getName(), transMeta.getRepositoryDirectory() );
-		if(transMeta.getCreatedDate() == null)
-			transMeta.setCreatedDate(new Date());
-		if(transMeta.getObjectId() == null)
-			transMeta.setObjectId(existingId);
-		transMeta.setModifiedDate(new Date());
-
-		 boolean versioningEnabled = true;
-         boolean versionCommentsEnabled = true;
-         String fullPath = transMeta.getRepositoryDirectory() + "/" + transMeta.getName() + transMeta.getRepositoryElementType().getExtension(); 
-         RepositorySecurityProvider repositorySecurityProvider = repository.getSecurityProvider() != null ? repository.getSecurityProvider() : null;
-         if ( repositorySecurityProvider != null ) {
-        	 versioningEnabled = repositorySecurityProvider.isVersioningEnabled(fullPath);
-        	 versionCommentsEnabled = repositorySecurityProvider.allowsVersionComments( fullPath );
-         }
-		String versionComment = null;
-		if (!versioningEnabled || !versionCommentsEnabled) {
-			versionComment = "";
-		} else {
-			versionComment = "no comment";
+			boolean versioningEnabled = true;
+			boolean versionCommentsEnabled = true;
+			String fullPath = transMeta.getRepositoryDirectory() + "/" + transMeta.getName() + transMeta.getRepositoryElementType().getExtension();
+			RepositorySecurityProvider repositorySecurityProvider = repository.getSecurityProvider() != null ? repository.getSecurityProvider() : null;
+			if ( repositorySecurityProvider != null ) {
+                versioningEnabled = repositorySecurityProvider.isVersioningEnabled(fullPath);
+                versionCommentsEnabled = repositorySecurityProvider.allowsVersionComments( fullPath );
+            }
+			String versionComment = null;
+			if (!versioningEnabled || !versionCommentsEnabled) {
+                versionComment = "";
+            } else {
+                versionComment = "no comment";
+            }
+			repository.save( transMeta, versionComment, null);
+			JsonUtils.success("转换保存成功！");
+		} catch (Exception e) {
+			e.printStackTrace();
+			KettleDatabaseRepository kell=(KettleDatabaseRepository)repository;
+			kell.connectionDelegate.getDatabase().getConnection().rollback();
+			throw new Exception(e.getMessage());
 		}
-		repository.save( transMeta, versionComment, null);
-		
-		JsonUtils.success("转换保存成功！");
 	}
 	
 	/**
@@ -590,24 +595,24 @@ public class TransGraphController {
 	protected void getSQL(@RequestParam String graphXml) throws Exception {
 		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
 		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
-		
+		//
 		GetSQLProgress getSQLProgress = new GetSQLProgress(transMeta);
 		List<SQLStatement> stats = getSQLProgress.run();
 		JSONArray jsonArray = new JSONArray();
 		if(stats != null && stats.size() > 0) {
-			
+			for ( int i = 0; i < stats.size(); i++ ) {
+				SQLStatement stat = stats.get( i );
+
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("name", stat.getStepname());
+				if(stat.getDatabase() != null)
+					jsonObject.put("databaseName", stat.getDatabase().getName());
+				jsonObject.put("sql", StringEscapeHelper.encode(stat.getSQL()));
+				jsonObject.put("error", stat.getError());
+				jsonArray.add(jsonObject);
+			}
 		} else {
-			 for ( int i = 0; i < stats.size(); i++ ) {
-			      SQLStatement stat = stats.get( i );
-			      
-			      JSONObject jsonObject = new JSONObject();
-			      jsonObject.put("name", stat.getStepname());
-			      if(stat.getDatabase() != null)
-			    	  jsonObject.put("databaseName", stat.getDatabase().getName());
-			      jsonObject.put("sql", StringEscapeHelper.encode(stat.getSQL()));
-			      jsonObject.put("error", stat.getError());
-			      jsonArray.add(jsonObject);
-			 }
+
 		}
 		
 		JsonUtils.response(jsonArray);
@@ -630,7 +635,7 @@ public class TransGraphController {
 		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
 		
 		StepMeta stepMeta = getStep(transMeta, stepName);
-		SearchFieldsProgress op = new SearchFieldsProgress( transMeta, stepMeta, before );
+		SearchFieldsProgress op = new SearchFieldsProgress(transMeta,stepMeta,before );
 		op.run();
 		RowMetaInterface rowMetaInterface = op.getFields();
 		

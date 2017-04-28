@@ -471,8 +471,14 @@ GuidePanel = Ext.extend(Ext.Panel, {
 												method: 'POST',
 												params: {dir: '/',transName:text,taskGroupArray:taskGroupNameArray},
 												success: function(response) {
-													var path = Ext.decode(response.responseText).message;
-													repositryOpenTrans(secondGuidePanel,path,text)
+													var result=Ext.decode(response.responseText);
+													if(result.success==false){
+														Ext.getBody().unmask();
+														Ext.MessageBox.alert("创建失败",result.message);
+													}else{
+														var path = Ext.decode(response.responseText).message;
+														repositryOpenTrans(secondGuidePanel,path,text)
+													}
 												},
 												failure: failureResponse
 											});
@@ -529,8 +535,15 @@ GuidePanel = Ext.extend(Ext.Panel, {
 												method: 'POST',
 												params: {dir: '/', jobName: text,taskGroupArray:taskGroupNameArray},
 												success: function(response) {
-													var path = Ext.decode(response.responseText).message;
-													repositryOpenJob(secondGuidePanel,path,text);
+													var result=Ext.decode(response.responseText);
+													if(result.success==false){
+														Ext.getBody().unmask();
+														Ext.MessageBox.alert("创建失败",result.message);
+													}else{
+														var path = Ext.decode(response.responseText).message;
+														repositryOpenJob(secondGuidePanel,path,text);
+													}
+
 												},
 												failure: failureResponse
 											});
@@ -575,10 +588,6 @@ GuidePanel = Ext.extend(Ext.Panel, {
 		GuidePanel.superclass.initComponent.call(this);
 	}
 });
-
-
-
-
 //  TransGuide = Ext.extend(Ext.Panel, {
 // //     activeTab: 0,
 // //     plain: true,

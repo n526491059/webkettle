@@ -192,7 +192,7 @@ public class UserController {
             out.write(result);
             out.flush();
             out.close();
-        }catch (IOException e){
+        }catch (Exception e){
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
@@ -213,7 +213,7 @@ public class UserController {
             out.write(json.toString());
             out.flush();
             out.close();
-        }catch (IOException e){
+        }catch (Exception e){
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
@@ -226,7 +226,7 @@ public class UserController {
         try{
            request.getSession().invalidate();
             response.sendRedirect(request.getContextPath() + "/login.jsp");
-        }catch (IOException e){
+        }catch (Exception e){
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
@@ -242,7 +242,7 @@ public class UserController {
             out.write(JSONArray.fromObject(users).toString());
             out.flush();
             out.close();
-        }catch (IOException e){
+        }catch (Exception e){
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }

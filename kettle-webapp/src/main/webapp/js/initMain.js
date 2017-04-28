@@ -147,8 +147,8 @@ Ext.onReady(function() {
 			}
 		})
 		var loginInfo="<div style='margin-left:81%;margin-top: 1%'><h3 style='display: inline-block;'>欢迎您：</h3><h1 style='display: inline-block;'>"
-			+username+"</h1>&nbsp;&nbsp;<img src='../ui/images/i_out16.png' onclick='loginOut()' class='imgLoginInfoCls' title='登出'/>&nbsp;&nbsp;" +
-			"<img src='../ui/images/i_updateTPWD.png' onclick='updateThisPwd()' class='imgLoginInfoCls' title='修改密码' id='updateThisPw'/></div>";
+			+username+"</h1>&nbsp;&nbsp;<img src='../ui/images/i_out24.png' onclick='loginOut()' class='imgLoginInfoCls' title='登出'/>&nbsp;&nbsp;" +
+			"<img src='../ui/images/i_updateTPWD24.png' onclick='updateThisPwd()' class='imgLoginInfoCls' title='修改密码' id='updateThisPw'/></div>";
 		var navigationPanel = new Ext.Panel({
 			id: 'navigationPanel',
 			region: 'north',
@@ -282,7 +282,7 @@ function syncCall(cfg) {
             	conn = new ActiveXObject(activeX[i]);
                 break;
             } catch(e) {
-            	
+				
             }
         }
     }
