@@ -14,17 +14,19 @@ function generateTrans(secondGuidePanel){
         {header:"最终修改者",width:100,dataIndex:"modifiedUser",align:"center"},
         {header:"修改时间",width:130,dataIndex:"modifiedDate",format:"y-M-d H:m:s"},
         {header:"所属任务组",dataIndex:"belongToTaskGroup"},
-        {header:"转换属性",width:280,dataIndex:"",menuDisabled:true,align:"center",
+        {header:"操作",width:280,dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
-                    return "<input type='button' onclick='showOneTransDetail()' value='查看转换属性'>&nbsp;"+
-                        "<input type='button' onclick='deleteTransByTransPath()' value='删除'>&nbsp;"+
-                        "<input type='button' onclick='editorTrans()' value='编辑'>&nbsp;"+
-                        "<input type='button' onclick='transCompositionImg()' value='结构图'>&nbsp;"+
-                        "<input type='button' onclick='transPowerExecute()' value='智能执行'>&nbsp;";;
+                    return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='showOneTransDetail()' title='查看转换属性'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_delete.png' class='imgCls' onclick='deleteTransByTransPath()' title='删除'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_editor.png' class='imgCls' onclick='editorTrans()' title='编辑'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_compositionImg.png' class='imgCls' onclick='transCompositionImg()' title='结构图'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_execute.png' class='imgCls' onclick='executeTrans()' title='执行转换配置'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_assigned.png' class='imgCls' onclick='beforeAssigned()' title='分配任务组'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_power.png' class='imgCls' onclick='transPowerExecute()' title='智能执行'/>&nbsp;&nbsp;";
                 }else{
-                    return "<input type='button' onclick='showOneTransDetail()' value='查看转换属性'>&nbsp;"+
-                        "<input type='button' onclick='transCompositionImg()' value='结构图'>&nbsp;";
+                    return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='showOneTransDetail()' title='查看转换属性'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_compositionImg.png' class='imgCls' onclick='transCompositionImg()' title='结构图'/>&nbsp;&nbsp;";
                 }
             }
         }
@@ -104,83 +106,9 @@ function generateTrans(secondGuidePanel){
         ]
     })
 
-    var t_bar="";
-    if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
-       t_bar=new Ext.Toolbar({
-           buttons:[
-               f ,"-",
-               {
-                   text:"查询",
-                   handler:function(){
-                       generateTrans(secondGuidePanel);
-                   }
-               },"-", {
-                   text:"执行转换配置",
-                   handler:function(){
-                       var path="";
-                       var num=0;
-                       var view=grid.getView();
-                       var rsm=grid.getSelectionModel();
-                       for(var i= 0;i<view.getRows().length;i++){
-                           if(rsm.isSelected(i)){
-                               //获取被选中的转换全目录路径
-                               path=grid.getStore().getAt(i).get("directoryName");
-                               num++;
-                           }
-                       }
-                       if(num!=1){
-                           Ext.MessageBox.alert("请先选择一个(只能一个)转换再执行");
-                           return;
-                       }
-                       /* var executeWindow=generateSlaveWindow(path,"transformation");
-                        executeWindow.show(grid);*/
-                       Ext.Ajax.request({
-                           url: GetUrl('task/detail.do'),
-                           method: 'POST',
-                           params: {taskName: path,type:'trans'},
-                           success: function(response) {
-                               var resObj = Ext.decode(response.responseText);
-                               var graphPanel = Ext.create({border: false, Executable: true },"TransGraphY");
-                               var dialog = new LogDetailDialog({
-                                   items: graphPanel
-                               });
-                               activeGraph = graphPanel;
-                               dialog.show(null, function() {
-                                   var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
-                                   var decoder = new mxCodec(xmlDocument);
-                                   var node = xmlDocument.documentElement;
-                                   var graph = graphPanel.getGraph();
-                                   decoder.decode(node, graph.getModel());
-                                   graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
-                               });
-                           }
-                       });
-                   }
-               },"-",{
-                   text:"分配任务组",
-                   handler:function () {
-                       beforeAssigned(grid,secondGuidePanel);
-                   }
-               }
-           ]
-       })
-    }else{
-        t_bar=new Ext.Toolbar({
-            buttons:[
-                f ,"-",
-                {
-                    text:"查询",
-                    handler:function(){
-                        generateTrans(secondGuidePanel);
-                    }
-                }
-            ]
-        })
-    }
-
     var grid=new Ext.grid.GridPanel({
         id:"transPanel",
-        title:"transPanel",
+        title:"转换管理",
         height:470,
         cm:cm,      //列模型
         sm:sm,      //行选择框
@@ -189,7 +117,18 @@ function generateTrans(secondGuidePanel){
             forceFit : true //让grid的列自动填满grid的整个宽度，不用一列一列的设定宽度
         },
         closable:true,
-        tbar:t_bar,
+        tbar:new Ext.Toolbar({
+            buttons:[
+                f ,"-",
+                {
+                    iconCls:"searchCls",
+                    tooltip: '查询',
+                    handler:function(){
+                        generateTrans(secondGuidePanel);
+                    }
+                }
+            ]
+        }),
         bbar:new Ext.PagingToolbar({
             store:store,
             pageSize:15,
@@ -205,6 +144,36 @@ function generateTrans(secondGuidePanel){
     secondGuidePanel.doLayout();
 }
 
+//执行转换配置
+function executeTrans(){
+    var grid=Ext.getCmp("transPanel");
+    var path=grid.getSelectionModel().getSelected().get("directoryName");
+    /* var executeWindow=generateSlaveWindow(path,"transformation");
+     executeWindow.show(grid);*/
+    Ext.Ajax.request({
+        url: GetUrl('task/detail.do'),
+        method: 'POST',
+        params: {taskName: path,type:'trans'},
+        success: function(response) {
+            var resObj = Ext.decode(response.responseText);
+            var graphPanel = Ext.create({border: false, Executable:true},resObj.GraphType);
+            var dialog = new LogDetailDialog({
+                items: graphPanel
+            });
+            activeGraph = graphPanel;
+            dialog.show(null, function() {
+                var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
+                var decoder = new mxCodec(xmlDocument);
+                var node = xmlDocument.documentElement;
+                var graph = graphPanel.getGraph();
+                decoder.decode(node, graph.getModel());
+                graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
+            });
+        }
+    });
+}
+
+//智能执行转换
 function transPowerExecute(){
     var grid=Ext.getCmp("transPanel");
     var path=grid.getSelectionModel().getSelected().get("directoryName");
@@ -314,9 +283,7 @@ function deleteTransByTransPath(){
                     generateTrans(secondGuidePanel);
                     Ext.MessageBox.alert("提示","删除转换成功~!");
                 },
-                failure:function(){
-                    Ext.MessageBox.alert("result","内部错误,删除失败!")
-                },
+                failure:failureResponse,
                 params:{path:transPath,flag:"transformation"}
             })
         }
@@ -330,53 +297,48 @@ function showOneTransDetail(){
     var thisBelongToTaskGroup=record.get("belongToTaskGroup");
     var thisName=record.get("name");
     //拼接窗口所需要显示的内容
-    var htmlInfo="";
+    var htmlInfo="<table cellpadding='0' cellspacing='0' width='440' bgcolor='white' border='1'>"
     if(thisBelongToTaskGroup!=undefined && thisBelongToTaskGroup.trim()!=""){
-        htmlInfo+="<h4>所属任务组</h4>"
         var taskGroupArray=new Array();
         taskGroupArray=thisBelongToTaskGroup.split(",");
+
         for(var i=0;i<taskGroupArray.length;i++){
-            htmlInfo+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+(i+1)+":&nbsp;&nbsp;&nbsp;"+taskGroupArray[i]+"<br/>";
+            if(i==0)
+                htmlInfo+="<tr><td align='center' rowspan='"+taskGroupArray.length+"'>所属任务组</td>"
+            else
+                htmlInfo+="<tr>"
+            htmlInfo+="<td align='center'>"+taskGroupArray[i]+"</td></tr>"
         }
     }else{
-        htmlInfo="该转换暂未分配任务组"
+        htmlInfo+="<tr><td align='center'>所属任务组</td><td align='center'>暂未分配任务组</td></tr>";
     }
+    htmlInfo+="</table>";
     var oneTransDetailWindow=new Ext.Window({
         id:"oneTransDetailWindow",
         title:thisName,
         bodyStyle:"background-color:white",
         width:455,
         modal:true,
-        height:450,
         html:htmlInfo
     });
     oneTransDetailWindow.show(transGrid);
 }
 
-//分配任务组前获取被选中的转换相关信息
-function beforeAssigned(grid,secondGuidePanel){
-    var view=grid.getView();
-    var rsm=grid.getSelectionModel();
-    var transNameArray=new Array();
-    var transId="";
-    var transPath="";
-    for(var i= 0;i<view.getRows().length;i++){
-        if(rsm.isSelected(i)){
-            //获取被选中的转换名 转换Id    转换全目录名
-            transNameArray.push(grid.getStore().getAt(i).get("name"));
-            transId=grid.getStore().getAt(i).get("transformationId");
-            transPath=grid.getStore().getAt(i).get("directoryName");
-        }
-    }
-    if(transNameArray.length!=1){
-        Ext.MessageBox.alert("请选择一个转换(单选)再分配任务组");
-    }else{
-        showWindowForAssigned(transId,transPath,transNameArray[0],grid,secondGuidePanel);
-    }
+//分配任务组 获取信息
+function beforeAssigned(){
+    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+    var grid=Ext.getCmp("transPanel");
+    var record=grid.getSelectionModel().getSelected();
+    var transId=record.get("transformationId");
+    var transPath=record.get("directoryName");
+    var transName=record.get("name");
+    showWindowForAssigned(transId,transPath,transName,grid,secondGuidePanel);
+
 }
 
+//分配任务组 显示窗口
 function showWindowForAssigned(transId,transPath,transName,grid,secondGuidePanel){
-    var panelByAssigned=AllTaskGroupPanel(transId,transPath,transName,"noCreate");
+    var panelByAssigned=AllTaskGroupPanel(transId,transPath,transName);
     var taskGroupAssignedWindow=new Ext.Window({
         id:"assignedWindow",
         title:"任务组分配",
@@ -392,7 +354,7 @@ function showWindowForAssigned(transId,transPath,transName,grid,secondGuidePanel
 }
 
 //获取该用户下的所有任务组  并且设置任务组是否包含该转换的标识
-function AllTaskGroupPanel(transId,transPath,transName,flag){
+function AllTaskGroupPanel(transId,transPath,transName){
     var sm2=new Ext.grid.CheckboxSelectionModel();
     //节点列模型
     var taskGroupModel=new Ext.grid.ColumnModel([
@@ -436,7 +398,7 @@ function AllTaskGroupPanel(transId,transPath,transName,flag){
                 {
                     text:"确认",
                     handler:function(){
-                        assignedGroupTask(transId,transPath,transName,taskGroupPanelByAssigned,flag);
+                        assignedGroupTask(transId,transPath,transName,taskGroupPanelByAssigned);
                     }
                 }
             ]
@@ -463,7 +425,8 @@ function AllTaskGroupPanel(transId,transPath,transName,flag){
     return taskGroupPanelByAssigned;
 }
 
-function assignedGroupTask(transId,transPath,transName,taskGroupPanelByAssigned,flag){
+//分配任务组 访问后台
+function assignedGroupTask(transId,transPath,transName,taskGroupPanelByAssigned){
     var view=taskGroupPanelByAssigned.getView();
     var rsm=taskGroupPanelByAssigned.getSelectionModel();
     var taskGroupNameArray=new Array();
@@ -472,36 +435,24 @@ function assignedGroupTask(transId,transPath,transName,taskGroupPanelByAssigned,
             taskGroupNameArray.push(taskGroupPanelByAssigned.getStore().getAt(i).get("taskGroupName"));
         }
     }
-    Ext.MessageBox.confirm("确认","确认按照如下选择分配该任务组?",function(btn){
-        if(btn=="yes"){
-            Ext.Ajax.request({
-                url:"/taskGroup/assignedTaskGroup.do",
-                success:function(response,config){
-                    Ext.MessageBox.alert("任务组分配成功!");
-                    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
-                    if(flag!="create"){
-                        Ext.getCmp("assignedWindow").close();
-                        generateTrans(secondGuidePanel);
-                    }else{
-                        Ext.getCmp("assignedWindowByCreate").close();
-                        Ext.getCmp("bodyPanelForTrans").enable();
-                        Ext.getCmp("westTreePanelForTrans").enable();
-                    }
-                },
-                failure:function(){
-                    Ext.MessageBox.alert("result","服务器异常,任务组分配失败!");
-                    Ext.getCmp("taskGroupAssignedWindow").close();
-                },
-                params:{taskId:transId,taskName:transName,taskPath:transPath,type:"trans",taskGroupNameArray:taskGroupNameArray}
-            })
-        }else{
-            return;
-        }
-    })
-}
-
-function closeWindwo(){
-    Ext.getCmp("executeWindow").close();
+    if(taskGroupNameArray.length>0){
+        Ext.Ajax.request({
+            url:"/taskGroup/assignedTaskGroup.do",
+            success:function(response,config){
+                Ext.MessageBox.alert("任务组分配成功!");
+                var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+                Ext.getCmp("assignedWindow").close();
+                generateTrans(secondGuidePanel);
+            },
+            failure:function(response){
+                Ext.getCmp("assignedWindow").close();
+                failureResponse(response);
+            },
+            params:{taskId:transId,taskName:transName,taskPath:transPath,type:"trans",taskGroupNameArray:taskGroupNameArray}
+        })
+    }else{
+        Ext.MessageBox.alert("必须为该转换分配一个任务组");
+    }
 }
 
 //智能执行
@@ -511,9 +462,7 @@ function powerExecute(path,powerFlag){
         success:function(response,config){
             Ext.MessageBox.alert("result","已执行")
         },
-        failure:function(){
-            Ext.MessageBox.alert("result","内部错误,执行失败!")
-        },
+        failure:failureResponse,
         params:{path:path,powerFlag:powerFlag}
     })
 

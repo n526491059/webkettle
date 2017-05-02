@@ -27,11 +27,11 @@ public interface JobService {
 
     public boolean beforeTimeExecuteJob(Map<String, Object> params,HttpServletRequest request) throws Exception;
 
-    public List<JobTimeSchedulerEntity> getAllTimerJob();
+    public List<JobTimeSchedulerEntity> getAllTimerJob() throws Exception;
 
-    public JobEntity getJobById(Integer jobId);
+    public JobEntity getJobById(Integer jobId) throws Exception;
 
-    public List<JobEntity> getJobPath(List<JobEntity> jobs);
+    public List<JobEntity> getJobPath(List<JobEntity> jobs) throws Exception;
 
-    public JobEntity getJobByName(String jobName);
+    public JobEntity getJobByName(String jobName) throws Exception;
 }

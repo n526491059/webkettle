@@ -41,7 +41,7 @@ public class TransServiceImpl implements TransService {
     protected SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
-    public List<TransformationEntity> getTransPath(List<TransformationEntity> items) {
+    public List<TransformationEntity> getTransPath(List<TransformationEntity> items) throws Exception{
         List<TransformationEntity> result=new ArrayList<TransformationEntity>();
         for (TransformationEntity tran:items){
             String directoryName="";
@@ -169,7 +169,7 @@ public class TransServiceImpl implements TransService {
     }
 
     @Override
-    public TransformationEntity getTransByName(String transName) {
+    public TransformationEntity getTransByName(String transName) throws Exception{
         TransformationEntity entity=transDao.getTransByName(transName);
         List<TransformationEntity> items=new ArrayList<TransformationEntity>();
         items.add(entity);

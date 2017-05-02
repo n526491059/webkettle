@@ -29,9 +29,7 @@ function refreshSlaveMonitorPanel(slaveMonitorPanel,quatoTypeValue,maxOrAvg,choo
                 showSlaveOneQuato(resultJson);
             }
         },
-        failure:function(){
-            Ext.MessageBox.alert("result","内部错误,请稍后再试");
-        },
+        failure:failureResponse,
         params:{quatoTypeValue:quatoTypeValue,maxOrAvg:maxOrAvg,chooseDate:chooseDate}
     });
 }
@@ -83,7 +81,8 @@ function getTbarForSlaveMonitorPanel(){
         buttons:[
             quatoTypeCombobox,"-",calcCombobox,"-",dateField,"-",
             {
-                text:"刷新",
+                iconCls:"searchCls",
+                tooltip: '查询',
                 handler:function(){
                     var quatoType=Ext.getCmp("slaveQuatoCombobox").getValue();
                     var avgOrMax=Ext.getCmp("calcCombobox").getValue();

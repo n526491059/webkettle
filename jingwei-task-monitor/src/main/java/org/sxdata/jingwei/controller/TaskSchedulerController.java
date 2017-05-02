@@ -28,7 +28,7 @@ public class TaskSchedulerController {
     //获取作业的定时调度信息
     @RequestMapping(value="/getAllJobScheduler")
     @ResponseBody
-    protected void getJobs(HttpServletResponse response,HttpServletRequest request) {
+    protected void getJobs(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             //获取前台传递的分页参数
             int start=Integer.parseInt(request.getParameter("start"));
@@ -62,28 +62,28 @@ public class TaskSchedulerController {
             out.flush();
             out.close();
         }catch (Exception e){
-            String errorMessage=e.getMessage();
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //获取所有作业的定时调度信息
     @RequestMapping(value="/deleteScheduler")
     @ResponseBody
-    protected void deleteScheduler(HttpServletResponse response,HttpServletRequest request) {
+    protected void deleteScheduler(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             String[] taskIdArray=request.getParameterValues("taskIdArray");
             schedulerService.deleteScheduler(taskIdArray);
         }catch (org.quartz.SchedulerException e){
-            String errorMessage=e.getMessage();
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //获取修改前所需要的数据展现
     @RequestMapping(value="/beforeUpdateScheduler")
     @ResponseBody
-    protected void beforeUpdateScheduler(HttpServletResponse response,HttpServletRequest request) {
+    protected void beforeUpdateScheduler(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             //获取需要修改的定时作业详细信息
             String taskId=request.getParameter("taskId");
@@ -95,15 +95,15 @@ public class TaskSchedulerController {
             out.flush();
             out.close();
         }catch (Exception e){
-            String errorMessage=e.getMessage();
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //修改
     @RequestMapping(value="/updateJobScheduler")
     @ResponseBody
-    protected void updateJobScheduler(HttpServletResponse response,HttpServletRequest request) {
+    protected void updateJobScheduler(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
@@ -119,6 +119,7 @@ public class TaskSchedulerController {
             out.close();
         }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 }

@@ -13,7 +13,7 @@ public interface UserDao {
 
     public List<UserEntity> getUserbyName(String name);
 
-    public List<UserEntity> getUsersLimit(int start,int limit,String userGroupName);
+    public List<UserEntity> getUsersLimit(int start,int limit,String userGroupName,String username,Integer userType);
 
     public void updateUser(UserEntity user);
 

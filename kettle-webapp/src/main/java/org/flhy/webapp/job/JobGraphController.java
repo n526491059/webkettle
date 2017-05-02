@@ -36,6 +36,7 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositorySecurityProvider;
+import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
 import org.pentaho.di.trans.TransMeta;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -138,37 +139,45 @@ public class JobGraphController {
 	 */
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/save")
-	protected void save(@RequestParam String graphXml) throws Exception {
-		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
-		JobMeta jobMeta = (JobMeta) codec.decode(StringEscapeHelper.decode(graphXml));
-		Repository repository = App.getInstance().getRepository();
-		ObjectId existingId = repository.getJobId(jobMeta.getName(), jobMeta.getRepositoryDirectory());
-				//repository.getTransformationID( jobMeta.getName(), jobMeta.getRepositoryDirectory());
+	protected void save(@RequestParam String graphXml) throws Exception{
+		Repository repository = null;
+		try {
+			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+			JobMeta jobMeta = (JobMeta) codec.decode(StringEscapeHelper.decode(graphXml));
+			repository = App.getInstance().getRepository();
+			ObjectId existingId = repository.getJobId(jobMeta.getName(), jobMeta.getRepositoryDirectory());
+			//repository.getTransformationID( jobMeta.getName(), jobMeta.getRepositoryDirectory());
+			if(jobMeta.getCreatedDate() == null)
+                jobMeta.setCreatedDate(new Date());
+			if(jobMeta.getObjectId() == null)
+                jobMeta.setObjectId(existingId);
+			jobMeta.setModifiedDate(new Date());
 
-		if(jobMeta.getCreatedDate() == null)
-			jobMeta.setCreatedDate(new Date());
-		if(jobMeta.getObjectId() == null)
-			jobMeta.setObjectId(existingId);
-		jobMeta.setModifiedDate(new Date());
-		
-		boolean versioningEnabled = true;
-		boolean versionCommentsEnabled = true;
-         String fullPath = jobMeta.getRepositoryDirectory() + "/" + jobMeta.getName() + jobMeta.getRepositoryElementType().getExtension(); 
-         RepositorySecurityProvider repositorySecurityProvider = repository.getSecurityProvider() != null ? repository.getSecurityProvider() : null;
-         if ( repositorySecurityProvider != null ) {
-        	 versioningEnabled = repositorySecurityProvider.isVersioningEnabled( fullPath );
-        	 versionCommentsEnabled = repositorySecurityProvider.allowsVersionComments( fullPath );
-         }
-		String versionComment = null;
-		if (!versioningEnabled || !versionCommentsEnabled) {
-			versionComment = "";
-		} else {
-			versionComment = "no comment";
+			boolean versioningEnabled = true;
+			boolean versionCommentsEnabled = true;
+			String fullPath = jobMeta.getRepositoryDirectory() + "/" + jobMeta.getName() + jobMeta.getRepositoryElementType().getExtension();
+			RepositorySecurityProvider repositorySecurityProvider = repository.getSecurityProvider() != null ? repository.getSecurityProvider() : null;
+			if ( repositorySecurityProvider != null ) {
+                versioningEnabled = repositorySecurityProvider.isVersioningEnabled( fullPath );
+                versionCommentsEnabled = repositorySecurityProvider.allowsVersionComments( fullPath );
+            }
+			String versionComment = null;
+			if (!versioningEnabled || !versionCommentsEnabled) {
+                versionComment = "";
+            } else {
+                versionComment = "no comment";
+            }
+			repository.save(jobMeta, versionComment, null);
+			JsonUtils.success("作业保存成功！");
+		} catch (Exception e) {
+			e.printStackTrace();
+			KettleDatabaseRepository kell=(KettleDatabaseRepository)repository;
+			kell.connectionDelegate.getDatabase().getConnection().rollback();
+			throw new Exception(e.getMessage());
 		}
-		
-		repository.save( jobMeta, versionComment, null);
-		
-		JsonUtils.success("作业保存成功！");
+
+
+
 	}
 	
 	/**

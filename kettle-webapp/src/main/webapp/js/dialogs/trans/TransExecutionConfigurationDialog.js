@@ -17,17 +17,28 @@ TransExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 		var wExecCluster = new Ext.form.Radio({name: 'execMethod', fieldLabel: '集群方式执行'});
 		var wRemoteHost = null;
 		if(this.runMode == 'normal') {
+			var proxy=new Ext.data.HttpProxy({url:"/slave/getSlaveSelect.do"});
+			var hostName=Ext.data.Record.create([
+				{name:"hostId",type:"String",mapping:"hostId"},
+				{name:"hostName",type:"String",mapping:"hostName"},
+			]);
+			var reader=new Ext.data.JsonReader({},hostName);
+			var store=new Ext.data.Store({
+				proxy:proxy,
+				reader:reader
+			});
 			wRemoteHost = new Ext.form.ComboBox({
 				fieldLabel: '远程主机',
 				anchor: '-20',
-				displayField: 'name',
-				valueField: 'name',
+				displayField: 'hostId',
+				valueField: 'hostName',
 				typeAhead: true,
-		        mode: 'local',
-		        forceSelection: true,
-		        triggerAction: 'all',
-		        selectOnFocus:true,
-		        store: getActiveGraph().getSlaveServerStore()
+				mode: 'remote',
+				forceSelection: true,
+				triggerAction: 'all',
+				selectOnFocus:true,
+				//store: getActiveGraph().getSlaveServerStore()
+				store:store
 			});
 		} else {
 			wRemoteHost = new Ext.form.TextField({fieldLabel: '远程主机', anchor: '-20', readOnly: true});

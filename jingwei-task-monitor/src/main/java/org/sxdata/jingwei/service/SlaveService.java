@@ -31,5 +31,5 @@ public interface SlaveService {
 
     public String slaveQuatoHTMLText(String quatoType,String maxOrAvg,String chooseDate,String userGroupName) throws Exception;
 
-    public String addSlave(HttpServletRequest request);
+    public String addSlave(HttpServletRequest request) throws Exception;
 }

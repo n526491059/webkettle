@@ -319,9 +319,7 @@ function generateToolButton(flag){
                                     generateSchedulerMonitorPanel(secondGuidePanel);
                                 }
                             },
-                            failure:function(){
-                                Ext.MessageBox.alert("异常","服务器异常,请稍后再试!");
-                            }
+                            failure:failureResponse
                         })
                     }else{
                         Ext.MessageBox.alert("失败","表单存在不规范填写,请再次确认后提交!");
@@ -346,7 +344,6 @@ function generateToolButton(flag){
                     Ext.MessageBox.alert("提交失败","请先选择定时类型");
                     return;
                 }else{
-
                     var weekChoose=Ext.getCmp("weekChoose");
                     var monthChoose=Ext.getCmp("monthChoose");
                     if(chooseType=="每周执行"){
@@ -426,9 +423,7 @@ function generateToolButton(flag){
                                     });
                                 }
                             },
-                            failure:function(){
-                                Ext.MessageBox.alert("异常","服务器异常,请稍后再试!");
-                            }
+                            failure:failureResponse
                         })
                     }else{
                         Ext.MessageBox.alert("失败","表单存在不规范填写,请再次确认!");

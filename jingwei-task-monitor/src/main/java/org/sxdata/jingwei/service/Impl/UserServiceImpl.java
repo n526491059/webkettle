@@ -15,6 +15,7 @@ import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -29,13 +30,13 @@ public class UserServiceImpl implements UserService{
     private UserGroupDao userGroupDao;
 
     @Override
-    public void deleteUser(Integer id,String username){
+    public void deleteUser(Integer id,String username) throws Exception{
         userGroupDao.deleteUserAttributeByName(username);
         userDao.deleteUser(id);
     }
 
     @Override
-    public void updateUser(UserEntity user,UserGroupAttributeEntity attr){
+    public void updateUser(UserEntity user,UserGroupAttributeEntity attr) throws Exception{
         //修改用户
         if(!StringDateUtil.isEmpty(user.getDescription())){
             userDao.updateUser(user);
@@ -66,27 +67,47 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public synchronized boolean addUser(UserEntity user,UserGroupAttributeEntity attribute) {
+    public synchronized boolean addUser(UserEntity user,UserGroupAttributeEntity attribute) throws Exception{
+        attribute.setCreateDate(new Date());
         List<UserEntity> allUser=userDao.getAllUsers();
         for(UserEntity item:allUser){
             if(item.getLogin().equals(user.getLogin()))
                 return false;
         }
-        user.setUserId(userDao.selectMaxId() + 1);
+        Integer userId=userDao.selectMaxId();
+        if(null!=userId)
+            userId+=1;
+        else
+            userId=0;
+        user.setUserId(userId);
         userDao.addUser(user);
         userGroupDao.addUserGroupAttribute(attribute);
         return true;
     }
 
     @Override
-    public String getUsersLimit(int start, int limit,HttpServletRequest request) {
+    public String getUsersLimit(int start, int limit,HttpServletRequest request) throws Exception{
+        String username=request.getParameter("username");
+        String userType=request.getParameter("usertype");
+        String userGroup=request.getParameter("usergroup");
         //获取当前用户所在的用户组
         UserGroupAttributeEntity userAttribute=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
         String userGroupName=userAttribute.getUserGroupName();
+        //如果是admin用户则把查询条件赋给该值
+        if(StringDateUtil.isEmpty(userGroupName))
+            userGroupName=userGroup;
+        //获取用户类型
+        Integer userTypeI=null;
+        if(userType.equals("管理员"))
+            userTypeI=1;
+        else if(userType.equals("普通用户"))
+            userTypeI=2;
+
+
         //获取用户集合    总记录数
         List<UserEntity> users=new ArrayList<>();
         Integer count= userDao.getUserCount(userGroupName);
-        users=userDao.getUsersLimit(start, limit,userGroupName);
+        users=userDao.getUsersLimit(start,limit,userGroupName,username,userTypeI);
         //如果不是是admin用户 把该用户组下面所有用户权限为1的用户移除
         if(!StringDateUtil.isEmpty(userGroupName)){
             List<UserEntity> adminUserArray=new ArrayList<>();
@@ -110,17 +131,17 @@ public class UserServiceImpl implements UserService{
         PageforBean bean=new PageforBean();
         bean.setRoot(users);
         bean.setTotalProperty(count);
-        return JSONObject.fromObject(bean).toString();
+        return JSONObject.fromObject(bean,StringDateUtil.configJson("yyyy-MM-dd HH:mm:ss")).toString();
     }
 
     @Override
-    public List<UserEntity> getUserByName(String login) {
+    public List<UserEntity> getUserByName(String login) throws Exception{
         return userDao.getUserbyName(login);
     }
 
     @Override
     //登录
-    public String login(String userName, String password,HttpServletRequest request) {
+    public String login(String userName, String password,HttpServletRequest request) throws Exception{
         String result="success";
         List<UserEntity> users=this.getUserByName(userName);
         if(users.size()==0){
@@ -170,7 +191,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     //给用户分配用户组
-    public void allotUserGroup(UserGroupAttributeEntity attr) {
+    public void allotUserGroup(UserGroupAttributeEntity attr) throws Exception{
         userGroupDao.updateUserGroupAttrByName(attr);
         //用户状态发生改变使session失效
         List<String> invalidSession=new ArrayList<String>();
@@ -183,7 +204,6 @@ public class UserServiceImpl implements UserService{
                     continue;
                 }else{
                     invalidSession.add(session.getId());
-
                 }
             }
         }
@@ -196,12 +216,12 @@ public class UserServiceImpl implements UserService{
 
     @Override
     //获取某个用户组下的所有用户 不分页
-    public List<UserEntity> getUsers(String userGroupName) {
+    public List<UserEntity> getUsers(String userGroupName) throws Exception{
         return userDao.getUsers(userGroupName);
     }
 
     @Override
-    public void updatePassword(UserEntity user) {
+    public void updatePassword(UserEntity user) throws Exception{
         userDao.updateUser(user);
     }
 }

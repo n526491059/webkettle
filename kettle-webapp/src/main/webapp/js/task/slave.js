@@ -36,9 +36,7 @@ function generateSlaveWindow(path,flag2){
                                 Ext.MessageBox.alert("result","已执行");
                                 setTimeout("closeWindwo()",1500);
                             },
-                            failure:function(){
-                                Ext.MessageBox.alert("result","内部错误,执行失败!")
-                            },
+                            failure:failureResponse,
                             params:{path:path,slaveId:resultArrya[1],flag:flag2}
                         })
                     }
@@ -199,26 +197,30 @@ function slaveManager(secondGuidePanel){
         tbar:new Ext.Toolbar({
             buttons: [
                 {
-                    text:"删除节点",
+                    iconCls:"deleteCls",
+                    tooltip: '删除节点',
                     id:"deleteSlaveButton",
                     handler:function(){
                         deleteSlave(slaveGridPanel,secondGuidePanel);
                     }
                 },"-",
                 {
-                    text: "节点体检",
+                    iconCls:"testCls",
+                    tooltip: '节点体检',
                     handler: function () {
                         slaveTest(slaveGridPanel);
                     }
                 },"-",
                 {
-                    text:"节点指标",
+                    iconCls:"quatoCls",
+                    tooltip: '节点指标',
                     handler:function(){
                         quatoWindow(slaveGridPanel);
                     }
                 },"-",
                 {
-                    text:"新增节点",
+                    iconCls:"addCls",
+                    tooltip: '新增节点',
                     id:"addSlaveButton",
                     handler:function(){
                         addSlave();
@@ -235,8 +237,8 @@ function slaveManager(secondGuidePanel){
         })
     })
     if(loginUserName!="admin" && loginUserSlavePower!=1){
-        Ext.getCmp("deleteSlaveButton").hide();
         Ext.getCmp("addSlaveButton").hide();
+        Ext.getCmp("deleteSlaveButton").hide();
     }
     slaveGridPanel.getColumnModel().setHidden(2,true);
     secondGuidePanel.removeAll(true);
@@ -275,9 +277,7 @@ function getQuatoInfo(carteInfoWindow,slaveGridPanel){
             carteInfoWindow.hide();
             carteInfoWindow.show(slaveGridPanel);
         },
-        failure:function(){
-            Ext.MessageBox.alert("result","内部错误,获取失败,请稍后再试!")
-        }
+        failure:failureResponse
     })
 }
 
@@ -429,8 +429,8 @@ function slaveTest(slaveGridPanel){
                 testJSONString=response.responseText;
                 setTimeout("showTestResultByWindow(testJSONString,slaveGridPanel)",600);
             },
-            failure:function(){
-                Ext.MessageBox.alert("result","内部错误,请稍后再试");
+            failure:function(response){
+                failureResponse(response);
             },
             params:{hostName:hostName}
         });
@@ -482,9 +482,7 @@ function deleteSlave(slaveGridPanel,secondGuidePanel){
                 Ext.MessageBox.alert("result","OK");
                 slaveManager(Ext.getCmp("secondGuidePanel"));
             },
-            failure:function(){
-                Ext.MessageBox.alert("result","内部错误,删除失败!");
-            },
+            failure:failureResponse,
             params:{items:slaveIdArray}
         });
     }
@@ -580,7 +578,7 @@ SlaveServerDialog = Ext.extend(Ext.Window, {
                                 this.close();
                             }
                         },
-                        failure:function(){},
+                        failure:failureResponse,
                         params:{slaveServer:JSON.stringify(data),userType:1}
                     })
                 }else{
@@ -615,7 +613,7 @@ SlaveServerDialog = Ext.extend(Ext.Window, {
                                                     userGroupChooseWindow.close();
                                                 }
                                             },
-                                            failure:function(){},
+                                            failure:failureResponse,
                                             params:{slaveServer:JSON.stringify(data),userGroupArray:userGroupNameArray,userType:0}
                                         })
                                     }

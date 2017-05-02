@@ -30,30 +30,35 @@ public class UserController {
     //分配用户组
     @RequestMapping(value="/allotUserGroup")
     @ResponseBody
-    protected void allotUserGroup(HttpServletResponse response,HttpServletRequest request){
-        UserGroupAttributeEntity attr=new UserGroupAttributeEntity();
-        Integer userType=Integer.valueOf(request.getParameter("rdaUserType"));
-        String username=request.getParameter("username");
-        String userGroupName=request.getParameter("userGroupCombobox");
-        attr.setUserType(userType);
-        attr.setUserGroupName(userGroupName);
-        attr.setUserName(username);
-        if(userType==1){
-            attr.setSlavePremissonType(1);
-            attr.setTaskPremissionType(1);
-        }else{
-            Integer slavePower=Integer.valueOf(request.getParameter("rdaSlavePower"));
-            Integer taskGroupPower=Integer.valueOf(request.getParameter("rdaTaskGroup"));
-            attr.setSlavePremissonType(slavePower);
-            attr.setTaskPremissionType(taskGroupPower);
+    protected void allotUserGroup(HttpServletResponse response,HttpServletRequest request) throws Exception{
+        try {
+            UserGroupAttributeEntity attr=new UserGroupAttributeEntity();
+            Integer userType=Integer.valueOf(request.getParameter("rdaUserType"));
+            String username=request.getParameter("username");
+            String userGroupName=request.getParameter("userGroupCombobox");
+            attr.setUserType(userType);
+            attr.setUserGroupName(userGroupName);
+            attr.setUserName(username);
+            if(userType==1){
+                attr.setSlavePremissonType(1);
+                attr.setTaskPremissionType(1);
+            }else{
+                Integer slavePower=Integer.valueOf(request.getParameter("rdaSlavePower"));
+                Integer taskGroupPower=Integer.valueOf(request.getParameter("rdaTaskGroup"));
+                attr.setSlavePremissonType(slavePower);
+                attr.setTaskPremissionType(taskGroupPower);
+            }
+            userService.allotUserGroup(attr);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
-        userService.allotUserGroup(attr);
     }
 
     //分页形式获取用户集合
     @RequestMapping(value="/getUsers")
     @ResponseBody
-    protected void getUsers(HttpServletResponse response,HttpServletRequest request){
+    protected void getUsers(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             Integer start=Integer.valueOf(request.getParameter("start"));
             Integer limit=Integer.valueOf(request.getParameter("limit"));
@@ -63,24 +68,30 @@ public class UserController {
             out.write(result);
             out.flush();
             out.close();
-        }catch (IOException e){
+        }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //删除用户
     @RequestMapping(value="/deleteUser")
     @ResponseBody
-    protected void deleteUser(HttpServletResponse response,HttpServletRequest request){
-        String userId=request.getParameter("userId");
-        String username=request.getParameter("username");
-        userService.deleteUser(Integer.valueOf(userId),username);
+    protected void deleteUser(HttpServletResponse response,HttpServletRequest request) throws Exception{
+        try {
+            String userId=request.getParameter("userId");
+            String username=request.getParameter("username");
+            userService.deleteUser(Integer.valueOf(userId),username);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
+        }
     }
 
     //修改用户
     @RequestMapping(value="/updateUser")
     @ResponseBody
-    protected void updateUser(HttpServletResponse response,HttpServletRequest request){
+    protected void updateUser(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             UserGroupAttributeEntity attr=new UserGroupAttributeEntity();
             //接收参数
@@ -110,15 +121,16 @@ public class UserController {
             out.write(json.toString());
             out.flush();
             out.close();
-        }catch (IOException e){
+        }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //添加用户
     @RequestMapping(value="/addUser")
     @ResponseBody
-    protected void addUser(HttpServletResponse response,HttpServletRequest request){
+    protected void addUser(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             //接收参数
             String description=request.getParameter("desc");
@@ -158,8 +170,9 @@ public class UserController {
             out.write(json.toString());
             out.flush();
             out.close();
-        }catch (IOException e){
+        }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
@@ -167,7 +180,7 @@ public class UserController {
     //登陆
     @RequestMapping(value="/doLogin")
     @ResponseBody
-    protected void doLogin(HttpServletResponse response,HttpServletRequest request,@RequestParam String username,@RequestParam String password){
+    protected void doLogin(HttpServletResponse response,HttpServletRequest request,@RequestParam String username,@RequestParam String password) throws Exception{
         try{
             UserEntity loginUser=(UserEntity)request.getSession().getAttribute("login");
             String result="success";
@@ -179,8 +192,9 @@ public class UserController {
             out.write(result);
             out.flush();
             out.close();
-        }catch (IOException e){
+        }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
@@ -188,7 +202,7 @@ public class UserController {
     //登陆
     @RequestMapping(value="/getLoginUser")
     @ResponseBody
-    protected void getLoginUser(HttpServletResponse response,HttpServletRequest request){
+    protected void getLoginUser(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             UserEntity loginUser=(UserEntity)request.getSession().getAttribute("login");
             UserGroupAttributeEntity userInfo=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
@@ -199,45 +213,53 @@ public class UserController {
             out.write(json.toString());
             out.flush();
             out.close();
-        }catch (IOException e){
+        }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //登出
     @RequestMapping(value="/loginOut")
     @ResponseBody
-    protected void loginOut(HttpServletResponse response,HttpServletRequest request){
+    protected void loginOut(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
            request.getSession().invalidate();
             response.sendRedirect(request.getContextPath() + "/login.jsp");
-        }catch (IOException e){
+        }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //获取某个用户组下的用户
     @RequestMapping(value="/getUsersByInfo")
     @ResponseBody
-    protected void getUsersByInfo(HttpServletResponse response,HttpServletRequest request,@RequestParam String userGroupName){
+    protected void getUsersByInfo(HttpServletResponse response,HttpServletRequest request,@RequestParam String userGroupName) throws Exception{
         try{
             List<UserEntity> users=userService.getUsers(userGroupName);
             PrintWriter out=response.getWriter();
             out.write(JSONArray.fromObject(users).toString());
             out.flush();
             out.close();
-        }catch (IOException e){
+        }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //修改密码
     @RequestMapping(value="/updatePassword")
     @ResponseBody
-    protected void updatePassword(@RequestParam String password,@RequestParam String userId){
-        UserEntity user=new UserEntity();
-        user.setUserId(Integer.valueOf(userId));
-        user.setPassword(KettleEncr.encryptPassword(password));
-        userService.updatePassword(user);
+    protected void updatePassword(@RequestParam String password,@RequestParam String userId) throws Exception{
+        try {
+            UserEntity user=new UserEntity();
+            user.setUserId(Integer.valueOf(userId));
+            user.setPassword(KettleEncr.encryptPassword(password));
+            userService.updatePassword(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
+        }
     }
 }

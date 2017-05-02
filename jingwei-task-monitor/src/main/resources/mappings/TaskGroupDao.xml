@@ -5,7 +5,8 @@
         select
             d.ID_TASK_GROUP as taskGroupId,
             d.TASK_GROUP_NAME as taskGroupName,
-            d.TASK_DESC as taskGroupDesc
+            d.TASK_DESC as taskGroupDesc,
+            d.CREATE_DATE as createDate
         from d_task_group d
         WHERE 1=1
         <if test='param3!=null and param3!=""'>
@@ -14,6 +15,12 @@
                 SELECT TASK_GROUP_NAME FROM d_user_group_tasks_relation WHERE
                 USER_GROUP_NAME=#{2}
             )
+        </if>
+        <if test='param4!=null and param4!=""'>
+            AND d.TASK_GROUP_NAME  LIKE concat('%',#{3},'%')
+        </if>
+        <if test='param5!=null and param5!=""'>
+            AND d.CREATE_DATE>#{4}
         </if>
         limit #{0},#{1}
     </select>
@@ -44,8 +51,8 @@
     <!--添加任务组-->
     <insert id="addTaskGroup" parameterType="org.sxdata.jingwei.entity.TaskGroupEntity">
         insert into d_task_group
-        (d_task_group.TASK_GROUP_NAME,d_task_group.TASK_DESC)
-        VALUES (#{taskGroupName},#{taskGroupDesc})
+        (d_task_group.TASK_GROUP_NAME,d_task_group.TASK_DESC,d_task_group.CREATE_DATE)
+        VALUES (#{taskGroupName},#{taskGroupDesc},#{createDate})
     </insert>
 
     <!--为任务组中添加任务-->

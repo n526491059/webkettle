@@ -1,5 +1,7 @@
 package org.sxdata.jingwei.entity;
 
+import java.util.Date;
+
 /**
  * Created by cRAZY on 2017/4/13.
  */
@@ -10,6 +12,15 @@ public class UserGroupAttributeEntity {
     private Integer slavePremissonType; //1:可增删改可执行 2:只读
     private Integer taskPremissionType; //1:可增删改 2:只读
     private Integer userType;           //1:管理员 2:普通用户
+    private Date createDate;
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
 
     public Integer getGroupAttributeId() {
         return groupAttributeId;

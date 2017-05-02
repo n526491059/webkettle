@@ -52,11 +52,11 @@ function generateUserGroupPanel(secondGuidePanel){
         {header:"用户组描述",dataIndex:"userGroupDesc"},
         {header:"操作",dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
-                return "<input type='button' onclick='deleteUserGroup()' value='删除'>&nbsp;"+
-                    "<input type='button' onclick='updateUserGroup()' value='修改'>&nbsp;"+
-                    "<input type='button' onclick='userGroupInfo()' value='详情'>&nbsp;"+
-                    "<input type='button' onclick='assignedSlaveForUserGroup()' value='分配节点'>&nbsp;"+
-                    "<input type='button' onclick='assignedTaskGroupForUserGroup()' value='分配任务组'>&nbsp;"
+                return  "<img src='../../ui/images/i_delete.png' class='imgCls' onclick='deleteUserGroup()' title='删除用户组'/>&nbsp;&nbsp;"+
+                    "<img src='../../ui/images/i_editor.png' class='imgCls' onclick='updateUserGroup()' title='修改用户组'/>&nbsp;&nbsp;"+
+                    "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='userGroupInfo()' title='用户组详情'/>&nbsp;&nbsp;"+
+                    "<img src='../../ui/images/i_assignedSlave.png' class='imgCls' onclick='assignedSlaveForUserGroup()' title='分配节点'/>&nbsp;&nbsp;"+
+                    "<img src='../../ui/images/i_assigned.png' class='imgCls' onclick='assignedTaskGroupForUserGroup()' title='分配任务组'/>&nbsp;&nbsp;";
             }
         }
     ]);
@@ -118,13 +118,15 @@ function generateUserGroupPanel(secondGuidePanel){
             buttons:[
                 nameField,
                 {
-                    text:"搜索",
+                    iconCls:"searchCls",
+                    tooltip: '搜索',
                     handler:function () {
                         generateUserGroupPanel(secondGuidePanel);
                     }
                 },"-",
                 {
-                    text:"新增",
+                    iconCls:"addCls",
+                    tooltip: '新增用户组',
                     handler:function () {
                         fillInBeforeAdd(new Array(),"","",new Array());
                     }
@@ -185,7 +187,7 @@ function assignedTaskGroupForUserGroup(){
                                     chooseTaskGroupWindow.close();
                                     Ext.MessageBox.alert("success","任务组分配成功");
                                 },
-                                failure:function(){},
+                                failure:failureResponse,
                                 params:{userGroupName:userGroupName,taskGroupNameArray:taskGroupNameArray}
                             })
                         }
@@ -240,7 +242,7 @@ function assignedSlaveForUserGroup(){
                                     chooseSlaveWindow.close();
                                     Ext.MessageBox.alert("success","节点分配成功!");
                                 },
-                                failure:function(){},
+                                failure:failureResponse,
                                 params:{userGroupName:userGroupName,slaveIdArray:slaveIdArray}
                             })
                         }
@@ -286,7 +288,7 @@ function deleteUserGroup(){
                                         Ext.MessageBox.alert("success","移除用户组成功!");
                                         generateUserGroupPanel(secondGuidePanel);
                                     },
-                                    failure:function(){},
+                                    failure:failureResponse,
                                     params:{userGroupName:chooseUserGroupName}
                                 })
                             }else{
@@ -372,7 +374,7 @@ function updateUserGroup(){
     });
     var updateUserGroupWindow=new Ext.Window({
         id:"updateUserGroupWindow",
-        title:"新增用户组",
+        title:"修改用户组",
         bodyStyle:"background-color:white",
         width:500,
         modal:true,
@@ -402,9 +404,9 @@ function updateUserGroup(){
                                     generateUserGroupPanel(Ext.getCmp("secondGuidePanel"));
                                 }
                             },
-                            failure:function(){
-                                Ext.MessageBox.alert("error","服务器异常,请稍后尝试");
+                            failure:function(response){
                                 updateUserGroupWindow.close();
+                                failureResponse(response);
                             },
                             params:{name:userGroupName,desc:userGroupDesc,id:userGroupId}
                         })
@@ -483,9 +485,9 @@ function fillInBeforeAdd(groupName,groupDesc,taskGroupNameArray,slaveIdArray){
                                     chooseVisualTaskGroup(taskGroupNameArray,userGroupName,userGroupDesc,slaveIdArray);
                                 }
                             },
-                            failure:function(){
-                                Ext.MessageBox.alert("error","服务器异常,请稍后尝试");
+                            failure:function(response){
                                 addUserGroupWindow.close();
+                                failureResponse(response);
                             },
                             params:{name:userGroupName}
                         })
@@ -595,9 +597,9 @@ function chooseVisualSlave(taskGroupNameArray,userGroupName,userGroupDesc,slaveI
                                     chooseSlaveWindow.close();
                                     generateUserGroupPanel(Ext.getCmp("secondGuidePanel"));
                                 },
-                                failure:function(){
-                                    Ext.MessageBox.alert("error","程序异常,请稍后尝试");
+                                failure:function(response){
                                     chooseSlaveWindow.close();
+                                    failureResponse(response);
                                 },
                                 params:{slaveIdArray:slaveIdArray,taskGroupNameArray:taskGroupNameArray,
                                     userGroupName:userGroupName,userGroupDesc:userGroupDesc}

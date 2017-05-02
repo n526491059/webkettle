@@ -26,7 +26,20 @@ function showTaskControlPanel(){
         {header:"任务名",dataIndex:"name"},
         {header:"运行节点",dataIndex:"hostName"},
         {header:"任务类型",dataIndex:"type"},
-        {header:"运行状态",dataIndex:"isStart"}
+        {header:"运行状态",dataIndex:"isStart"},
+        {header:"操作",width:280,dataIndex:"",menuDisabled:true,align:"center",
+            renderer:function(v){
+                if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
+                    return "<img src='../../ui/images/i_execute.png' class='imgCls' onclick='collectData()' title='日志明细'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_timer.png' class='imgCls' onclick='showTransDetailWindow()' title='转换详情'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_assigned.png' class='imgCls' onclick='stopJobOrTrans()' title='结束'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_power.png' class='imgCls' onclick='pauseOrStart()' title='暂停/开始'/>&nbsp;&nbsp;";
+                }else{
+                    return "<img src='../../ui/images/i_execute.png' class='imgCls' onclick='collectData()' title='日志明细'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_timer.png' class='imgCls' onclick='showTransDetailWindow()' title='转换详情'/>&nbsp;&nbsp;";
+                }
+            }
+        }
     ])
     //数据从后台获取
     var proxy=new Ext.data.HttpProxy({url:"/task/getRunningTask.do"});
@@ -47,7 +60,7 @@ function showTaskControlPanel(){
     store.load();
     //创建panel
     var grid=new Ext.grid.GridPanel({
-        id:"controlPanel",
+        id:"任务监控",
         title:"任务监控",
         width:1150,
         height:470,
@@ -78,121 +91,64 @@ function showTaskControlPanel(){
                     Ext.getCmp("pushOrStart").enable();
                 }
             }
-        },
-        tbar:new Ext.Toolbar({buttons:[
-            {
-                text:"刷新",
-                handler:function(){
-                    secondGuidePanel.removeAll(true);
-                    secondGuidePanel.add(showTaskControlPanel());
-                    secondGuidePanel.doLayout();
-                }
-            },'-',
-            {
-                text:"日志明细",
-                handler:function(){
-                    collectData(grid);
-                }
-            },'-',
-            {
-                text:"结束",
-                id:"endTaskByRunning",
-                handler:function(){
-                    stopJobOrTrans(grid,secondGuidePanel);
-                }
-            },'-',
-            {
-                text:"转换详情",
-                id:"transDetailButton",
-                handler:function(){
-                    showTransDetailWindow(grid);
-                }
-            },'-',
-            {
-                text:"暂停/开始",
-                id:"pushOrStart",
-                handler:function(){
-                   pauseOrStart(grid,secondGuidePanel);
-                }
-            }
-        ]})
+        }
     });
     grid.getColumnModel().setHidden(2,true);
-    if(loginUserName!="admin" && loginUserTaskGroupPower!=1){
-        Ext.getCmp("pushOrStart").hide();
-        Ext.getCmp("endTaskByRunning").hide();
-    }
     transAndJobGrid=grid;
     return grid;
 }
 
 //暂停OR开始转换
-function pauseOrStart(grid,secondGuidePanel){
-    var view=grid.getView();
-    var rsm=grid.getSelectionModel();
+function pauseOrStart(){
+    var grid=Ext.getCmp("controlPanel");
+    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+    //获取参数
     var idArray=new Array();
     var hostArray=new Array();
-    for(var i= 0;i<view.getRows().length;i++){
-        if(rsm.isSelected(i)){
-            idArray.push(grid.getStore().getAt(i).get("id"));
-            hostArray.push(grid.getStore().getAt(i).get("hostName"));
-        }
-    }
-    if(idArray.length<1){
-        Ext.MessageBox.alert("请至少选择一个需要暂停/开始的转换");
-        return;
-    }else{
-        Ext.Ajax.request({
-            url:"/task/pauseOrStart.do",
-            success:function(response,config){
-                Ext.MessageBox.alert("result","OK");
-                secondGuidePanel.removeAll(true);
-                secondGuidePanel.add(showTaskControlPanel());
-                secondGuidePanel.doLayout();
-            },
-            failure:function(){
-                Ext.MessageBox.alert("result","内部错误,暂停/开始失败!");
-            },
-            params:{idArray:idArray,hostArray:hostArray}
-        });
-    }
+    idArray.push(grid.getSelectionModel().getSelected().get("id"));
+    hostArray.push(grid.getSelectionModel().getSelected().get("hostName"));
+    Ext.Ajax.request({
+        url:"/task/pauseOrStart.do",
+        success:function(response,config){
+            Ext.MessageBox.alert("result","OK");
+            secondGuidePanel.removeAll(true);
+            secondGuidePanel.add(showTaskControlPanel());
+            secondGuidePanel.doLayout();
+        },
+        failure:failureResponse,
+        params:{idArray:idArray,hostArray:hostArray}
+    });
+
 }
 
 //停止作业OR转换
-function stopJobOrTrans(grid,secondGuidePanel){
-    var view=grid.getView();
-    var rsm=grid.getSelectionModel();
+function stopJobOrTrans(){
+    var grid=Ext.getCmp("controlPanel");
+    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+    //获取停止的参数
     var idArray=new Array();
     var typeArray=new Array();
     var hostNameArray=new Array();
-    for(var i= 0;i<view.getRows().length;i++){
-        if(rsm.isSelected(i)){
-            typeArray.push(grid.getStore().getAt(i).get("type"));
-            idArray.push(grid.getStore().getAt(i).get("id"));
-            hostNameArray.push(grid.getStore().getAt(i).get("hostName"))
-        }
-    }
-    if(typeArray.length<1){
-        Ext.MessageBox.alert("请至少选择一个需要停止的任务");
-    }else{
-        Ext.Ajax.request({
-            url:"/task/stopTransOrJob.do",
-            success:function(response,config){
-                Ext.MessageBox.alert("result","OK");
-                secondGuidePanel.removeAll(true);
-                secondGuidePanel.add(showTaskControlPanel());
-                secondGuidePanel.doLayout();
-            },
-            failure:function(){
-                Ext.MessageBox.alert("result","内部错误,删除失败!");
-            },
-            params:{idArray:idArray,typeArray:typeArray,hostArray:hostNameArray}
-        });
-    }
+    idArray.push(grid.getSelectionModel().getSelected().get("id"));
+    typeArray.push(grid.getSelectionModel().getSelected().get("type"));
+    hostNameArray.push(grid.getSelectionModel().getSelected().get("hostName"));
+    Ext.Ajax.request({
+        url:"/task/stopTransOrJob.do",
+        success:function(response,config){
+            Ext.MessageBox.alert("result","OK");
+            secondGuidePanel.removeAll(true);
+            secondGuidePanel.add(showTaskControlPanel());
+            secondGuidePanel.doLayout();
+        },
+        failure:failureResponse,
+        params:{idArray:idArray,typeArray:typeArray,hostArray:hostNameArray}
+    });
+
 }
 
 //显示转换详情的窗口(嵌入一个panel)
-function showTransDetailWindow(grid){
+function showTransDetailWindow(){
+    var grid=Ext.getCmp("controlPanel");
     var view=grid.getView();
     var rsm=grid.getSelectionModel();
     var idArray=new Array();
@@ -302,29 +258,17 @@ function generateTransDetailPanel(carteId,hostName){
     return grid;
 }
 
-function collectData(grid){
+function collectData(){
+    var grid=Ext.getCmp("controlPanel");
+    var record=grid.getSelectionModel().getSelected();
     var view=grid.getView();
     var rsm=grid.getSelectionModel();
-    //存放被选的作业/转换的id串
-    var idArray=new Array();
-    for(var i= 0;i<view.getRows().length;i++){
-        if(rsm.isSelected(i)){
-            idArray.push(grid.getStore().getAt(i).get("id"));
-            type=grid.getStore().getAt(i).get("type");
-            conHostName=grid.getStore().getAt(i).get("hostName");
-        }
-    }
-    if(idArray.length<1){
-        Ext.MessageBox.alert("提示","请选择一个作业/转换");
-        return;
-    }else if(idArray.length>1){
-        Ext.MessageBox.alert("提示","只能选择一个任务进行查看");
-        return;
-    }else{
-        carteId=idArray[0];
-        showWindow(grid);
-        refreshHTML();
-    }
+    //获取被选中的数据
+    type=record.get("type");
+    conHostName=record.get("hostName");
+    carteId=record.get("id");
+    showWindow(grid);
+    refreshHTML();
 }
 
 //日志信息以window形式展现
@@ -384,9 +328,7 @@ function refreshHTML(){
             var windowDom=logWindow.body.dom;
             windowDom.scrollTop=windowDom.scrollHeight- windowDom.offsetHeight;
         },
-        failure:function(){
-            Ext.MessageBox.alert("result","内部错误,暂时无法查看,请稍后尝试!")
-        },
+        failure:failureResponse,
         params:{id:carteId,type:type,hostName:conHostName}
     });
 }

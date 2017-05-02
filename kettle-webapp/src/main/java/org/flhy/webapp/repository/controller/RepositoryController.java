@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.spi.TimeZoneNameProvider;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -64,6 +65,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.sxdata.jingwei.entity.TaskGroupAttributeEntity;
+import org.sxdata.jingwei.service.JobService;
 import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 import org.sxdata.jingwei.util.TaskUtil.CarteClient;
 import org.w3c.dom.Document;
@@ -75,7 +77,6 @@ public class RepositoryController {
 
 	/**
 	 * 该方法返回所有的资源库信息
-	 * 
 	 * @throws KettleException 
 	 * @throws IOException 
 	 */
@@ -133,6 +134,28 @@ public class RepositoryController {
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "/createTrans")
 	protected void createTrans(@RequestParam String dir, @RequestParam String transName,@RequestParam String[] taskGroupArray) throws KettleException, IOException {
+		Repository repository = App.getInstance().getRepository();
+		RepositoryDirectoryInterface directory = null;
+		TransMeta transMeta = null;
+		SqlSession sqlSession=null;
+		try {
+			directory = repository.findDirectory(dir);
+			if(directory == null)
+				directory = repository.getUserHomeDirectory();
+
+			if(repository.exists(transName, directory, RepositoryObjectType.TRANSFORMATION)) {
+				JsonUtils.fail("该转换已经存在，请重新输入！");
+				return;
+			}
+			transMeta = new TransMeta();
+			transMeta.setRepository(App.getInstance().getRepository());
+			transMeta.setMetaStore(App.getInstance().getMetaStore());
+			transMeta.setName(transName);
+			transMeta.setRepositoryDirectory(directory);
+			repository.save(transMeta, "add: " + new Date(), null);
+			//添加任务组记录
+			if(null!=taskGroupArray && taskGroupArray.length>0){
+				sqlSession=CarteClient.sessionFactory.openSession();
 		Repository 	repository = App.getInstance().getRepository();
 		RepositoryDirectoryInterface directory = null;
 		TransMeta transMeta = new TransMeta();
@@ -180,27 +203,47 @@ public class RepositoryController {
 				}
 				sqlSession.commit();
 				sqlSession.close();
-			}catch(Exception e){
-				e.printStackTrace();
-				sqlSession.rollback();
-				//删除转换
-				ObjectId id = repository.getTransformationID(transName, directory);
-				repository.deleteTransformation(id);
-				JsonUtils.fail("分配任务组失败!");
 			}
+			String transPath = directory.getPath();
+			if(!transPath.endsWith("/"))
+				transPath = transPath + '/';
+			transPath = transPath + transName;
+			JsonUtils.success(transPath);
+		} catch (Exception e) {
+			//出现异常回滚
+			e.printStackTrace();
+			sqlSession.rollback();
+			sqlSession.close();
+			//删除转换
+			ObjectId id = repository.getTransformationID(transName, directory);
+			repository.deleteTransformation(id);
+			JsonUtils.fail("创建失败!");
 		}
-		String transPath = directory.getPath();
-		if(!transPath.endsWith("/"))
-			transPath = transPath + '/';
-		transPath = transPath + transName;
-		JsonUtils.success(transPath);
-		
 	}
 	
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "/createJob")
 	protected void createJob(@RequestParam String dir, @RequestParam String jobName,@RequestParam String[] taskGroupArray) throws KettleException, IOException {
 		Repository repository = App.getInstance().getRepository();
+		SqlSession sqlSession=null;
+		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
+		try {
+			if(directory == null)
+				directory = repository.getUserHomeDirectory();
+			if(repository.exists(jobName, directory, RepositoryObjectType.JOB)) {
+				JsonUtils.fail("该作业已经存在，请重新输入！");
+				return;
+			}
+			JobMeta jobMeta = new JobMeta();
+			jobMeta.setRepository(App.getInstance().getRepository());
+			jobMeta.setMetaStore(App.getInstance().getMetaStore());
+			jobMeta.setName(jobName);
+			jobMeta.setRepositoryDirectory(directory);
+			repository.save(jobMeta, "add: " + new Date(), null);
+			//添加任务组记录
+			if(null!=taskGroupArray && taskGroupArray.length>0){
+				sqlSession=CarteClient.sessionFactory.openSession();
+
 		RepositoryDirectoryInterface directory = null;
 		JobMeta jobMeta = new JobMeta();
 		try{
@@ -250,22 +293,22 @@ public class RepositoryController {
 				}
 				sqlSession.commit();
 				sqlSession.close();
-			}catch(Exception e){
-				e.printStackTrace();
-				sqlSession.rollback();
-				//删除作业
-				ObjectId id = repository.getJobId(jobName, directory);
-				repository.deleteJob(id);
-				JsonUtils.fail("作业创建失败!");
 			}
+			String jobPath = directory.getPath();
+			if(!jobPath.endsWith("/"))
+				jobPath = jobPath + '/';
+			jobPath = jobPath + jobName;
+
+			JsonUtils.success(jobPath);
+		}catch (Exception e){
+			e.printStackTrace();
+			sqlSession.rollback();
+			sqlSession.close();
+			//删除作业
+			ObjectId id = repository.getJobId(jobName, directory);
+			repository.deleteJob(id);
+			JsonUtils.fail("作业创建失败!");
 		}
-		
-		String jobPath = directory.getPath();
-		if(!jobPath.endsWith("/"))
-			jobPath = jobPath + '/';
-		jobPath = jobPath + jobName;
-		
-		JsonUtils.success(jobPath);
 	}
 	
 	@ResponseBody
@@ -315,7 +358,7 @@ public class RepositoryController {
 		
 		PluginRegistry registry = PluginRegistry.getInstance();
 	    Class<? extends PluginTypeInterface> pluginType = RepositoryPluginType.class;
-	    List<PluginInterface> plugins = registry.getPlugins( pluginType );
+	    List<PluginInterface> plugins = registry.getPlugins(pluginType);
 
 	    for ( int i = 0; i < plugins.size(); i++ ) {
 	      PluginInterface plugin = plugins.get( i );
@@ -338,7 +381,7 @@ public class RepositoryController {
 	 */
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.GET, value = "/{reposityId}")
-	protected void reposity(@PathVariable String reposityId) throws KettleException, IOException {
+	protected void reposity(@PathVariable String reposityId) throws KettleException,IOException {
 		RepositoriesMeta input = new RepositoriesMeta();
 		if (input.readData()) {
 			RepositoryMeta repositoryMeta = input.searchRepository( reposityId );
@@ -357,6 +400,26 @@ public class RepositoryController {
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "/open")
 	protected void open(@RequestParam String path, @RequestParam String type) throws Exception {
+		String dir = path.substring(0, path.lastIndexOf("/"));
+		String name = path.substring(path.lastIndexOf("/") + 1);
+		Repository repository = App.getInstance().getRepository();
+		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
+		if(directory == null)
+			directory = repository.getUserHomeDirectory();
+		if(RepositoryObjectType.TRANSFORMATION.getTypeDescription().equals(type)) {
+			TransMeta transMeta = repository.loadTransformation(name, directory, null, true, null);
+			transMeta.setRepositoryDirectory(directory);
+	    	
+			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+			String graphXml = codec.encode(transMeta);
+			JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
+		} else if(RepositoryObjectType.JOB.getTypeDescription().equals(type)) {
+			JobMeta jobMeta = repository.loadJob(name, directory, null, null);
+	    	jobMeta.setRepositoryDirectory(directory);
+	    	
+	    	GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+			String graphXml = codec.encode(jobMeta);
+			JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
 		try {
 			String dir = path.substring(0, path.lastIndexOf("/"));
 			String name = path.substring(path.lastIndexOf("/") + 1);
@@ -723,10 +786,7 @@ public class RepositoryController {
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "/login")
 	protected void login(@RequestParam String loginInfo, Model model) throws IOException, KettlePluginException, KettleSecurityException, KettleException {
-		
-		
 		JSONObject jsonObject = JSONObject.fromObject(loginInfo);
-		
 		RepositoriesMeta input = new RepositoriesMeta();
 		if (input.readData()) {
 			RepositoryMeta repositoryMeta = input.searchRepository( jsonObject.optString("reposityId") );
@@ -783,8 +843,6 @@ public class RepositoryController {
 			jsonArray.add(jsonObject);
 		}
 		info.put("slaves", jsonArray);
-		
-		
 		JsonUtils.response(info);
 	}
 	

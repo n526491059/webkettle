@@ -761,7 +761,7 @@ public class SlaveServiceImpl implements SlaveService {
     }
 
     @Override
-    public String addSlave(HttpServletRequest request) {
+    public String addSlave(HttpServletRequest request) throws Exception{
         String result="Y";
         //解析json参数
         String slaveServer=request.getParameter("slaveServer");

@@ -24,7 +24,8 @@
               d.USER_GROUP_NAME as belongToUserGroup,
               d.SLAVE_PERMISSION_TYPE as slavePower,
               d.TASK_PERMISSION_TYPE as taskGroupPower,
-               d.USER_TYPE as userType
+              d.USER_TYPE as userType,
+              d.CREATE_DATE as createDate
         from r_user r INNER JOIN d_user_group_member_attribute d
         ON r.LOGIN=d.USER_NAME
         WHERE 1=1
@@ -32,6 +33,12 @@
             AND r.LOGIN IN
               (select a.USER_NAME from
               d_user_group_member_attribute a where a.USER_GROUP_NAME=#{2})
+        </if>
+        <if test='param4!=null and param4!=""'>
+            AND r.LOGIN LIKE concat('%',#{3},'%')
+        </if>
+        <if test='param5!=null'>
+            AND d.USER_TYPE=#{4}
         </if>
          limit #{0},#{1}
     </select>
@@ -47,7 +54,8 @@
         d.USER_GROUP_NAME as belongToUserGroup,
         d.SLAVE_PERMISSION_TYPE as slavePower,
         d.TASK_PERMISSION_TYPE as taskGroupPower,
-        d.USER_TYPE as userType
+        d.USER_TYPE as userType,
+        d.CREATE_DATE as createDate
         from r_user r INNER JOIN d_user_group_member_attribute d
         ON r.LOGIN=d.USER_NAME
         WHERE 1=1

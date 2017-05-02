@@ -10,13 +10,10 @@ function checkUserSessionStatus(conn,response,options){
 		window.location.href="/login.jsp";
 	}
 }
-
-
 //退出登录
 function loginOut(){
 	window.location.href = 'user/loginOut.do';
 }
-
 //修改当前用户密码
 function updateThisPwd(){
 	Ext.Ajax.request({
@@ -126,6 +123,7 @@ function updateThisPwd(){
 }
 
 Ext.onReady(function() {
+
 	Ext.QuickTips.init();
 	Ext.MessageBox.buttonText.yes = '确定';
 	Ext.MessageBox.buttonText.ok = '好的';
@@ -141,9 +139,16 @@ Ext.onReady(function() {
 //		});
 
 		var username=document.getElementById("loginUsername").value;
-		var loginInfo="<div style='margin-left: 70%;margin-top: 1%'>欢迎您：<h3 style='display: inline-block;'>"
-			+username+"</h3>&nbsp;&nbsp;<input type='button' value='登 出' onclick='loginOut();'>&nbsp;&nbsp;" +
-			"<input type='button' value='修改密码' onclick='updateThisPwd();' id='updateThisPw'></div>";
+		var loginOutButton=new Ext.Button({
+			iconCls:"logoutCls",
+			tooltip: '登出',
+			handler:function(){
+				loginOut();
+			}
+		})
+		var loginInfo="<div style='margin-left:81%;margin-top: 1%'><h3 style='display: inline-block;'>欢迎您：</h3><h1 style='display: inline-block;'>"
+			+username+"</h1>&nbsp;&nbsp;<img src='../ui/images/i_out24.png' onclick='loginOut()' class='imgLoginInfoCls' title='登出'/>&nbsp;&nbsp;" +
+			"<img src='../ui/images/i_updateTPWD24.png' onclick='updateThisPwd()' class='imgLoginInfoCls' title='修改密码' id='updateThisPw'/></div>";
 		var navigationPanel = new Ext.Panel({
 			id: 'navigationPanel',
 			region: 'north',
@@ -152,7 +157,7 @@ Ext.onReady(function() {
 			html:loginInfo,
 			margin: '0,0,0,0',
 			bodyStyle: {
-				background: '#3992D4'
+				background: 'cornflowerblue'
 			}
 		});
 		var footPanel = new Ext.Panel({
@@ -162,7 +167,7 @@ Ext.onReady(function() {
 			border: false,
 			margin: '0,0,0,0',
 			bodyStyle: {
-				background: '#3992D4'
+				background: 'cornflowerblue'
 			}
 		});
 
@@ -277,7 +282,7 @@ function syncCall(cfg) {
             	conn = new ActiveXObject(activeX[i]);
                 break;
             } catch(e) {
-            	
+				
             }
         }
     }

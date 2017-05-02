@@ -16,6 +16,7 @@ import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -33,24 +34,25 @@ public class TaskGroupServiceImpl implements TaskGroupService{
     protected UserGroupDao userGroupDao;
 
     @Override
-    public String getAllTaskGroupByLogin(int start, int limit,String userGroupName) throws Exception {
-        List<TaskGroupEntity> taskGroups=taskGroupDao.getAllTaskGroup(start, limit,userGroupName);
+    public String getAllTaskGroupByLogin(int start, int limit,String userGroupName,String taskGroupName,String createDate) throws Exception {
+        List<TaskGroupEntity> taskGroups=taskGroupDao.getAllTaskGroup(start, limit,userGroupName,taskGroupName,createDate);
         Integer totalCount=taskGroupDao.getTotalCountTaskGroup(userGroupName);
         PageforBean pageBean=new PageforBean();
         pageBean.setTotalProperty(totalCount);
         pageBean.setRoot(taskGroups);
-        return JSONObject.fromObject(pageBean).toString();
+        return JSONObject.fromObject(pageBean,StringDateUtil.configJson("yyyy-MM-dd HH:mm:ss")).toString();
     }
 
     @Override
     //添加任务组以及任务组下的明细
-    public void addTaskGroup(HttpServletRequest request){
+    public void addTaskGroup(HttpServletRequest request) throws Exception{
         //任务组对象
         String taskGroupDesc=request.getParameter("taskGroupDesc");
         String taskGroupName=request.getParameter("taskGroupName").trim();
         TaskGroupEntity taskGroup=new TaskGroupEntity();
         taskGroup.setTaskGroupName(taskGroupName);
         taskGroup.setTaskGroupDesc(taskGroupDesc);
+        taskGroup.setCreateDate(new Date());
         taskGroupDao.addTaskGroup(taskGroup);
         //任务组成员对象 任务组下的任务
         String taskArray=request.getParameter("taskArray");
@@ -137,7 +139,7 @@ public class TaskGroupServiceImpl implements TaskGroupService{
 
     @Override
     @Transactional
-    public void updateTaskGroup(TaskGroupEntity taskGroup){
+    public void updateTaskGroup(TaskGroupEntity taskGroup) throws Exception{
         TaskGroupEntity item=taskGroupDao.getTaskGroupById(taskGroup.getTaskGroupId());
         taskGroupDao.updateTaskGroup(taskGroup);
         if(!taskGroup.getTaskGroupName().equals(item.getTaskGroupName())){
@@ -166,7 +168,7 @@ public class TaskGroupServiceImpl implements TaskGroupService{
 
     @Override
     //判断任务组是否包含某个任务 判断结果会存放在任务组的属性中
-    public List<TaskGroupEntity> isContainsTask(String taskName, String type,String userGroupName) {
+    public List<TaskGroupEntity> isContainsTask(String taskName, String type,String userGroupName) throws Exception{
         //获取当前用户下的所有任务组
         List<TaskGroupEntity> items=taskGroupDao.getTaskGroupByThisUser(userGroupName);
         for(TaskGroupEntity item:items){
@@ -182,7 +184,7 @@ public class TaskGroupServiceImpl implements TaskGroupService{
 
     @Override
     //分配任务组
-    public void assignedTaskGroup(List<TaskGroupAttributeEntity> items,String taskName,String type){
+    public void assignedTaskGroup(List<TaskGroupAttributeEntity> items,String taskName,String type) throws Exception{
         taskGroupDao.deleteTaskGroupAttributesByTaskName(taskName,type);
         if(items.size()>0){
             for(TaskGroupAttributeEntity item:items){
@@ -192,13 +194,13 @@ public class TaskGroupServiceImpl implements TaskGroupService{
     }
 
     @Override
-    public String getAllTaskGroupNoPage() {
+    public String getAllTaskGroupNoPage() throws Exception{
         String result=JSONArray.fromObject(taskGroupDao.getAllTaskGroupNoLimit()).toString();
         return result;
     }
 
     @Override
-    public List<TaskGroupEntity> AllTaskGroupBeforeAdd(String userGroupName) {
+    public List<TaskGroupEntity> AllTaskGroupBeforeAdd(String userGroupName) throws Exception{
         return taskGroupDao.getTaskGroupByThisUser(userGroupName);
     }
 }

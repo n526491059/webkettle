@@ -34,7 +34,7 @@ public class SlaveController {
     //获得节点信息 以panel形式显示
     @RequestMapping(value="/getSlave")
     @ResponseBody
-    protected void getJobs(HttpServletResponse response,HttpServletRequest request) {
+    protected void getJobs(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
             String userGroupName="";
@@ -48,14 +48,15 @@ public class SlaveController {
             out.flush();
             out.close();
         }catch(Exception e){
-
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //获取节点信息 以下拉列表形式展现
     @RequestMapping(value="/getSlaveSelect")
     @ResponseBody
-    protected void getSlaveSelect(HttpServletResponse response,HttpServletRequest request){
+    protected void getSlaveSelect(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             StringBuffer sbf=new StringBuffer("[");
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
@@ -83,14 +84,15 @@ public class SlaveController {
             out.flush();
             out.close();
         }catch(Exception e){
-
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //所有节点的指标信息
     @RequestMapping(value="/allSlaveQuato")
     @ResponseBody
-    protected  void allSlaveQuato(HttpServletResponse response,HttpServletRequest request){
+    protected  void allSlaveQuato(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             //获取当前用户所在的用户组
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
@@ -105,6 +107,7 @@ public class SlaveController {
             out.close();
         }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
@@ -112,7 +115,7 @@ public class SlaveController {
     //节点管理列表
     @RequestMapping(value="/slaveManager")
     @ResponseBody
-    protected  void slaveManager(HttpServletResponse response,HttpServletRequest request){
+    protected  void slaveManager(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             Integer start=Integer.valueOf(request.getParameter("start"));
             Integer limit=Integer.valueOf(request.getParameter("limit"));
@@ -129,13 +132,14 @@ public class SlaveController {
             out.close();
         }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //删除节点
     @RequestMapping(value="/deleteSlave")
     @ResponseBody
-    protected  void deleteSlave(HttpServletResponse response,HttpServletRequest request){
+    protected  void deleteSlave(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             String[] items=request.getParameterValues("items");
             slaveService.deleteSlave(items);
@@ -145,13 +149,14 @@ public class SlaveController {
             out.close();
         }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //节点体检
     @RequestMapping(value="/slaveTest")
     @ResponseBody
-    protected  void slaveTest(HttpServletResponse response,HttpServletRequest request){
+    protected  void slaveTest(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             String hostName=request.getParameter("hostName");
             String result=slaveService.slaveTest(hostName);
@@ -161,13 +166,14 @@ public class SlaveController {
             out.close();
         }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //单独对节点的某项指标进行监
     @RequestMapping(value="/slaveQuatoByCondition")
     @ResponseBody
-    protected  void slaveQuatoByCondition(HttpServletResponse response,HttpServletRequest request){
+    protected  void slaveQuatoByCondition(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             String chooseDate=request.getParameter("chooseDate");
             String quatoType=request.getParameter("quatoTypeValue");
@@ -189,13 +195,14 @@ public class SlaveController {
             out.close();
         }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //新增节点
     @RequestMapping(value="/addSlave")
     @ResponseBody
-    protected  void addSlave(HttpServletResponse response,HttpServletRequest request){
+    protected  void addSlave(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             String result=slaveService.addSlave(request);
             PrintWriter out=response.getWriter();
@@ -204,6 +211,7 @@ public class SlaveController {
             out.close();
         }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 }

@@ -64,7 +64,7 @@ public class TaskController {
     //暂停/开始转换
     @RequestMapping(value="/pauseOrStart")
     @ResponseBody
-    protected void pauseOrStart(HttpServletResponse response,HttpServletRequest request){
+    protected void pauseOrStart(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             String[] idArray=request.getParameterValues("idArray");
             String[] hostArray=request.getParameterValues("hostArray");
@@ -75,15 +75,15 @@ public class TaskController {
             out.flush();
             out.close();
         }catch (Exception e){
-            String errorMessage=e.getMessage();
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //停止转换/作业
     @RequestMapping(value="/stopTransOrJob")
     @ResponseBody
-    protected void stopTransOrJob(HttpServletResponse response,HttpServletRequest request){
+    protected void stopTransOrJob(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             String[] typeArray=request.getParameterValues("typeArray");
             String[] idArray=request.getParameterValues("idArray");
@@ -101,15 +101,15 @@ public class TaskController {
             out.flush();
             out.close();
         }catch (Exception e){
-            String errorMessage=e.getMessage();
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //根据作业/转换名获取作业/转换
     @RequestMapping(value="/getJobOrTransByName")
     @ResponseBody
-    protected void getJobOrTransByName(HttpServletResponse response,HttpServletRequest request){
+    protected void getJobOrTransByName(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             String type=request.getParameter("type");
             String taskName=request.getParameter("taskName");
@@ -128,13 +128,14 @@ public class TaskController {
             out.close();
         }catch (Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //获取转换的详情列表
     @RequestMapping(value="/getTransDetail")
     @ResponseBody
-    protected void getTransDetail(HttpServletResponse response,HttpServletRequest request){
+    protected void getTransDetail(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             String carteId=request.getParameter("carteId");
             String hostName=request.getParameter("hostName");
@@ -145,15 +146,15 @@ public class TaskController {
             out.flush();
             out.close();
         }catch (Exception e){
-            String errorMessage=e.getMessage();
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //获取某个任务的日志
     @RequestMapping(value="/getLog")
     @ResponseBody
-    protected void getLog(HttpServletResponse response,HttpServletRequest request){
+    protected void getLog(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             String result="";
             String id=request.getParameter("id");
@@ -170,15 +171,15 @@ public class TaskController {
             out.flush();
             out.close();
         }catch (Exception e){
-            String errorMessage=e.getMessage();
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //获取所有正在运行中的任务(transformation job)
     @RequestMapping(value="/getRunningTask")
     @ResponseBody
-    protected void getRunningTask(HttpServletResponse response,HttpServletRequest request){
+    protected void getRunningTask(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
 
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
@@ -197,15 +198,15 @@ public class TaskController {
             out.flush();
             out.close();
         }catch (Exception e){
-            String errorMessage=e.getMessage();
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //查询作业;包括条件查询
     @RequestMapping(value="/getJobs.do")
     @ResponseBody
-    protected void getJobs(HttpServletResponse response,HttpServletRequest request){
+    protected void getJobs(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             //获取前台传递的分页参数
             int start=Integer.parseInt(request.getParameter("start"));
@@ -227,15 +228,15 @@ public class TaskController {
             out.flush();
             out.close();
         }catch (Exception e){
-            String errorMessage=e.getMessage();
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //删除作业OR转换
     @RequestMapping(value="/delete")
     @ResponseBody
-    protected void deleteJobs(HttpServletResponse response,HttpServletRequest request) {
+    protected void deleteJobs(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             String path=request.getParameter("path");
             String flag=request.getParameter("flag");
@@ -246,8 +247,8 @@ public class TaskController {
                 jobService.deleteJobs(path,flag);
             }
         }catch (Exception e){
-            String errorMessage=e.getMessage();
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
@@ -255,7 +256,7 @@ public class TaskController {
     //查询转换;包括条件查询
     @ResponseBody
     @RequestMapping(method=RequestMethod.POST, value="/getTrans")
-    protected void getTrans(HttpServletResponse response,HttpServletRequest request) {
+    protected void getTrans(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             //获取前台传递的分页参数
             int start=Integer.parseInt(request.getParameter("start"));
@@ -278,15 +279,15 @@ public class TaskController {
             out.flush();
             out.close();
         }catch (Exception e){
-            String errorMessage=e.getMessage();
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     //在节点上执行转换OR作业
     @ResponseBody
     @RequestMapping(value="/execute")
-    protected void execute(HttpServletResponse response,HttpServletRequest request) {
+    protected void execute(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
             String path=request.getParameter("path");
             Integer slaveId=Integer.valueOf(request.getParameter("slaveId"));
@@ -303,8 +304,8 @@ public class TaskController {
             out.flush();
             out.close();
         }catch (Exception e){
-            String errorMessage=e.getMessage();
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
@@ -369,14 +370,16 @@ public class TaskController {
             }else{
                 json="{'success':true,'isSuccess':false}";
             }
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write(json);
+            out.flush();
+            out.close();
         }catch(Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
-        response.setContentType("text/html;charset=utf-8");
-        PrintWriter out=response.getWriter();
-        out.write(json);
-        out.flush();
-        out.close();
+
     }
 
     //定时执行作业
@@ -387,6 +390,7 @@ public class TaskController {
             jobService.addTimeExecuteJob(graphXml,executionConfiguration,request);
         }catch(Exception e){
             e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
