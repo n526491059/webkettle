@@ -238,7 +238,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 								{id:"slaveMonitoring",text:"<font size = '2px'>节点监控</font>",cls:"navl",leaf:true,icon:'ui/images/i_slaveCon.png'},
 							]
 						},{
-							text : "<font size = '3px'>调度</font>",icon:'ui/images/i_scheduler.png', cls:'nav-node',
+							text : "<font size = '3px'>定时调度</font>",icon:'ui/images/i_scheduler.png', cls:'nav-node',
 							children:[
 								{id:"schedulerMonitor",text:"<font size = '2px'>定时调度管理</font>",cls:"navl",leaf:true,icon:'ui/images/i_timerManager_24.png'},
 							]
