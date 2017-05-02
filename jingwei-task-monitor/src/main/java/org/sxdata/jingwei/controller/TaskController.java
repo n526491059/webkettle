@@ -12,10 +12,13 @@ import org.flhy.ext.trans.TransExecutionConfigurationCodec;
 import org.flhy.ext.utils.JsonUtils;
 import org.flhy.ext.utils.RepositoryUtils;
 import org.flhy.ext.utils.StringEscapeHelper;
+import org.pentaho.di.core.exception.KettleDatabaseException;
+import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.job.JobExecutionConfiguration;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
+import org.pentaho.di.repository.RepositoryMeta;
 import org.pentaho.di.repository.RepositoryObjectType;
 import org.pentaho.di.trans.TransExecutionConfiguration;
 import org.pentaho.di.trans.TransMeta;
@@ -392,21 +395,32 @@ public class TaskController {
     @RequestMapping(method=RequestMethod.POST, value="/detail")
     protected void detail(@RequestParam String taskName,@RequestParam String type) throws Exception {
         org.flhy.ext.utils.JSONObject jsonObject = new org.flhy.ext.utils.JSONObject();
-        if(type.equals("trans")) {
-            TransMeta transMeta = RepositoryUtils.loadTransByPath(taskName);
-            jsonObject.put("GraphType", "TransGraph");
-            GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
-            String graphXml = codec.encode(transMeta);
-            jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
-        } else if(type.equals("job")) {
-            JobMeta jobMeta = RepositoryUtils.loadJobbyPath(taskName);
-            jsonObject.put("GraphType", "JobGraph");
+        try{
+            if(type.equals("trans")) {
+                TransMeta transMeta = RepositoryUtils.loadTransByPath(taskName);
+                jsonObject.put("GraphType", "TransGraph");
+                GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+                String graphXml = codec.encode(transMeta);
+                jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
+            } else if(type.equals("job")) {
+                JobMeta jobMeta = RepositoryUtils.loadJobbyPath(taskName);
+                jsonObject.put("GraphType", "JobGraph");
 
-            GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
-            String graphXml = codec.encode(jobMeta);
+                GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+                String graphXml = codec.encode(jobMeta);
 
-            jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
+                jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
+            }
+            JsonUtils.response(jsonObject);
+        }catch (Exception e){
+            //数据库连接出现问题后kettle内部api资源库连接失效需要捕获异常后重新连接
+           e.printStackTrace();
+            if(e instanceof KettleException){
+                Repository appRepo = App.getInstance().getRepository();
+                appRepo.disconnect();
+                appRepo.init( App.getInstance().meta);
+                appRepo.connect("admin", "admin");
+            }
         }
-        JsonUtils.response(jsonObject);
     }
 }

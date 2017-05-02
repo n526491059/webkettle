@@ -133,24 +133,34 @@ public class RepositoryController {
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "/createTrans")
 	protected void createTrans(@RequestParam String dir, @RequestParam String transName,@RequestParam String[] taskGroupArray) throws KettleException, IOException {
-
-		Repository repository = App.getInstance().getRepository();
-		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
-		if(directory == null)
-			directory = repository.getUserHomeDirectory();
-		
-		if(repository.exists(transName, directory, RepositoryObjectType.TRANSFORMATION)) {
-			JsonUtils.fail("该转换已经存在，请重新输入！");
-			return;
-		}
-		
+		Repository 	repository = App.getInstance().getRepository();
+		RepositoryDirectoryInterface directory = null;
 		TransMeta transMeta = new TransMeta();
-		transMeta.setRepository(App.getInstance().getRepository());
-		transMeta.setMetaStore(App.getInstance().getMetaStore());
-		transMeta.setName(transName);
-		transMeta.setRepositoryDirectory(directory);
-		
-		repository.save(transMeta, "add: " + new Date(), null);
+		try{
+			directory = repository.findDirectory(dir);
+			if(directory == null) {
+				directory = repository.getUserHomeDirectory();
+			}
+
+			if(repository.exists(transName, directory, RepositoryObjectType.TRANSFORMATION)) {
+				JsonUtils.fail("该转换已经存在，请重新输入！");
+				return;
+			}
+			transMeta.setRepository(App.getInstance().getRepository());
+			transMeta.setMetaStore(App.getInstance().getMetaStore());
+			transMeta.setName(transName);
+			transMeta.setRepositoryDirectory(directory);
+
+			repository.save(transMeta, "add: " + new Date(), null);
+		}catch (Exception e){
+			//数据库连接出现问题后kettle内部api资源库连接失效需要捕获异常后重新连接
+			e.printStackTrace();
+			if(e instanceof KettleException){
+				repository.disconnect();
+				repository.init( App.getInstance().meta);
+				repository.connect("admin", "admin");
+			}
+		}
 		//添加任务组记录
 		if(null!=taskGroupArray && taskGroupArray.length>0){
 			SqlSession sqlSession=CarteClient.sessionFactory.openSession();
@@ -191,22 +201,36 @@ public class RepositoryController {
 	@RequestMapping(method = RequestMethod.POST, value = "/createJob")
 	protected void createJob(@RequestParam String dir, @RequestParam String jobName,@RequestParam String[] taskGroupArray) throws KettleException, IOException {
 		Repository repository = App.getInstance().getRepository();
-		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
-		if(directory == null)
-			directory = repository.getUserHomeDirectory();
-		
-		if(repository.exists(jobName, directory, RepositoryObjectType.JOB)) {
-			JsonUtils.fail("该作业已经存在，请重新输入！");
-			return;
-		}
-		
+		RepositoryDirectoryInterface directory = null;
 		JobMeta jobMeta = new JobMeta();
-		jobMeta.setRepository(App.getInstance().getRepository());
-		jobMeta.setMetaStore(App.getInstance().getMetaStore());
-		jobMeta.setName(jobName);
-		jobMeta.setRepositoryDirectory(directory);
-		
-		repository.save(jobMeta, "add: " + new Date(), null);
+		try{
+			directory = repository.findDirectory(dir);
+			if(directory == null) {
+				directory = repository.getUserHomeDirectory();
+			}
+
+			if(repository.exists(jobName, directory, RepositoryObjectType.JOB)) {
+				JsonUtils.fail("该作业已经存在，请重新输入！");
+				return;
+			}
+
+			jobMeta.setRepository(App.getInstance().getRepository());
+			jobMeta.setMetaStore(App.getInstance().getMetaStore());
+			jobMeta.setName(jobName);
+			jobMeta.setRepositoryDirectory(directory);
+
+			repository.save(jobMeta, "add: " + new Date(), null);
+		}catch (Exception e){
+			//数据库连接出现问题后kettle内部api资源库连接失效需要捕获异常后重新连接
+			e.printStackTrace();
+			if(e instanceof KettleException){
+				repository.disconnect();
+				repository.init( App.getInstance().meta);
+				repository.connect("admin", "admin");
+			}
+		}
+
+
 		//添加任务组记录
 		if(null!=taskGroupArray && taskGroupArray.length>0){
 			SqlSession sqlSession=CarteClient.sessionFactory.openSession();
@@ -333,27 +357,39 @@ public class RepositoryController {
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "/open")
 	protected void open(@RequestParam String path, @RequestParam String type) throws Exception {
-		String dir = path.substring(0, path.lastIndexOf("/"));
-		String name = path.substring(path.lastIndexOf("/") + 1);
-		Repository repository = App.getInstance().getRepository();
-		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
-		if(directory == null)
-			directory = repository.getUserHomeDirectory();
-		
-		if(RepositoryObjectType.TRANSFORMATION.getTypeDescription().equals(type)) {
-			TransMeta transMeta = repository.loadTransformation(name, directory, null, true, null);
-			transMeta.setRepositoryDirectory(directory);
-	    	
-			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
-			String graphXml = codec.encode(transMeta);
-			JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
-		} else if(RepositoryObjectType.JOB.getTypeDescription().equals(type)) {
-			JobMeta jobMeta = repository.loadJob(name, directory, null, null);
-	    	jobMeta.setRepositoryDirectory(directory);
-	    	
-	    	GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
-			String graphXml = codec.encode(jobMeta);
-			JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
+		try {
+			String dir = path.substring(0, path.lastIndexOf("/"));
+			String name = path.substring(path.lastIndexOf("/") + 1);
+			Repository repository = App.getInstance().getRepository();
+			RepositoryDirectoryInterface directory = repository.findDirectory(dir);
+			if (directory == null)
+				directory = repository.getUserHomeDirectory();
+
+			if (RepositoryObjectType.TRANSFORMATION.getTypeDescription().equals(type)) {
+				TransMeta transMeta = repository.loadTransformation(name, directory, null, true, null);
+				transMeta.setRepositoryDirectory(directory);
+
+				GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+				String graphXml = codec.encode(transMeta);
+				JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
+			} else if (RepositoryObjectType.JOB.getTypeDescription().equals(type)) {
+				JobMeta jobMeta = repository.loadJob(name, directory, null, null);
+				jobMeta.setRepositoryDirectory(directory);
+
+				GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+				String graphXml = codec.encode(jobMeta);
+				JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+			//数据库连接出现问题后kettle内部api资源库连接失效需要捕获异常后重新连接
+			e.printStackTrace();
+			if(e instanceof KettleException){
+				Repository appRepo = App.getInstance().getRepository();
+				appRepo.disconnect();
+				appRepo.init( App.getInstance().meta);
+				appRepo.connect("admin", "admin");
+			}
 		}
 	}
 	

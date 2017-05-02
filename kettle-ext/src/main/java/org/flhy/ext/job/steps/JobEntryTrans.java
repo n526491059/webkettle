@@ -35,7 +35,6 @@ public class JobEntryTrans extends AbstractJobEntry {
 	@Override
 	public void decode(JobEntryInterface jobEntry, mxCell cell, List<DatabaseMeta> databases, IMetaStore metaStore) throws Exception {
 		org.pentaho.di.job.entries.trans.JobEntryTrans jobEntryTrans = (org.pentaho.di.job.entries.trans.JobEntryTrans) jobEntry;
-		
 		String specification_method = cell.getAttribute("specification_method");
 		jobEntryTrans.setSpecificationMethod(ObjectLocationSpecificationMethod.getSpecificationMethodByCode(specification_method));
 		

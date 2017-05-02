@@ -28,13 +28,13 @@ import org.springframework.context.ApplicationContextAware;
 public class App implements ApplicationContextAware {
 
 	private static App app;
+	public static KettleDatabaseRepositoryMeta meta;
+
 	private LogChannelInterface log;
-	
 	private TransExecutionConfiguration transExecutionConfiguration;
 	private TransExecutionConfiguration transPreviewExecutionConfiguration;
 	private TransExecutionConfiguration transDebugExecutionConfiguration;
 	private JobExecutionConfiguration jobExecutionConfiguration;
-	
 	public PropsUI props;
 
 	private App() {
@@ -134,7 +134,7 @@ public class App implements ApplicationContextAware {
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext context) throws BeansException {
+	public void  setApplicationContext(ApplicationContext context) throws BeansException {
 		KettleDatabaseRepository repository = new KettleDatabaseRepository();
 		try {
 			BasicDataSource dataSource = (BasicDataSource) context.getBean(DataSource.class);
@@ -165,8 +165,8 @@ public class App implements ApplicationContextAware {
 
 			dbMeta.addExtraOption(dbMeta.getPluginId(), "characterEncoding", "gbk");
 			dbMeta.addExtraOption(dbMeta.getPluginId(), "useUnicode", "true");
-			
-			KettleDatabaseRepositoryMeta meta = new KettleDatabaseRepositoryMeta();
+			dbMeta.addExtraOption(dbMeta.getPluginId(), "autoReconnect", "true");
+			meta = new KettleDatabaseRepositoryMeta();
 			meta.setName("defaultRepository");
 			meta.setId("defaultRepository");
 			meta.setConnection(dbMeta);
@@ -180,7 +180,7 @@ public class App implements ApplicationContextAware {
 		}
 		
 	}
-	
+
 //	public JSONArray encodeVariables() {
 //		Object[] data = variables.getData();
 //		String[] fields = variables.getRowMeta().getFieldNames();
