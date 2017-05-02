@@ -95,7 +95,7 @@ public class RepositoryController {
 	
 	/**
 	 * 根据databaseName加载该数据库的所有配置信息
-	 * 
+	 *
 	 * @param name - 数据库标识
 	 * @throws Exception
 	 */
@@ -651,7 +651,6 @@ public class RepositoryController {
 				input.writeData();
 			}
 		}
-		
 		JsonUtils.success("操作成功！");
 	}
 	
