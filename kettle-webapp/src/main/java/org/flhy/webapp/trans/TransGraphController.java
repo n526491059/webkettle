@@ -108,39 +108,32 @@ public class TransGraphController {
 	@RequestMapping(method=RequestMethod.POST, value="/save")
 	protected void save(@RequestParam String graphXml) throws Exception {
 		Repository repository=null;
-		try {
-			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
-			AbstractMeta transMeta = codec.decode(StringEscapeHelper.decode(graphXml));
-			 repository= App.getInstance().getRepository();
-			ObjectId existingId = repository.getTransformationID( transMeta.getName(), transMeta.getRepositoryDirectory() );
-			if(transMeta.getCreatedDate() == null)
-                transMeta.setCreatedDate(new Date());
-			if(transMeta.getObjectId() == null)
-                transMeta.setObjectId(existingId);
-			transMeta.setModifiedDate(new Date());
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+		AbstractMeta transMeta = codec.decode(StringEscapeHelper.decode(graphXml));
+		repository= App.getInstance().getRepository();
+		ObjectId existingId = repository.getTransformationID( transMeta.getName(), transMeta.getRepositoryDirectory() );
+		if(transMeta.getCreatedDate() == null)
+			transMeta.setCreatedDate(new Date());
+		if(transMeta.getObjectId() == null)
+			transMeta.setObjectId(existingId);
+		transMeta.setModifiedDate(new Date());
 
-			boolean versioningEnabled = true;
-			boolean versionCommentsEnabled = true;
-			String fullPath = transMeta.getRepositoryDirectory() + "/" + transMeta.getName() + transMeta.getRepositoryElementType().getExtension();
-			RepositorySecurityProvider repositorySecurityProvider = repository.getSecurityProvider() != null ? repository.getSecurityProvider() : null;
-			if ( repositorySecurityProvider != null ) {
-                versioningEnabled = repositorySecurityProvider.isVersioningEnabled(fullPath);
-                versionCommentsEnabled = repositorySecurityProvider.allowsVersionComments( fullPath );
-            }
-			String versionComment = null;
-			if (!versioningEnabled || !versionCommentsEnabled) {
-                versionComment = "";
-            } else {
-                versionComment = "no comment";
-            }
-			repository.save( transMeta, versionComment, null);
-			JsonUtils.success("转换保存成功！");
-		} catch (Exception e) {
-			e.printStackTrace();
-			KettleDatabaseRepository kell=(KettleDatabaseRepository)repository;
-			kell.connectionDelegate.getDatabase().getConnection().rollback();
-			throw new Exception(e.getMessage());
+		boolean versioningEnabled = true;
+		boolean versionCommentsEnabled = true;
+		String fullPath = transMeta.getRepositoryDirectory() + "/" + transMeta.getName() + transMeta.getRepositoryElementType().getExtension();
+		RepositorySecurityProvider repositorySecurityProvider = repository.getSecurityProvider() != null ? repository.getSecurityProvider() : null;
+		if ( repositorySecurityProvider != null ) {
+			versioningEnabled = repositorySecurityProvider.isVersioningEnabled(fullPath);
+			versionCommentsEnabled = repositorySecurityProvider.allowsVersionComments( fullPath );
 		}
+		String versionComment = null;
+		if (!versioningEnabled || !versionCommentsEnabled) {
+			versionComment = "";
+		} else {
+			versionComment = "no comment";
+		}
+		repository.save( transMeta, versionComment, null);
+		JsonUtils.success("转换保存成功！");
 	}
 	
 	/**
