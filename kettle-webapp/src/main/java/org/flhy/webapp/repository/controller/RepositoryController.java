@@ -77,7 +77,6 @@ public class RepositoryController {
 
 	/**
 	 * 该方法返回所有的资源库信息
-	 * 
 	 * @throws KettleException 
 	 * @throws IOException 
 	 */
@@ -335,16 +334,12 @@ public class RepositoryController {
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "/open")
 	protected void open(@RequestParam String path, @RequestParam String type) throws Exception {
-		if(!path.contains("/")){
-			throw new Exception("该作业/转换已存在！");
-		}
 		String dir = path.substring(0, path.lastIndexOf("/"));
 		String name = path.substring(path.lastIndexOf("/") + 1);
 		Repository repository = App.getInstance().getRepository();
 		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
 		if(directory == null)
 			directory = repository.getUserHomeDirectory();
-		
 		if(RepositoryObjectType.TRANSFORMATION.getTypeDescription().equals(type)) {
 			TransMeta transMeta = repository.loadTransformation(name, directory, null, true, null);
 			transMeta.setRepositoryDirectory(directory);
