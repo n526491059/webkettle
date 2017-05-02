@@ -211,7 +211,6 @@ public class RepositoryController {
 			//添加任务组记录
 			if(null!=taskGroupArray && taskGroupArray.length>0){
 				sqlSession=CarteClient.sessionFactory.openSession();
-
 				Integer taskId=Integer.valueOf(jobMeta.getObjectId().getId());
 				for(String taskGroupName:taskGroupArray){
 					if(StringDateUtil.isEmpty(taskGroupName)){

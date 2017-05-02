@@ -81,12 +81,15 @@ div.mxPopupMenu tr.mxPopupMenuItemHover {
  */
 .x-tree-node div.nav-node {
     border-bottom: 1px solid #ccc;
-    background-color: #efefef;
+    /*background-color: #efefef;*/
     line-height: 24px;
-    font-style: italic;
+   /* font-style: italic;*/
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 .x-tree-node div.nav {
     line-height: 24px;
+    padding-left: 10px;
 }
 div.nav-node .x-tree-ec-icon, div.nav .x-tree-ec-icon {
 	margin-top: 3px;
@@ -103,6 +106,15 @@ div.nav-node .x-tree-node-icon, div.nav .x-tree-node-icon {
 .x-grid-row .x-grid-cell,.nav-node {
 	border-style: none;
 }
+
+div.navl{
+    height:28px;
+    line-height: 28px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    border-bottom: 1px dashed deepskyblue;
+}
+
 
 
 /****for ext4******/
@@ -138,3 +150,5 @@ td.nav-node .x-tree-node-text,td.nav .x-tree-node-text {
 .x-border-layout-ct {
     background-color: #ffffff;
 }
+
+

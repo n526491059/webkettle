@@ -1,3 +1,9 @@
+.bgColorCls{
+	background-color:white;
+	background-image:url();
+}
+
+
 .imgCls:hover{
 	border:2px solid cadetblue;
 	margin:-2px;
@@ -7,12 +13,10 @@
 	border:none;
 }
 .imgLoginInfoCls:hover{
-	border:2px solid deepskyblue;
-	margin:-2px;
-	border-radius:5px;
+	cursor:pointer;
 }
 .imgLoginInfoCls:link{
-	border:none;
+	cursor:auto;
 }
 
 .updateUGCls{
