@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.spi.TimeZoneNameProvider;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -65,13 +64,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.sxdata.jingwei.entity.TaskGroupAttributeEntity;
-import org.sxdata.jingwei.service.JobService;
 import org.sxdata.jingwei.util.CommonUtil.StringDateUtil;
 import org.sxdata.jingwei.util.TaskUtil.CarteClient;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import static oracle.net.aso.C03.e;
 
 @Controller
 @RequestMapping(value = "/repository")
