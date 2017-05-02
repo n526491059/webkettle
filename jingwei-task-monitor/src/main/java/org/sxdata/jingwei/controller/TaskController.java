@@ -399,7 +399,7 @@ public class TaskController {
     @RequestMapping(method=RequestMethod.POST, value="/detail")
     protected void detail(@RequestParam String taskName,@RequestParam String type) throws Exception {
         org.flhy.ext.utils.JSONObject jsonObject = new org.flhy.ext.utils.JSONObject();
-        try{
+
             if(type.equals("trans")) {
                 TransMeta transMeta = RepositoryUtils.loadTransByPath(taskName);
                 jsonObject.put("GraphType", "TransGraph");
@@ -416,15 +416,6 @@ public class TaskController {
                 jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
             }
             JsonUtils.response(jsonObject);
-        }catch (Exception e){
-            //数据库连接出现问题后kettle内部api资源库连接失效需要捕获异常后重新连接
-           e.printStackTrace();
-            if(e instanceof KettleException){
-                Repository appRepo = App.getInstance().getRepository();
-                appRepo.disconnect();
-                appRepo.init( App.getInstance().meta);
-                appRepo.connect("admin", "admin");
-            }
-        }
+
     }
 }

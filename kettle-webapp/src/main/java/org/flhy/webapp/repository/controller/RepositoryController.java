@@ -71,6 +71,8 @@ import org.sxdata.jingwei.util.TaskUtil.CarteClient;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import static oracle.net.aso.C03.e;
+
 @Controller
 @RequestMapping(value = "/repository")
 public class RepositoryController {
@@ -135,11 +137,10 @@ public class RepositoryController {
 	@RequestMapping(method = RequestMethod.POST, value = "/createTrans")
 	protected void createTrans(@RequestParam String dir, @RequestParam String transName,@RequestParam String[] taskGroupArray) throws KettleException, IOException {
 		Repository repository = App.getInstance().getRepository();
-		RepositoryDirectoryInterface directory = null;
-		TransMeta transMeta = null;
 		SqlSession sqlSession=null;
+        RepositoryDirectoryInterface directory = null;
 		try {
-			directory = repository.findDirectory(dir);
+            directory = repository.findDirectory(dir);
 			if(directory == null)
 				directory = repository.getUserHomeDirectory();
 
@@ -147,71 +148,45 @@ public class RepositoryController {
 				JsonUtils.fail("该转换已经存在，请重新输入！");
 				return;
 			}
-			transMeta = new TransMeta();
+            TransMeta transMeta = new TransMeta();
 			transMeta.setRepository(App.getInstance().getRepository());
 			transMeta.setMetaStore(App.getInstance().getMetaStore());
 			transMeta.setName(transName);
 			transMeta.setRepositoryDirectory(directory);
 			repository.save(transMeta, "add: " + new Date(), null);
-			//添加任务组记录
-			if(null!=taskGroupArray && taskGroupArray.length>0){
-				sqlSession=CarteClient.sessionFactory.openSession();
-		Repository 	repository = App.getInstance().getRepository();
-		RepositoryDirectoryInterface directory = null;
-		TransMeta transMeta = new TransMeta();
-		try{
-			directory = repository.findDirectory(dir);
-			if(directory == null) {
-				directory = repository.getUserHomeDirectory();
-			}
 
-			if(repository.exists(transName, directory, RepositoryObjectType.TRANSFORMATION)) {
-				JsonUtils.fail("该转换已经存在，请重新输入！");
-				return;
-			}
-			transMeta.setRepository(App.getInstance().getRepository());
-			transMeta.setMetaStore(App.getInstance().getMetaStore());
-			transMeta.setName(transName);
-			transMeta.setRepositoryDirectory(directory);
-
-			repository.save(transMeta, "add: " + new Date(), null);
-		}catch (Exception e){
-			//数据库连接出现问题后kettle内部api资源库连接失效需要捕获异常后重新连接
+		//添加任务组记录
+            if(null!=taskGroupArray && taskGroupArray.length>0) {
+                sqlSession = CarteClient.sessionFactory.openSession();
+                Integer taskId = Integer.valueOf(transMeta.getObjectId().getId());
+                for (String taskGroupName : taskGroupArray) {
+                    if (StringDateUtil.isEmpty(taskGroupName)) {
+                        continue;
+                    }
+                    TaskGroupAttributeEntity attr = new TaskGroupAttributeEntity();
+                    attr.setTaskGroupName(taskGroupName);
+                    attr.setType("trans");
+                    attr.setTaskId(taskId);
+                    attr.setTaskPath(dir + transName);
+                    attr.setTaskName(transName);
+                    sqlSession.insert("org.sxdata.jingwei.dao.TaskGroupDao.addTaskGroupAttribute", attr);
+                }
+                sqlSession.commit();
+                sqlSession.close();
+                String transPath = directory.getPath();
+                if (!transPath.endsWith("/"))
+                    transPath = transPath + '/';
+                transPath = transPath + transName;
+                JsonUtils.success(transPath);
+            }
+		}catch (Exception e) {
 			e.printStackTrace();
 			if(e instanceof KettleException){
 				repository.disconnect();
 				repository.init( App.getInstance().meta);
 				repository.connect("admin", "admin");
 			}
-		}
-		//添加任务组记录
-		if(null!=taskGroupArray && taskGroupArray.length>0){
-			SqlSession sqlSession=CarteClient.sessionFactory.openSession();
-			try{
-				Integer taskId=Integer.valueOf(transMeta.getObjectId().getId());
-				for(String taskGroupName:taskGroupArray){
-					if(StringDateUtil.isEmpty(taskGroupName)){
-						continue;
-					}
-					TaskGroupAttributeEntity attr=new TaskGroupAttributeEntity();
-					attr.setTaskGroupName(taskGroupName);
-					attr.setType("trans");
-					attr.setTaskId(taskId);
-					attr.setTaskPath(dir + transName);
-					attr.setTaskName(transName);
-					sqlSession.insert("org.sxdata.jingwei.dao.TaskGroupDao.addTaskGroupAttribute",attr);
-				}
-				sqlSession.commit();
-				sqlSession.close();
-			}
-			String transPath = directory.getPath();
-			if(!transPath.endsWith("/"))
-				transPath = transPath + '/';
-			transPath = transPath + transName;
-			JsonUtils.success(transPath);
-		} catch (Exception e) {
 			//出现异常回滚
-			e.printStackTrace();
 			sqlSession.rollback();
 			sqlSession.close();
 			//删除转换
@@ -226,8 +201,9 @@ public class RepositoryController {
 	protected void createJob(@RequestParam String dir, @RequestParam String jobName,@RequestParam String[] taskGroupArray) throws KettleException, IOException {
 		Repository repository = App.getInstance().getRepository();
 		SqlSession sqlSession=null;
-		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
+        RepositoryDirectoryInterface directory = null;
 		try {
+			directory = repository.findDirectory(dir);
 			if(directory == null)
 				directory = repository.getUserHomeDirectory();
 			if(repository.exists(jobName, directory, RepositoryObjectType.JOB)) {
@@ -240,29 +216,31 @@ public class RepositoryController {
 			jobMeta.setName(jobName);
 			jobMeta.setRepositoryDirectory(directory);
 			repository.save(jobMeta, "add: " + new Date(), null);
-			//添加任务组记录
-			if(null!=taskGroupArray && taskGroupArray.length>0){
-				sqlSession=CarteClient.sessionFactory.openSession();
 
-		RepositoryDirectoryInterface directory = null;
-		JobMeta jobMeta = new JobMeta();
-		try{
-			directory = repository.findDirectory(dir);
-			if(directory == null) {
-				directory = repository.getUserHomeDirectory();
-			}
-
-			if(repository.exists(jobName, directory, RepositoryObjectType.JOB)) {
-				JsonUtils.fail("该作业已经存在，请重新输入！");
-				return;
-			}
-
-			jobMeta.setRepository(App.getInstance().getRepository());
-			jobMeta.setMetaStore(App.getInstance().getMetaStore());
-			jobMeta.setName(jobName);
-			jobMeta.setRepositoryDirectory(directory);
-
-			repository.save(jobMeta, "add: " + new Date(), null);
+		//添加任务组记录
+		if(null!=taskGroupArray && taskGroupArray.length>0){
+			sqlSession=CarteClient.sessionFactory.openSession();
+                Integer taskId = Integer.valueOf(jobMeta.getObjectId().getId());
+                for (String taskGroupName : taskGroupArray) {
+                    if (StringDateUtil.isEmpty(taskGroupName)) {
+                        continue;
+                    }
+                    TaskGroupAttributeEntity attr = new TaskGroupAttributeEntity();
+                    attr.setTaskGroupName(taskGroupName);
+                    attr.setType("job");
+                    attr.setTaskId(taskId);
+                    attr.setTaskPath(dir + jobName);
+                    attr.setTaskName(jobName);
+                    sqlSession.insert("org.sxdata.jingwei.dao.TaskGroupDao.addTaskGroupAttribute", attr);
+                }
+                sqlSession.commit();
+                sqlSession.close();
+                String jobPath = directory.getPath();
+                if (!jobPath.endsWith("/"))
+                    jobPath = jobPath + '/';
+                jobPath = jobPath + jobName;
+                JsonUtils.success(jobPath);
+            }
 		}catch (Exception e){
 			//数据库连接出现问题后kettle内部api资源库连接失效需要捕获异常后重新连接
 			e.printStackTrace();
@@ -271,37 +249,6 @@ public class RepositoryController {
 				repository.init( App.getInstance().meta);
 				repository.connect("admin", "admin");
 			}
-		}
-
-
-		//添加任务组记录
-		if(null!=taskGroupArray && taskGroupArray.length>0){
-			SqlSession sqlSession=CarteClient.sessionFactory.openSession();
-			try{
-				Integer taskId=Integer.valueOf(jobMeta.getObjectId().getId());
-				for(String taskGroupName:taskGroupArray){
-					if(StringDateUtil.isEmpty(taskGroupName)){
-						continue;
-					}
-					TaskGroupAttributeEntity attr=new TaskGroupAttributeEntity();
-					attr.setTaskGroupName(taskGroupName);
-					attr.setType("job");
-					attr.setTaskId(taskId);
-					attr.setTaskPath(dir + jobName);
-					attr.setTaskName(jobName);
-					sqlSession.insert("org.sxdata.jingwei.dao.TaskGroupDao.addTaskGroupAttribute",attr);
-				}
-				sqlSession.commit();
-				sqlSession.close();
-			}
-			String jobPath = directory.getPath();
-			if(!jobPath.endsWith("/"))
-				jobPath = jobPath + '/';
-			jobPath = jobPath + jobName;
-
-			JsonUtils.success(jobPath);
-		}catch (Exception e){
-			e.printStackTrace();
 			sqlSession.rollback();
 			sqlSession.close();
 			//删除作业
@@ -403,6 +350,7 @@ public class RepositoryController {
 		String dir = path.substring(0, path.lastIndexOf("/"));
 		String name = path.substring(path.lastIndexOf("/") + 1);
 		Repository repository = App.getInstance().getRepository();
+     try {
 		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
 		if(directory == null)
 			directory = repository.getUserHomeDirectory();
@@ -414,17 +362,15 @@ public class RepositoryController {
 			String graphXml = codec.encode(transMeta);
 			JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
 		} else if(RepositoryObjectType.JOB.getTypeDescription().equals(type)) {
-			JobMeta jobMeta = repository.loadJob(name, directory, null, null);
-	    	jobMeta.setRepositoryDirectory(directory);
-	    	
-	    	GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
-			String graphXml = codec.encode(jobMeta);
-			JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
-		try {
-			String dir = path.substring(0, path.lastIndexOf("/"));
-			String name = path.substring(path.lastIndexOf("/") + 1);
-			Repository repository = App.getInstance().getRepository();
-			RepositoryDirectoryInterface directory = repository.findDirectory(dir);
+            JobMeta jobMeta = repository.loadJob(name, directory, null, null);
+            jobMeta.setRepositoryDirectory(directory);
+
+            GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+            String graphXml = codec.encode(jobMeta);
+            JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
+
+        }
+
 			if (directory == null)
 				directory = repository.getUserHomeDirectory();
 
@@ -444,7 +390,6 @@ public class RepositoryController {
 				JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
 			}
 		}catch (Exception e){
-			e.printStackTrace();
 			//数据库连接出现问题后kettle内部api资源库连接失效需要捕获异常后重新连接
 			e.printStackTrace();
 			if(e instanceof KettleException){
@@ -649,7 +594,7 @@ public class RepositoryController {
 		
 		return list;
 	}
-	
+
 	@RequestMapping(method=RequestMethod.POST, value="/exptree")
 	protected @ResponseBody List exptree(@RequestParam int loadElement) throws KettleException, IOException {
 		Repository repository = App.getInstance().getRepository();
