@@ -4,10 +4,10 @@ function generateSchedulerMonitorPanel(secondGuidePanel){
     var cm=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
         sm,
-        {header:"定时id",dataIndex:"idJobtask"},
-        {header:"作业名",dataIndex:"jobName"},
-        {header:"执行节点",dataIndex:"hostName"},
-        {header:"周期",dataIndex:"timerInfo"},
+        {header:"定时id",dataIndex:"idJobtask",align:"center"},
+        {header:"作业名",dataIndex:"jobName",align:"center"},
+        {header:"执行节点",dataIndex:"hostName",align:"center"},
+        {header:"周期",dataIndex:"timerInfo",align:"center"},
         {header:"操作",dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
@@ -80,7 +80,7 @@ function generateSchedulerMonitorPanel(secondGuidePanel){
 
     var jobSchedulerGrid=new Ext.grid.GridPanel({
         id:"schedulergrid",
-        title:"定时调度",
+        title:"<font size = '3px' >定时调度</font>",
         width:1000,
         height:600,
         cm:cm,      //列模型

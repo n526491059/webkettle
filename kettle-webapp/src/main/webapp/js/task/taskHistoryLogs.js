@@ -9,12 +9,12 @@ function showHistoryLogPanel(secondGuidePanel){
     //列模型
     var cm=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
-        {header:"id",dataIndex:"fireId"},
-        {header:"任务名",dataIndex:"jobName"},
-        {header:"任务类型",dataIndex:"type"},
-        {header:"开始时间",dataIndex:"startTime",format:"y-M-d H:m:s"},
-        {header:"结束时间",dataIndex:"endTime",format:"y-M-d H:m:s"},
-        {header:"执行方式",dataIndex:"execMethod"},
+        {header:"id",dataIndex:"fireId",align:"center"},
+        {header:"任务名",dataIndex:"jobName",align:"center"},
+        {header:"任务类型",dataIndex:"type",align:"center"},
+        {header:"开始时间",dataIndex:"startTime",format:"y-M-d H:m:s",align:"center"},
+        {header:"结束时间",dataIndex:"endTime",format:"y-M-d H:m:s",align:"center"},
+        {header:"执行方式",dataIndex:"execMethod",align:"center"},
         {header:"状态",dataIndex:"status",align:"center"},
         {header:"参数信息",dataIndex:"executionConfiguration",align:"center",
             renderer:function(v){
@@ -63,7 +63,7 @@ function showHistoryLogPanel(secondGuidePanel){
     var logTbar=getTbarForHistoryLog(search.statu,search.type,search.taskName);
     var grid=new Ext.grid.GridPanel({
         id:"historyLogPanel",
-        title:"历史日志",
+        title:"<font size = '3px' >历史日志</font>",
         height:470,
         cm:cm,      //列模型
         store:store,

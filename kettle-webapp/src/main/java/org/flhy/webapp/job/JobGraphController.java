@@ -141,8 +141,8 @@ public class JobGraphController {
 	@RequestMapping(method=RequestMethod.POST, value="/save")
 	protected void save(@RequestParam String graphXml) throws Exception{
 		Repository repository = null;
-
 		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+		System.out.println(StringEscapeHelper.decode(graphXml));
 		JobMeta jobMeta = (JobMeta) codec.decode(StringEscapeHelper.decode(graphXml));
 		repository = App.getInstance().getRepository();
 		ObjectId existingId = repository.getJobId(jobMeta.getName(), jobMeta.getRepositoryDirectory());
@@ -152,7 +152,6 @@ public class JobGraphController {
 		if(jobMeta.getObjectId() == null)
 			jobMeta.setObjectId(existingId);
 		jobMeta.setModifiedDate(new Date());
-
 		boolean versioningEnabled = true;
 		boolean versionCommentsEnabled = true;
 		String fullPath = jobMeta.getRepositoryDirectory() + "/" + jobMeta.getName() + jobMeta.getRepositoryElementType().getExtension();

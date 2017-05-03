@@ -22,11 +22,11 @@ function showTaskControlPanel(){
     var cm=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),
         chooseModel,
-        {header:"id",dataIndex:"id"},
-        {header:"任务名",dataIndex:"name"},
-        {header:"运行节点",dataIndex:"hostName"},
-        {header:"任务类型",dataIndex:"type"},
-        {header:"运行状态",dataIndex:"isStart"},
+        {header:"id",dataIndex:"id",align:"center"},
+        {header:"任务名",dataIndex:"name",align:"center"},
+        {header:"运行节点",dataIndex:"hostName",align:"center"},
+        {header:"任务类型",dataIndex:"type",align:"center"},
+        {header:"运行状态",dataIndex:"isStart",align:"center"},
         {header:"操作",width:280,dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
@@ -61,7 +61,7 @@ function showTaskControlPanel(){
     //创建panel
     var grid=new Ext.grid.GridPanel({
         id:"任务监控",
-        title:"任务监控",
+        title:"<font size = '3px' >任务监控</font>",
         width:1150,
         height:470,
         cm:cm,      //列模型

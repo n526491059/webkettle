@@ -6,7 +6,7 @@ function showUserPanel(secondGuidePanel){
     var cm=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
         sm,
-        {header:"id",dataIndex:"userId"},
+        {header:"id",dataIndex:"userId",align:"center"},
         {header:"type",dataIndex:"userType",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(v==1){
@@ -16,11 +16,11 @@ function showUserPanel(secondGuidePanel){
                 }
             }
         },
-        {header:"password",dataIndex:"password"},
-        {header:"创建时间",dataIndex:"createDate",format:"y-M-d H:m:s"},
-        {header:"描述",dataIndex:"description"},
-        {header:"用户名",dataIndex:"login"},
-        {header:"所属用户组",dataIndex:"belongToUserGroup"},
+        {header:"password",dataIndex:"password",align:"center"},
+        {header:"创建时间",dataIndex:"createDate",format:"y-M-d H:m:s",align:"center"},
+        {header:"描述",dataIndex:"description",align:"center"},
+        {header:"用户名",dataIndex:"login",align:"center"},
+        {header:"所属用户组",dataIndex:"belongToUserGroup",align:"center"},
         {header:"任务组权限",dataIndex:"taskGroupPower",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(v==1){
@@ -117,7 +117,7 @@ function showUserPanel(secondGuidePanel){
     var userTypeCom=userTypeCombobox(chooseUsertype);
     var grid=new Ext.grid.GridPanel({
         id:"usersPanel",
-        title:"用户管理",
+        title:"<font size = '3px' >用户管理</font>",
         height:470,
         cm:cm,      //列模型
         sm:sm,

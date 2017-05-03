@@ -98,6 +98,7 @@ div.nav-node .x-tree-node-icon, div.nav .x-tree-node-icon {
   height: 24px;
   vertical-align: top;
   width: 24px;
+
 }
 
 .nav .x-tree-ec-icon {
@@ -105,14 +106,18 @@ div.nav-node .x-tree-node-icon, div.nav .x-tree-node-icon {
 }
 .x-grid-row .x-grid-cell,.nav-node {
 	border-style: none;
+
 }
 
 div.navl{
     height:28px;
-    line-height: 28px;
-    padding-bottom: 5px;
-    padding-top: 5px;
+    padding-top: 6px;
     border-bottom: 1px dashed deepskyblue;
+   /* padding-left: 10px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    border-style: none;
+    vertical-align: top;*/
 }
 
 

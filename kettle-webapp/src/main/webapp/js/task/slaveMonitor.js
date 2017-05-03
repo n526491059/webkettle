@@ -5,7 +5,7 @@ function showSlaveMonitorPanel(secondGuidePanel){
 
     var slaveMonitorPanel=new Ext.Panel({
         id:"slaveMonitorPanel",
-        title:"节点监控",
+        title:"<font size = '3px' >节点监控</font>",
         widht:820,
         html:divHtml,
         tbar:tBar

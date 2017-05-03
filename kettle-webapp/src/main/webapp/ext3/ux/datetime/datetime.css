@@ -2,6 +2,15 @@
 	background-color:white;
 	background-image:url();
 }
+.x-grid3-hd-row TD
+{
+	font-size: 14px; /*改变表头字体大小*/
+}
+.x-grid3-row TD
+{
+	font-size: 13px; /*改变行内容字体大小*/
+	line-height: 13px;
+}
 
 
 .imgCls:hover{

@@ -47,9 +47,9 @@ function generateUserGroupPanel(secondGuidePanel){
     var cm=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
         sm,
-        {header:"用户组id",dataIndex:"userGroupId"},
-        {header:"用户组名",dataIndex:"userGroupName"},
-        {header:"用户组描述",dataIndex:"userGroupDesc"},
+        {header:"用户组id",dataIndex:"userGroupId",align:"center"},
+        {header:"用户组名",dataIndex:"userGroupName",align:"center"},
+        {header:"用户组描述",dataIndex:"userGroupDesc",align:"center"},
         {header:"操作",dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
                 return  "<img src='../../ui/images/i_delete.png' class='imgCls' onclick='deleteUserGroup()' title='删除用户组'/>&nbsp;&nbsp;"+
@@ -105,7 +105,7 @@ function generateUserGroupPanel(secondGuidePanel){
 
     var grid=new Ext.grid.GridPanel({
         id:"userGroupPanel",
-        title:"用户组管理",
+        title:"<font size = '3px' >用户组管理</font>",
         height:470,
         cm:cm,      //列模型
         sm:sm,      //行选择框

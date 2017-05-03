@@ -12,10 +12,10 @@ function showTaskGroupPanel(secondGuidePanel){
     var taskGroupModel=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
         sm2,
-        {header:"任务组ID",dataIndex:"taskGroupId"},
-        {header:"任务组名",dataIndex:"taskGroupName"},
-        {header:"任务组描述",dataIndex:"taskGroupDesc"},
-        {header:"创建时间",dataIndex:"createDate",format:"y-M-d H:m:s"},
+        {header:"任务组ID",dataIndex:"taskGroupId",align:"center"},
+        {header:"任务组名",dataIndex:"taskGroupName",align:"center"},
+        {header:"任务组描述",dataIndex:"taskGroupDesc",align:"center"},
+        {header:"创建时间",dataIndex:"createDate",format:"y-M-d H:m:s",align:"center"},
         {header:"操作",dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(loginUserName=="admin" || loginUserTaskGroupPower==1){
@@ -83,7 +83,7 @@ function showTaskGroupPanel(secondGuidePanel){
     })
     var taskGroupPanel=new Ext.grid.GridPanel({
         id:"taskGroupPanel",
-        title:"任务组",
+        title:"<font size = '3px' >任务组</font>",
         width:1200,
         height:600,
         cm:taskGroupModel,

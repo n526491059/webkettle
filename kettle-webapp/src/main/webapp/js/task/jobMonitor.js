@@ -7,14 +7,14 @@ function generateJobPanel(secondGuidePanel){
     var cm=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
         sm,
-        {header:"id",dataIndex:"jobId"},
-        {header:"目录",width:150,dataIndex:"directoryName"},
-        {header:"名字",width:150,dataIndex:"name"},
-        {header:"创建用户",width:100,dataIndex:"createUser"},
-        {header:"创建时间",width:130,dataIndex:"createDate",tooltip:"这是创建时间",format:"y-M-d H:m:s"},
+        {header:"id",dataIndex:"jobId",align:"center"},
+        {header:"目录",width:150,dataIndex:"directoryName",align:"center"},
+        {header:"名字",width:150,dataIndex:"name",align:"center"},
+        {header:"创建用户",width:100,dataIndex:"createUser",align:"center"},
+        {header:"创建时间",width:130,dataIndex:"createDate",tooltip:"这是创建时间",format:"y-M-d H:m:s",align:"center"},
         {header:"最终修改者",width:100,dataIndex:"modifiedUser",align:"center"},
-        {header:"修改时间",width:130,dataIndex:"modifiedDate",format:"y-M-d H:m:s"},
-        {header:"所属任务组",dataIndex:"belongToTaskGroup"},
+        {header:"修改时间",width:130,dataIndex:"modifiedDate",format:"y-M-d H:m:s",align:"center"},
+        {header:"所属任务组",dataIndex:"belongToTaskGroup",align:"center"},
         {header:"操作",width:280,dataIndex:"",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
@@ -108,7 +108,7 @@ function generateJobPanel(secondGuidePanel){
 
     var grid=new Ext.grid.GridPanel({
         id:"JobPanel",
-        title:"作业管理",
+        title:"<font size = '3px' >作业管理</font>  ",
         height:470,
         cm:cm,      //列模型
         sm:sm,
@@ -369,7 +369,7 @@ function showWindowByAssigned(jobId,jobPath,jobName,grid){
     var panelByAssigned=generateAllTaskGroupPanel(jobId,jobPath,jobName);
     var taskGroupAssignedWindow=new Ext.Window({
         id:"taskGroupAssignedWindow",
-        title:"任务组分配",
+        title:"<font size = '3px' >任务组分配</font>",
         bodyStyle:"background-color:white",
         width:455,
         height:570,

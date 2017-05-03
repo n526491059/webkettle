@@ -190,7 +190,7 @@ function repositryOpenTrans(secondGuidePanel,path,text){
 //
 //	});
 
-GuidePanel = Ext.extend(Ext.Panel, {
+GuidePanel = Ext.extend(Ext.Panel,{
 	border:false,
 	initComponent: function() {
 		var fristGuidePanel="";
@@ -215,38 +215,38 @@ GuidePanel = Ext.extend(Ext.Panel, {
 							icon:'ui/images/i_model.png',
 							text : "<font size = '3px'>模型</font>",
 							children:[
-								{id:"newTrans",text:"<font size = '2px'>新建转换</font>",cls:"navl",leaf:true,icon:'ui/images/r_transformation.png'},
-								{id:"newJob",text:"<font size = '2px'>新建作业</font>",cls:"navl",leaf:true,icon:'ui/images/r_job.png'}
+								{id:"newTrans",text:"<font size = '2px' style='margin-left:9px;'>新建转换</font>",cls:"navl",leaf:true,icon:'ui/images/r_transformation.png'},
+								{id:"newJob",text:"<font size = '2px' style='margin-left:9px;'>新建作业</font>",cls:"navl",leaf:true,icon:'ui/images/r_job.png'}
 							]
 						},{
 							text : "<font size = '3px'>任务</font>",icon:'ui/images/i_task.png', cls:'nav-node',
 							children:[
-								{id:"jobMonitor",text:"<font size = '2px'>作业管理</font>",cls:"navl",leaf:true,icon:'ui/images/i_jobManager.png'},
-								{id:"transMonitor",text:"<font size = '2px'>转换管理</font>",cls:"navl",leaf:true,icon:'ui/images/i_transManager.png'},
-								{id:"taskGroupMonitor",text:"<font size = '2px'>任务组管理</font>",cls:"navl",leaf:true,icon:'ui/images/i_taskGroupManager.png'},
-								{id:"taskMonitoring",text:"<font size = '2px'>任务监控</font>",cls:"navl",leaf:true,icon:'ui/images/r_taskControl.png'}
+								{id:"jobMonitor",text:"<font size = '2px' style='margin-left:9px;'>作业管理</font>",cls:"navl",leaf:true,icon:'ui/images/i_jobManager.png'},
+								{id:"transMonitor",text:"<font size = '2px' style='margin-left:9px;'>转换管理</font>",cls:"navl",leaf:true,icon:'ui/images/i_transManager.png'},
+								{id:"taskGroupMonitor",text:"<font size = '2px' style='margin-left:9px;'>任务组管理</font>",cls:"navl",leaf:true,icon:'ui/images/i_taskGroupManager.png'},
+								{id:"taskMonitoring",text:"<font size = '2px' style='margin-left:9px;'>任务监控</font>",cls:"navl",leaf:true,icon:'ui/images/r_taskControl.png'}
 							],id:"taskIdTwo",expand:true
 						},{
 							text : "<font size = '3px'>日志</font>",icon:'ui/images/i_log.png', cls:'nav-node',
 							children:[
-								{id:"taskLog",text:"<font size = '2px'>任务历史日志</font>",cls:"navl",leaf:true,icon:'ui/images/i_tasklog.png'},
+								{id:"taskLog",text:"<font size = '2px' style='margin-left:9px;'>任务历史日志</font>",cls:"navl",leaf:true,icon:'ui/images/i_tasklog.png'},
 							]
 						},{
 							text : "<font size = '3px'>节点</font>",icon:'ui/images/i_slave.png', cls:'nav-node',
 							children:[
-								{id:"slaveMonitor",text:"<font size = '2px'>节点管理</font>",cls:"navl",leaf:true,icon:'ui/images/i_slaveManager.png'},
-								{id:"slaveMonitoring",text:"<font size = '2px'>节点监控</font>",cls:"navl",leaf:true,icon:'ui/images/i_slaveCon.png'},
+								{id:"slaveMonitor",text:"<font size = '2px' style='margin-left:9px;'>节点管理</font>",cls:"navl",leaf:true,icon:'ui/images/i_slaveManager.png'},
+								{id:"slaveMonitoring",text:"<font size = '2px' style='margin-left:9px;'>节点监控</font>",cls:"navl",leaf:true,icon:'ui/images/i_slaveCon.png'},
 							]
 						},{
 							text : "<font size = '3px'>定时调度</font>",icon:'ui/images/i_scheduler.png', cls:'nav-node',
 							children:[
-								{id:"schedulerMonitor",text:"<font size = '2px'>定时调度管理</font>",cls:"navl",leaf:true,icon:'ui/images/i_timerManager_24.png'},
+								{id:"schedulerMonitor",text:"<font size = '2px' style='margin-left:9px;'>定时调度管理</font>",cls:"navl",leaf:true,icon:'ui/images/i_timerManager_24.png'},
 							]
 						},{
 							text:"<font size = '3px'>用户</font>",icon:'ui/images/i_user.png', cls:'nav-node',
 							children:[
-								{id:"userMonitor",text:"<font size = '2px'>用户管理</font>",leaf:true,cls:"navl",icon:'ui/images/i_userManager_16.png'},
-								{id:"userGroupMonitor",text:"<font size = '2px'>用户组管理</font>",leaf:true,cls:"navl",icon:'ui/images/i_userGroupManager_16.png'},
+								{id:"userMonitor",text:"<font size = '2px' style='margin-left:9px;'>用户管理</font>",leaf:true,cls:"navl",icon:'ui/images/i_userManager_16.png'},
+								{id:"userGroupMonitor",text:"<font size = '2px' style='margin-left:9px;'>用户组管理</font>",leaf:true,cls:"navl",icon:'ui/images/i_userGroupManager_16.png'},
 							]
 						}
 					]
@@ -430,7 +430,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				clearInterval(timeIntervalByTaskControl);
 				timeIntervalByTaskControl="";
 			}
-			if(node.text == "<font size = '2px'>新建转换</font>")
+			if(node.text == "<font size = '2px' style='margin-left:9px;'>新建转换</font>")
 			{
 				//设置文本框格式
 				var dlg = Ext.Msg.getDialog();
@@ -494,7 +494,7 @@ GuidePanel = Ext.extend(Ext.Panel, {
 				    }
 				});
 			}
-			else if(node.text == "<font size = '2px'>新建作业</font>")
+			else if(node.text == "<font size = '2px' style='margin-left:9px;'>新建作业</font>")
 			{
 				secondGuidePanel.removeAll(true);
 				//设置文本框格式
@@ -558,28 +558,28 @@ GuidePanel = Ext.extend(Ext.Panel, {
 						addTaskGroupWindow.show(secondGuidePanel);
 				    }
 				});
-			}else if(node.text == "<font size = '2px'>作业管理</font>") {
+			}else if(node.text == "<font size = '2px' style='margin-left:9px;'>作业管理</font>") {
 				generateJobPanel(secondGuidePanel);
-			}else if(node.text == "<font size = '2px'>转换管理</font>") {
+			}else if(node.text == "<font size = '2px' style='margin-left:9px;'>转换管理</font>") {
 				generateTrans(secondGuidePanel);
-			}else if(node.text == "<font size = '2px'>定时调度管理</font>") {
+			}else if(node.text == "<font size = '2px' style='margin-left:9px;'>定时调度管理</font>") {
 				generateSchedulerMonitorPanel(secondGuidePanel);
-			}else if(node.text=="<font size = '2px'>任务监控</font>"){
+			}else if(node.text=="<font size = '2px' style='margin-left:9px;'>任务监控</font>"){
 				secondGuidePanel.removeAll(true);
 				secondGuidePanel.add(showTaskControlPanel());
 				secondGuidePanel.doLayout();
 				timeIntervalByTaskControl=setInterval("refreshControlPanel()",5000);
-			}else if(node.text=="<font size = '2px'>节点管理</font>"){
+			}else if(node.text=="<font size = '2px' style='margin-left:9px;'>节点管理</font>"){
 				slaveManager(secondGuidePanel);
-			}else if(node.text=="<font size = '2px'>节点监控</font>"){
+			}else if(node.text=="<font size = '2px' style='margin-left:9px;'>节点监控</font>"){
 				showSlaveMonitorPanel(secondGuidePanel);
-			}else if(node.text=="<font size = '2px'>任务组管理</font>"){
+			}else if(node.text=="<font size = '2px' style='margin-left:9px;'>任务组管理</font>"){
 				showTaskGroupPanel(secondGuidePanel);
-			}else if(node.text=="<font size = '2px'>用户管理</font>"){
+			}else if(node.text=="<font size = '2px' style='margin-left:9px;'>用户管理</font>"){
 				showUserPanel(secondGuidePanel);
-			}else if(node.text=="<font size = '2px'>用户组管理</font>"){
+			}else if(node.text=="<font size = '2px' style='margin-left:9px;'>用户组管理</font>"){
 				generateUserGroupPanel(secondGuidePanel);
-			}else if(node.text=="<font size = '2px'>任务历史日志</font>"){
+			}else if(node.text=="<font size = '2px' style='margin-left:9px;'>任务历史日志</font>"){
 				showHistoryLogPanel(secondGuidePanel);
 			}
 		});

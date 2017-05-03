@@ -147,16 +147,16 @@ function slaveManager(secondGuidePanel){
     var slaveModel=new Ext.grid.ColumnModel([
         new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
         sm2,
-        {header:"slaveId",dataIndex:"slaveId"},
-        {header:"主机名",dataIndex:"hostName"},
-        {header:"端口",dataIndex:"port"},
-        {header:"负载指数",dataIndex:"loadAvg",tooltip:"这是负载指数"},
+        {header:"slaveId",dataIndex:"slaveId",align:"center"},
+        {header:"主机名",dataIndex:"hostName",align:"center"},
+        {header:"端口",dataIndex:"port",align:"center"},
+        {header:"负载指数",dataIndex:"loadAvg",tooltip:"这是负载指数",align:"center"},
         {header:"状态",dataIndex:"status",align:"center"},
-        {header:"运行中作业数",dataIndex:"runningJobNum"},
-        {header:"运行中转换数",dataIndex:"runningTransNum"},
-        {header:"已完成作业数",dataIndex:"finishJobNum"},
-        {header:"已完成转换数",dataIndex:"finishTransNum"},
-        {header:"运行时长",dataIndex:"upTime"}
+        {header:"运行中作业数",dataIndex:"runningJobNum",align:"center"},
+        {header:"运行中转换数",dataIndex:"runningTransNum",align:"center"},
+        {header:"已完成作业数",dataIndex:"finishJobNum",align:"center"},
+        {header:"已完成转换数",dataIndex:"finishTransNum",align:"center"},
+        {header:"运行时长",dataIndex:"upTime",align:"center"}
     ]);
 
     var proxy=new Ext.data.HttpProxy({url:"/slave/slaveManager.do"});
@@ -184,7 +184,7 @@ function slaveManager(secondGuidePanel){
 
     var slaveGridPanel=new Ext.grid.GridPanel({
         id:"slaveGridPanel",
-        title:"选择节点",
+        title:"<font size = '3px' >节点管理</font>",
         width:1200,
         height:600,
         cm:slaveModel,
