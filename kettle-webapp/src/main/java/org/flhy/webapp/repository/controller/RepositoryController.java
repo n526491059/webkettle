@@ -193,14 +193,15 @@ public class RepositoryController {
 	protected void createJob(@RequestParam String dir, @RequestParam String jobName,@RequestParam String[] taskGroupArray) throws KettleException, IOException {
 		Repository repository = App.getInstance().getRepository();
 		SqlSession sqlSession=null;
-		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
-		try {
-			if(directory == null)
-				directory = repository.getUserHomeDirectory();
-			if(repository.exists(jobName, directory, RepositoryObjectType.JOB)) {
-				JsonUtils.fail("该作业已经存在，请重新输入！");
-				return;
-			}
+        RepositoryDirectoryInterface directory = null;
+		try{
+             directory = repository.findDirectory(dir);
+                if(directory == null)
+                directory = repository.getUserHomeDirectory();
+            if(repository.exists(jobName, directory, RepositoryObjectType.JOB)) {
+                JsonUtils.fail("该作业已经存在，请重新输入！");
+                return;
+            }
 			JobMeta jobMeta = new JobMeta();
 			jobMeta.setRepository(App.getInstance().getRepository());
 			jobMeta.setMetaStore(App.getInstance().getMetaStore());
@@ -342,45 +343,28 @@ public class RepositoryController {
 		String dir = path.substring(0, path.lastIndexOf("/"));
 		String name = path.substring(path.lastIndexOf("/") + 1);
 		Repository repository = App.getInstance().getRepository();
+		RepositoryDirectoryInterface directory = null;
      try {
-		RepositoryDirectoryInterface directory = repository.findDirectory(dir);
-		if(directory == null)
-			directory = repository.getUserHomeDirectory();
-		if(RepositoryObjectType.TRANSFORMATION.getTypeDescription().equals(type)) {
-			TransMeta transMeta = repository.loadTransformation(name, directory, null, true, null);
-			transMeta.setRepositoryDirectory(directory);
-	    	
-			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
-			String graphXml = codec.encode(transMeta);
-			JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
-		} else if(RepositoryObjectType.JOB.getTypeDescription().equals(type)) {
-            JobMeta jobMeta = repository.loadJob(name, directory, null, null);
-            jobMeta.setRepositoryDirectory(directory);
-
-            GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
-            String graphXml = codec.encode(jobMeta);
-            JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
-
-        }
-
-			if (directory == null)
+			 directory = repository.findDirectory(dir);
+			if(directory == null)
 				directory = repository.getUserHomeDirectory();
-
-			if (RepositoryObjectType.TRANSFORMATION.getTypeDescription().equals(type)) {
+			if(RepositoryObjectType.TRANSFORMATION.getTypeDescription().equals(type)) {
 				TransMeta transMeta = repository.loadTransformation(name, directory, null, true, null);
 				transMeta.setRepositoryDirectory(directory);
 
 				GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
 				String graphXml = codec.encode(transMeta);
 				JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
-			} else if (RepositoryObjectType.JOB.getTypeDescription().equals(type)) {
+			} else if(RepositoryObjectType.JOB.getTypeDescription().equals(type)) {
 				JobMeta jobMeta = repository.loadJob(name, directory, null, null);
 				jobMeta.setRepositoryDirectory(directory);
 
 				GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
 				String graphXml = codec.encode(jobMeta);
 				JsonUtils.responseXml(StringEscapeHelper.encode(graphXml));
+
 			}
+
 		}catch (Exception e){
 			//数据库连接出现问题后kettle内部api资源库连接失效需要捕获异常后重新连接
 			e.printStackTrace();
