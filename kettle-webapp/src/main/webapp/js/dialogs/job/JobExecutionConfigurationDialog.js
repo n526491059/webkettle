@@ -124,7 +124,6 @@ JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 			
 			if(me.fireEvent('beforestart', data) !== false) {
 				me.setDisabled(true);
-				alert(data.remote_server);
 				Ext.Ajax.request({
 					url: GetUrl('job/run.do'),
 					params: {graphXml: getActiveGraph().toXml(), executionConfiguration: Ext.encode(data)},

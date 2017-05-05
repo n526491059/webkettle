@@ -20,6 +20,7 @@ function generateTrans(secondGuidePanel){
                     return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='showOneTransDetail()' title='查看转换属性'/>&nbsp;&nbsp;"+
                         "<img src='../../ui/images/i_delete.png' class='imgCls' onclick='deleteTransByTransPath()' title='删除'/>&nbsp;&nbsp;"+
                         "<img src='../../ui/images/i_editor.png' class='imgCls' onclick='editorTrans()' title='编辑'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_updateTaskName.png' class='imgCls' onclick='updateTransName()' title='修改转换名'/>&nbsp;&nbsp;"+
                         "<img src='../../ui/images/i_compositionImg.png' class='imgCls' onclick='transCompositionImg()' title='结构图'/>&nbsp;&nbsp;"+
                         "<img src='../../ui/images/i_execute.png' class='imgCls' onclick='executeTrans()' title='执行转换配置'/>&nbsp;&nbsp;"+
                         "<img src='../../ui/images/i_assigned.png' class='imgCls' onclick='beforeAssigned()' title='分配任务组'/>&nbsp;&nbsp;"+
@@ -56,9 +57,9 @@ function generateTrans(secondGuidePanel){
             "beforeload": function(store) {
                 var transName="";
                 var createDate="";
-                if(Ext.getCmp("transMonitorForm")!=undefined){
-                    transName=Ext.getCmp("transMonitorForm").getForm().findField("name").getValue();
-                    createDate=Ext.getCmp("transMonitorForm").getForm().findField("createDate").getValue();
+                if(Ext.getCmp("transNameForSearch")!=undefined){
+                    transName=Ext.getCmp("transNameForSearch").getValue();
+                    createDate=Ext.getCmp("crtDateForSearch").getValue();
                 }
                 store.baseParams = {
                     name:transName,
@@ -71,24 +72,24 @@ function generateTrans(secondGuidePanel){
 
 
     var inputTransName="";
-    if(Ext.getCmp("transMonitorForm")!=undefined){
-        inputTransName=Ext.getCmp("transMonitorForm").getForm().findField("name").getValue();
+    if(Ext.getCmp("transNameForSearch")!=undefined){
+        inputTransName=Ext.getCmp("transNameForSearch").getValue();
     }
     var nameField=new Ext.form.TextField({
-        name: "name",
+        id: "transNameForSearch",
         fieldLabel: "转换名",
-        width:100,
-        value:inputTransName
+        width:120,
+        value:inputTransName,
+        emptyText:"请输入转换名"
     })
     var dateField=new Ext.form.DateField({
-        name: "createDate",
+        id: "crtDateForSearch",
         fieldLabel: "创建日期",
-        width: 100,
+        width:100,
         format: "Y-m-d"
     })
 
-
-    f=new Ext.form.FormPanel({
+   /* f=new Ext.form.FormPanel({
         id:"transMonitorForm",
         width:350,
         autoHeight:true,
@@ -104,7 +105,7 @@ function generateTrans(secondGuidePanel){
                 ]
             }
         ]
-    })
+    })*/
 
     var grid=new Ext.grid.GridPanel({
         id:"transPanel",
@@ -119,7 +120,7 @@ function generateTrans(secondGuidePanel){
         closable:true,
         tbar:new Ext.Toolbar({
             buttons:[
-                f ,"-",
+                nameField ,"-",dateField,"-",
                 {
                     iconCls:"searchCls",
                     tooltip: '查询',
@@ -130,6 +131,7 @@ function generateTrans(secondGuidePanel){
             ]
         }),
         bbar:new Ext.PagingToolbar({
+            cls: "bgColorCls",
             store:store,
             pageSize:15,
             displayInfo:true,
@@ -465,4 +467,33 @@ function powerExecute(path,powerFlag){
         params:{path:path,powerFlag:powerFlag}
     })
 
+}
+
+function updateTransName(){
+    var grid=Ext.getCmp("transPanel");
+    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+    var oldName=grid.getSelectionModel().getSelected().get("name");
+    //设置文本框格式
+    var dlg = Ext.Msg.getDialog();
+    var t = Ext.get(dlg.body).select('.ext-mb-input');
+    t.each(function (el) {
+        el.dom.type = "text";
+    });
+    Ext.Msg.prompt('修该转换名', '请输入新的转换名称:', function(btn, text) {
+        if (btn == 'ok' && text != '') {
+            Ext.Ajax.request({
+                url:"/task/updateTaskName.do",
+                success:function(response,config){
+                    if(response.responseText=="OK"){
+                        generateTrans(secondGuidePanel);
+                        Ext.MessageBox.alert("提示","修改转换名成功!");
+                    }else{
+                        Ext.MessageBox.alert("修改失败","该转换名已存在!");
+                    }
+                },
+                failure:failureResponse,
+                params:{oldName:oldName,newName:text,type:"trans"}
+            })
+        }
+    })
 }

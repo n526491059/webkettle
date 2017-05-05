@@ -21,6 +21,7 @@ function generateJobPanel(secondGuidePanel){
                     return "<img src='../../ui/images/i_delete.png' class='imgCls' onclick='deleteJobByJobPath()' title='删除作业'/>&nbsp;&nbsp;"+
                         "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='showOneJobDetail()' title='作业属性'/>&nbsp;&nbsp;"+
                         "<img src='../../ui/images/i_editor.png' class='imgCls' onclick='editorJob()' title='编辑'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_updateTaskName.png' class='imgCls' onclick='updateJobName()' title='修改作业名'/>&nbsp;&nbsp;"+
                         "<img src='../../ui/images/i_compositionImg.png' class='imgCls' onclick='jobCompositionImg()'  title='结构图'/>&nbsp;&nbsp;"+
                         "<img src='../../ui/images/i_execute.png' class='imgCls' onclick='executeJob()' title='执行作业配置'/>&nbsp;&nbsp;"+
                         "<img src='../../ui/images/i_timer.png' class='imgCls' onclick='beforeSchedulerJob()' title='定时执行'/>&nbsp;&nbsp;"+
@@ -57,9 +58,9 @@ function generateJobPanel(secondGuidePanel){
             "beforeload": function(store) {
                 var jobName="";
                 var createDate="";
-                if(Ext.getCmp("jobMonitorForm")!=undefined){
-                    jobName=Ext.getCmp("jobMonitorForm").getForm().findField("name").getValue();
-                    createDate=Ext.getCmp("jobMonitorForm").getForm().findField("createDate").getValue();
+                if(Ext.getCmp("jobNameForSearch")!=undefined){
+                    jobName=Ext.getCmp("jobNameForSearch").getValue();
+                    createDate=Ext.getCmp("createDateForSearch").getValue();
                 }
                 store.baseParams = {
                     name:jobName,
@@ -71,39 +72,21 @@ function generateJobPanel(secondGuidePanel){
     store.load({params:{start:0,limit:15}});
 
     var inputJobName="";
-    if(Ext.getCmp("jobMonitorForm")!=undefined){
-        inputJobName=Ext.getCmp("jobMonitorForm").getForm().findField("name").getValue();
+    if(Ext.getCmp("jobNameForSearch")!=undefined){
+        inputJobName=Ext.getCmp("jobNameForSearch").getValue();
     }
     var nameField=new Ext.form.TextField({
-        name: "name",
+        id: "jobNameForSearch",
         fieldLabel: "作业名",
-        width:100,
-        value:inputJobName
+        width:120,
+        value:inputJobName,
+        emptyText:"请输入作业名.."
     })
-
     var dateField=new Ext.form.DateField({
-        name: "createDate",
+        id: "createDateForSearch",
         fieldLabel: "创建日期",
         width: 100,
         format: "Y-m-d"
-    })
-
-    f=new Ext.form.FormPanel({
-        id:"jobMonitorForm",
-        width:350,
-        autoHeight:true,
-        frame:true,
-        labelWidth:50,
-        labelAlign:"right",
-        items:[
-            {
-                layout:"column",    //横向布局(列布局),左到右
-                items:[
-                    {layout:"form", items:[nameField]},     //每一个是单独的表单控件,单个使用纵向布局,上到下
-                    {layout:"form",items:[dateField]}
-                ]
-            }
-        ]
     })
 
     var grid=new Ext.grid.GridPanel({
@@ -116,7 +99,7 @@ function generateJobPanel(secondGuidePanel){
         closable:true,
         tbar:new Ext.Toolbar({
             buttons:[
-                f ,"-",
+                nameField ,"-",dateField,
                 {
                     iconCls:"searchCls",
                     tooltip: '查询',
@@ -478,6 +461,36 @@ function assignedTaskGroup(jobId,jobName,jobPath,taskGroupPanelByAssigned){
     }else{
         Ext.MessageBox.alert("必须为该作业分配至少一个任务组");
     }
+}
+
+//修改作业名
+function updateJobName(){
+    var grid=Ext.getCmp("JobPanel");
+    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+    var oldName=grid.getSelectionModel().getSelected().get("name");
+    //设置文本框格式
+    var dlg = Ext.Msg.getDialog();
+    var t = Ext.get(dlg.body).select('.ext-mb-input');
+    t.each(function (el) {
+        el.dom.type = "text";
+    });
+    Ext.Msg.prompt('修该作业名', '请输入新的作业名称:', function(btn, text) {
+        if (btn == 'ok' && text != '') {
+            Ext.Ajax.request({
+                url:"/task/updateTaskName.do",
+                success:function(response,config){
+                    if(response.responseText=="OK"){
+                        generateJobPanel(secondGuidePanel);
+                        Ext.MessageBox.alert("提示","修改作业名成功!");
+                    }else{
+                        Ext.MessageBox.alert("修改失败","该作业名已存在!");
+                    }
+                },
+                failure:failureResponse,
+                params:{oldName:oldName,newName:text,type:"job"}
+            })
+        }
+    })
 }
 
 

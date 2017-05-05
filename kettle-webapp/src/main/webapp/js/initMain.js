@@ -139,25 +139,19 @@ Ext.onReady(function() {
 //		});
 
 		var username=document.getElementById("loginUsername").value;
-		var loginOutButton=new Ext.Button({
-			iconCls:"logoutCls",
-			tooltip: '登出',
-			handler:function(){
-				loginOut();
-			}
-		})
-		var loginInfo="<div style='margin-left:81%;margin-top: 1%'><h3 style='display: inline-block;'>欢迎您：</h3><h1 style='display: inline-block;'>"
-			+username+"</h1>&nbsp;&nbsp;<img src='../ui/images/i_out24.png' onclick='loginOut()' class='imgLoginInfoCls' title='登出'/>&nbsp;&nbsp;" +
-			"<img src='../ui/images/i_updateTPWD24.png' onclick='updateThisPwd()' class='imgLoginInfoCls' title='修改密码' id='updateThisPw'/></div>";
+		var loginInfo="<div style='display:inline-block;height:100%'><img src='../ui/images/i_headerLogo.png' style='margin:14px 40px;'/></div>" +
+			"<div class='header-button-Cls header-public-display'>"+
+			"<span onclick='loginOut()' class='header-operation-Cls'>退出登录</span><span class='header-split-Cls'>|</span><span onclick='updateThisPwd()' class='header-operation-Cls' id='updateThisPw'>修改密码</span></div>"+
+			"<div style='margin-bottom:5px;display: inline-block' class='header-loginInfo-Cls header-public-display'>欢迎您："+username+"</div>";
 		var navigationPanel = new Ext.Panel({
 			id: 'navigationPanel',
 			region: 'north',
-			height: 50,
+			height:90,
 			border: false,
 			html:loginInfo,
 			margin: '0,0,0,0',
 			bodyStyle: {
-				background: 'cornflowerblue'
+				background: 'url(../ui/images/i_headerBGI.png) no-repeat'
 			}
 		});
 		var footPanel = new Ext.Panel({
@@ -167,7 +161,7 @@ Ext.onReady(function() {
 			border: false,
 			margin: '0,0,0,0',
 			bodyStyle: {
-				background: 'cornflowerblue'
+				background: 'url(../ui/images/i_footColor.png) no-repeat'
 			}
 		});
 

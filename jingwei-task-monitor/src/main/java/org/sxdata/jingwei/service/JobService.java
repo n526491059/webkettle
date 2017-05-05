@@ -34,4 +34,6 @@ public interface JobService {
     public List<JobEntity> getJobPath(List<JobEntity> jobs) throws Exception;
 
     public JobEntity getJobByName(String jobName) throws Exception;
+
+    public boolean updateJobName(String oldName,String newName);
 }

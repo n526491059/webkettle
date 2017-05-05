@@ -31,6 +31,8 @@ public interface TaskGroupDao {
 
     public void updateTaskGroupAttributes(String oldName,String newName);
 
+    public void updateTaskNameforAttr(String oldName,String newName,String type,String dirName);
+
     public List<TaskGroupAttributeEntity> getTaskGroupAttributesByName(String name);
 
     public void deleteTaskGroupAttributesByName(String name);

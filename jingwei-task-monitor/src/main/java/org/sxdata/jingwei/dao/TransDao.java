@@ -19,4 +19,7 @@ public interface TransDao {
     public Integer conditionFindTransCount(String name,String date,String userGroupName);//带条件查询总记录数u
 
     public TransformationEntity getTransByName(String transName);
+
+    public void updateTransNameforTrans(String oldName,String newName);
+
 }

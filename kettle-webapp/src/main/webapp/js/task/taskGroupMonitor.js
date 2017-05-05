@@ -118,6 +118,7 @@ function showTaskGroupPanel(secondGuidePanel){
             ]
         }),
         bbar:new Ext.PagingToolbar({
+            cls: "bgColorCls",
             store:store,
             pageSize:10,
             displayInfo:true,

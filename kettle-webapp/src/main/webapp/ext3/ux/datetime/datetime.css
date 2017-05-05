@@ -14,18 +14,12 @@
 
 
 .imgCls:hover{
-	border:2px solid cadetblue;
+	border:2px solid lightcyan;
 	margin:-2px;
 	border-radius:5px;
 }
 .imgCls:link{
 	border:none;
-}
-.imgLoginInfoCls:hover{
-	cursor:pointer;
-}
-.imgLoginInfoCls:link{
-	cursor:auto;
 }
 
 .updateUGCls{
