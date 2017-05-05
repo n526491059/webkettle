@@ -74,10 +74,6 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
                 }
             }
         }
-
-
-
-
         return result;
     }
 

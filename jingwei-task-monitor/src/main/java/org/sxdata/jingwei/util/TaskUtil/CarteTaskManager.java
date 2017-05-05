@@ -235,7 +235,7 @@ public class CarteTaskManager {
 				JobMeta jobMeta = RepositoryUtils.loadJobbyPath(jobPath);
 				org.flhy.ext.utils.JSONObject jsonObject = org.flhy.ext.utils.JSONObject.fromObject(executionConfiguration);
 				JobExecutionConfiguration jobExecutionConfiguration = JobExecutionConfigurationCodec.decode(jsonObject, jobMeta);
-				JobExecutor jobExecutor = JobExecutor.initExecutor(jobExecutionConfiguration, jobMeta);
+				JobExecutor jobExecutor = new JobExecutor(jobExecutionConfiguration,jobMeta);
 				//TODO		把执行需要的参数添加到dataMap	添加定时任务
 				JobDetail job = newJob(org.sxdata.jingwei.util.quartzUtil.JobTimerTask.class).withIdentity(idJobTask + "", JOB_TIMER_TASK_GROUP).build();
 				List<UserEntity> userEntityList=session.selectList("org.sxdata.jingwei.dao.UserDao.getUserbyName","admin");

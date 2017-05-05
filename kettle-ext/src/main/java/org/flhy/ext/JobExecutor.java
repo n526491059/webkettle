@@ -107,7 +107,7 @@ public class JobExecutor implements Runnable {
 	public static void remove(String executionId) {
 		executors.remove(executionId);
 	}
-	private JobExecutor(JobExecutionConfiguration executionConfiguration, JobMeta jobMeta) {
+	public JobExecutor(JobExecutionConfiguration executionConfiguration, JobMeta jobMeta) {
 		this.executionId = UUID.randomUUID().toString().replaceAll("-", "");
 		this.executionConfiguration = executionConfiguration;
 		this.jobMeta = jobMeta;
@@ -161,7 +161,7 @@ public class JobExecutor implements Runnable {
 				}
 	            job.getJobMeta().activateParameters();
 	            job.start();
-				while(!job.isFinished()) {
+				while(!job.isFinished()){
 					Thread.sleep(500);
 				}
 				errCount = job.getErrors();
