@@ -165,7 +165,6 @@ public class TransExecutor implements Runnable {
 					
 					while(!trans.isFinished())
 						Thread.sleep(500);
-					
 					errCount = trans.getErrors();
 		        } else {
 		        	checkErrorVisuals();

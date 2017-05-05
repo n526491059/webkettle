@@ -330,7 +330,7 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
             while (keys.hasMoreElements()){
                 String transExecutorId = keys.nextElement();
                 TransExecutor transExecutor = table.get(transExecutorId);
-                if(transExecutor.getExecutionId().equals(id) && !transExecutor.isFinished()){
+                if(transExecutor.getExecutionId().equals(id) && !transExecutor.isFinished() && !transExecutor.isClickStop()){
                     transExecutor.stop();
                     transExecutor.setIsClickStop(true);
                     return;

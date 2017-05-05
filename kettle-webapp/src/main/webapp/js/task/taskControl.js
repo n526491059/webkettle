@@ -7,6 +7,7 @@ var transDetailId;
 var transDetailHostName;
 var transAndJobGrid;
 
+
 function refreshControlPanel(){
     var secondGuidePanel=Ext.getCmp("secondGuidePanel");
     secondGuidePanel.removeAll(true);
@@ -27,20 +28,29 @@ function showTaskControlPanel(){
         {header:"运行节点",dataIndex:"hostName",align:"center"},
         {header:"任务类型",dataIndex:"type",align:"center"},
         {header:"运行状态",dataIndex:"isStart",align:"center"},
-        {header:"操作",width:280,dataIndex:"type",menuDisabled:true,align:"center",
+        {header:"操作",width:280,dataIndex:"isStart",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
-                    if(v=="转换"){
-                        return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='collectData()' id='transDetailButton' title='日志明细'/>&nbsp;&nbsp;"+
-                            "<img src='../../ui/images/i_transDetail.png' class='imgCls' onclick='showTransDetailWindow()' title='转换详情'/>&nbsp;&nbsp;"+
-                            "<img src='../../ui/images/i_shutDown.png' class='imgCls' onclick='stopJobOrTrans()' title='结束'/>&nbsp;&nbsp;"+
-                            "<img src='../../ui/images/i_power.png' class='imgCls' onclick='pauseOrStart()' id='pushOrStart' title='暂停/开始'/>&nbsp;&nbsp;";
+                    if(v!=""){
+                        if(v=="暂停中"){
+                            return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='collectData()' id='transDetailButton' title='日志明细'/>&nbsp;&nbsp;"+
+                                "<img src='../../ui/images/i_transDetail.png' class='imgCls' onclick='showTransDetailWindow()' title='转换详情'/>&nbsp;&nbsp;"+
+                                "<img src='../../ui/images/i_shutDown.png' class='imgCls' onclick='stopJobOrTrans()' title='结束'/>&nbsp;&nbsp;"+
+                                "<img src='../../ui/images/i_pause.png' class='imgCls' onclick='pauseOrStart()' id='startTrans' title='暂停' style='display:none'/>&nbsp;&nbsp;"+
+                                "<img src='../../ui/images/i_start.png' class='imgCls' onclick='pauseOrStart()' id='pauseTrans' title='开始'/>&nbsp;&nbsp;";
+                        }else{
+                            return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='collectData()' id='transDetailButton' title='日志明细'/>&nbsp;&nbsp;"+
+                                "<img src='../../ui/images/i_transDetail.png' class='imgCls' onclick='showTransDetailWindow()' title='转换详情'/>&nbsp;&nbsp;"+
+                                "<img src='../../ui/images/i_shutDown.png' class='imgCls' onclick='stopJobOrTrans()' title='结束'/>&nbsp;&nbsp;"+
+                                "<img src='../../ui/images/i_pause.png' class='imgCls' onclick='pauseOrStart()' id='startTrans' title='暂停' />&nbsp;&nbsp;"+
+                                "<img src='../../ui/images/i_start.png' class='imgCls' onclick='pauseOrStart()' id='pauseTrans' title='开始' style='display:none'/>&nbsp;&nbsp;";
+                        }
                     }else{
                         return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='collectData()' id='transDetailButton' title='日志明细'/>&nbsp;&nbsp;"+
                             "<img src='../../ui/images/i_shutDown.png' class='imgCls' onclick='stopJobOrTrans()' title='结束'/>&nbsp;&nbsp;";
                     }
                 }else{
-                    if(v=="作业"){
+                    if(v==""){
                         return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='collectData()' id='transDetailButton' title='日志明细'/>&nbsp;&nbsp;"
                     }else{
                         return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='collectData()' id='transDetailButton' title='日志明细'/>&nbsp;&nbsp;"+

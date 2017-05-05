@@ -9,7 +9,7 @@
     </insert>
 
     <select id="getAllLogByPage" resultType="org.flhy.ext.Task.ExecutionTraceEntity">
-      select
+        select
         e.fireId as fireId,
         e.jobName as jobName,
         e.startTime as startTime,
@@ -19,7 +19,7 @@
         e.executionConfiguration as executionConfiguration,
         e.executionLog as executionLog,
          e.type as type
-      from task_execution_log e WHERE 1=1
+      from (select * from task_execution_log ORDER BY startTime DESC) e WHERE 1=1
         <if test='param7!=null and param7!=""'>
             and  e.jobName IN
             (
