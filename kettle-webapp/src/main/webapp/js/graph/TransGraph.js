@@ -414,18 +414,6 @@ TransGraph = Ext.extend(BaseGraph, {
             }];
         }else if(this.Executable==true && this.readOnly==false){
             this.tbar = [{
-                iconCls: 'save', scope: this, tooltip: '保存这个转换', handler: this.save
-            }, '-', {
-                iconCls: 'run', scope: this, tooltip: '运行这个转换', handler: this.run
-            }, {
-                iconCls: 'pause', scope: this, disabled: true, tooltip: '恢复/暂停这个转换', handler: this.pause
-            }, {
-                iconCls: 'stop', scope: this, disabled: true, tooltip: '停止这个转换', handler: this.stop
-            }];
-        }else if(this.Executable==true && this.readOnly==true){
-            this.tbar = [{
-                iconCls: 'save', scope: this, tooltip: '保存这个转换', handler: this.save
-            }, '-', {
                 iconCls: 'run', scope: this, tooltip: '运行这个转换', handler: this.run
             }, {
                 iconCls: 'pause', scope: this, disabled: true, tooltip: '恢复/暂停这个转换', handler: this.pause
