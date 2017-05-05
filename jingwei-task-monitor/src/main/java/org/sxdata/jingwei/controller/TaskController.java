@@ -45,7 +45,7 @@ import java.util.List;
 
 
 /**
- * Created by pengpai on 2017/1/18 0018.
+ * Created by pengpai on 2017/1/18
  */
 @Controller
 @RequestMapping(value="/task")
@@ -60,6 +60,34 @@ public class TaskController {
     @Autowired
     protected ControlService controlService;
     private static HashMap<String, JobExecutor> executions = new HashMap<String, JobExecutor>();
+
+    //修改任务名
+    @RequestMapping(value="/updateTaskName")
+    @ResponseBody
+    protected void updateTaskName(HttpServletResponse response,HttpServletRequest request) throws Exception{
+        try{
+            boolean isSuccess=false;
+            String oldName=request.getParameter("oldName");
+            String newName=request.getParameter("newName");
+            String type=request.getParameter("type");
+            if(type.equals("job"))
+                isSuccess=jobService.updateJobName(oldName,newName);
+            else
+                isSuccess=transService.updateTransName(oldName,newName);
+            PrintWriter out=response.getWriter();
+            String result="";
+            if(isSuccess)
+                result="OK";
+            else
+                result="faile";
+            out.write(result);
+            out.flush();
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
+        }
+    }
 
     //暂停/开始转换
     @RequestMapping(value="/pauseOrStart")
@@ -181,7 +209,6 @@ public class TaskController {
     @ResponseBody
     protected void getRunningTask(HttpServletResponse response,HttpServletRequest request) throws Exception{
         try{
-
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
             String userGroupName="";
             if(null!=attr){

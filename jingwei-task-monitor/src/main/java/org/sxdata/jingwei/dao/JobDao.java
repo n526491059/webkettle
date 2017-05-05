@@ -23,4 +23,5 @@ public interface JobDao {
 
     public JobEntity getJobByName(String jobName);
 
+    public void updateJobNameforJob(String oldName,String newName);
 }

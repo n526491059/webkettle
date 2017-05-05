@@ -106,8 +106,12 @@
     <update id="updateTaskGroup" parameterType="org.sxdata.jingwei.entity.TaskGroupEntity">
         UPDATE d_task_group
         <trim prefix="set" suffixOverrides=",">
-            TASK_GROUP_NAME=#{taskGroupName},
-            TASK_DESC=#{taskGroupDesc}
+            <if test='taskGroupName!=null and taskGroupName!=""'>
+                TASK_GROUP_NAME=#{taskGroupName},
+            </if>
+            <if test='taskGroupDesc!=null'>
+                TASK_DESC=#{taskGroupDesc}
+            </if>
         </trim>
         WHERE ID_TASK_GROUP=#{taskGroupId}
     </update>
@@ -119,6 +123,16 @@
             TASK_GROUP_NAME=#{1}
         </trim>
         WHERE TASK_GROUP_NAME=#{0}
+    </update>
+
+    <!--修改任务组明细表中的任务名  不会单独调用;多用于与修改任务名的语句一起调用 -->
+    <update id="updateTaskNameforAttr" parameterType="org.sxdata.jingwei.entity.TaskGroupAttributeEntity">
+        UPDATE d_task_group_member_attribute
+        <trim prefix="set" suffixOverrides=",">
+            TASK_NAME=#{1},
+            TASK_PATH=#{3}
+        </trim>
+        WHERE TASK_NAME=#{0} AND TYPE=#{2}
     </update>
 
     <!--根据任务组ID获取任务组-->

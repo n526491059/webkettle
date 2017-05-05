@@ -73,6 +73,7 @@ function showHistoryLogPanel(secondGuidePanel){
         closable:true,
         tbar:logTbar,
         bbar:new Ext.PagingToolbar({
+            cls: "bgColorCls",
             store:store,
             pageSize:10,
             displayInfo:true,
@@ -191,15 +192,14 @@ function showConfigInfo(){
 //日志列表顶部的控件 用作查询
 function getTbarForHistoryLog(statu,type,taskName){
     var taskNameField=new Ext.form.TextField({
-        name: "taskName",
-        id:"taskName",
+        id:"nameForLogSearch",
         fieldLabel: "任务名",
-        width:150,
-        value:taskName
+        width:120,
+        value:taskName,
+        emptyText:"请输入任务名"
     });
     var dateField=new Ext.form.DateField({
-        name: "startDate",
-        id:"startDate",
+        id:"crtDateForLogSearch",
         fieldLabel: "开始时间",
         width:100,
         format: "Y-m-d"
@@ -207,29 +207,12 @@ function getTbarForHistoryLog(statu,type,taskName){
     var searchButton=new Ext.Button({
         iconCls:"searchCls",
         tooltip: '查询',
-        style:'margin:1px 5px 1px 5px;',
         handler:function(){
             var secondGuidePanel=Ext.getCmp("secondGuidePanel");
             showHistoryLogPanel(secondGuidePanel);
         }
     });
-    f=new Ext.form.FormPanel({
-        width:445,
-        height:42,
-        frame:true,
-        labelWidth:50,
-        labelAlign:"right",
-        items:[
-            {
-                layout:"column",    //横向布局(列布局),左到右
-                items:[
-                    {layout:"form", items:[taskNameField]},     //每一个是单独的表单控件,单个使用纵向布局,上到下
-                    {layout:"form",items:[dateField]},
-                    {layout:"form",items:[searchButton]},
-                ]
-            }
-        ]
-    });
+
     var logStatu=logStatuSelect();
     var taskType=taskTypeSelect();
     if(statu!=""){
@@ -244,7 +227,7 @@ function getTbarForHistoryLog(statu,type,taskName){
 
     var toolBar=new Ext.Toolbar({
         buttons:[
-            logStatu,"-",taskType,"-",f
+            logStatu,"-",taskType,"-",taskNameField,"-",dateField,"-",searchButton
         ]
     });
     return toolBar;
@@ -333,14 +316,12 @@ function getSearchParam(){
     if(Ext.getCmp("taskTypeCombobox")!=undefined){
         type=Ext.getCmp("taskTypeCombobox").getValue();
     }
-    if(Ext.getCmp("startDate")!=undefined){
-        startDate=Ext.getCmp("startDate").getRawValue();
+    if(Ext.getCmp("crtDateForLogSearch")!=undefined){
+        startDate=Ext.getCmp("crtDateForLogSearch").getValue();
     }
-    if(Ext.getCmp("taskName")!=undefined){
-        taskName=Ext.getCmp("taskName").getValue();
+    if(Ext.getCmp("nameForLogSearch")!=undefined){
+        taskName=Ext.getCmp("nameForLogSearch").getValue();
     }
-
-
     var entity=new logSearch(statu,type,startDate,taskName);
     return entity;
 }

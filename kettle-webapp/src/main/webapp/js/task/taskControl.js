@@ -27,16 +27,26 @@ function showTaskControlPanel(){
         {header:"运行节点",dataIndex:"hostName",align:"center"},
         {header:"任务类型",dataIndex:"type",align:"center"},
         {header:"运行状态",dataIndex:"isStart",align:"center"},
-        {header:"操作",width:280,dataIndex:"",menuDisabled:true,align:"center",
+        {header:"操作",width:280,dataIndex:"type",menuDisabled:true,align:"center",
             renderer:function(v){
                 if(loginUserTaskGroupPower==1 || loginUserName=="admin"){
-                    return "<img src='../../ui/images/i_execute.png' class='imgCls' onclick='collectData()' title='日志明细'/>&nbsp;&nbsp;"+
-                        "<img src='../../ui/images/i_timer.png' class='imgCls' onclick='showTransDetailWindow()' title='转换详情'/>&nbsp;&nbsp;"+
-                        "<img src='../../ui/images/i_assigned.png' class='imgCls' onclick='stopJobOrTrans()' title='结束'/>&nbsp;&nbsp;"+
-                        "<img src='../../ui/images/i_power.png' class='imgCls' onclick='pauseOrStart()' title='暂停/开始'/>&nbsp;&nbsp;";
+                    if(v=="转换"){
+                        return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='collectData()' id='transDetailButton' title='日志明细'/>&nbsp;&nbsp;"+
+                            "<img src='../../ui/images/i_transDetail.png' class='imgCls' onclick='showTransDetailWindow()' title='转换详情'/>&nbsp;&nbsp;"+
+                            "<img src='../../ui/images/i_shutDown.png' class='imgCls' onclick='stopJobOrTrans()' title='结束'/>&nbsp;&nbsp;"+
+                            "<img src='../../ui/images/i_power.png' class='imgCls' onclick='pauseOrStart()' id='pushOrStart' title='暂停/开始'/>&nbsp;&nbsp;";
+                    }else{
+                        return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='collectData()' id='transDetailButton' title='日志明细'/>&nbsp;&nbsp;"+
+                            "<img src='../../ui/images/i_shutDown.png' class='imgCls' onclick='stopJobOrTrans()' title='结束'/>&nbsp;&nbsp;";
+                    }
                 }else{
-                    return "<img src='../../ui/images/i_execute.png' class='imgCls' onclick='collectData()' title='日志明细'/>&nbsp;&nbsp;"+
-                        "<img src='../../ui/images/i_timer.png' class='imgCls' onclick='showTransDetailWindow()' title='转换详情'/>&nbsp;&nbsp;";
+                    if(v=="作业"){
+                        return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='collectData()' id='transDetailButton' title='日志明细'/>&nbsp;&nbsp;"
+                    }else{
+                        return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='collectData()' id='transDetailButton' title='日志明细'/>&nbsp;&nbsp;"+
+                            "<img src='../../ui/images/i_transDetail.png' class='imgCls' onclick='showTransDetailWindow()' title='转换详情'/>&nbsp;&nbsp;";
+                    }
+
                 }
             }
         }
@@ -60,7 +70,7 @@ function showTaskControlPanel(){
     store.load();
     //创建panel
     var grid=new Ext.grid.GridPanel({
-        id:"任务监控",
+        id:"controlPanel",
         title:"<font size = '3px' >任务监控</font>",
         width:1150,
         height:470,
@@ -70,7 +80,7 @@ function showTaskControlPanel(){
         closable:true,
         viewConfig : {
             forceFit : true //让grid的列自动填满grid的整个宽度，不用一列一列的设定宽度
-        },
+        }/*,
         listeners:{
             rowclick:function(grid,index,e){
                 var view=grid.getView();
@@ -80,18 +90,18 @@ function showTaskControlPanel(){
                     if(rsm.isSelected(i)){
                         var type=grid.getStore().getAt(i).get("type");
                         if(type=="作业"){
-                            Ext.getCmp("pushOrStart").disable();
-                            Ext.getCmp("transDetailButton").disable();
+                            document.getElementById("pushOrStart").style.visibility ="hidden";
+                            document.getElementById("transDetailButton").style.visibility ="hidden";
                             flag=true;
                         }
                     }
                 }
                 if(flag=false){
-                    Ext.getCmp("transDetailButton").enable();
-                    Ext.getCmp("pushOrStart").enable();
+                    document.getElementById("pushOrStart").style.visibility ="visible";
+                    document.getElementById("transDetailButton").style.visibility ="visible";
                 }
             }
-        }
+        }*/
     });
     grid.getColumnModel().setHidden(2,true);
     transAndJobGrid=grid;

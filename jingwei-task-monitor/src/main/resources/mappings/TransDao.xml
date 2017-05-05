@@ -106,4 +106,8 @@
             and j.CREATED_DATE &gt; #{1}
         </if>
     </select>
+
+    <update id="updateTransNameforTrans" parameterType="java.lang.String">
+        UPDATE r_transformation SET NAME=#{1} WHERE NAME=#{0}
+    </update>
 </mapper>

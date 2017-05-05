@@ -175,4 +175,19 @@ public class TransServiceImpl implements TransService {
         items.add(entity);
         return this.getTransPath(items).get(0);
     }
+
+    @Override
+    public boolean updateTransName(String oldName, String newName) {
+        //修改转换名前首先判断新的转换名是否存在
+        List<TransformationEntity> items=taskGroupDao.getAllTrans("");
+        for(TransformationEntity item:items){
+            if(item.getName().equals(oldName))
+                continue;
+            if(item.getName().equals(newName))
+                return false;
+        }
+        taskGroupDao.updateTaskNameforAttr(oldName,newName,"trans","/"+newName);
+        transDao.updateTransNameforTrans(oldName,newName);
+        return true;
+    }
 }

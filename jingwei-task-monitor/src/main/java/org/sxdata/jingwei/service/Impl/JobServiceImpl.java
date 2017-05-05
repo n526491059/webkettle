@@ -409,4 +409,18 @@ public class JobServiceImpl implements JobService{
         jobs.add(job);
         return this.getJobPath(jobs).get(0);
     }
+
+    @Override
+    public boolean updateJobName(String oldName, String newName) {
+        //修改作业名前先判断新的作业名是否已存在
+        for(JobEntity job:taskGroupDao.getAllJob("")){
+            if(job.getName().equals(oldName))
+                continue;
+            if (job.getName().equals(newName))
+                return false;
+        }
+        jobDao.updateJobNameforJob(oldName,newName);
+        taskGroupDao.updateTaskNameforAttr(oldName,newName,"job","/"+newName);
+        return true;
+    }
 }

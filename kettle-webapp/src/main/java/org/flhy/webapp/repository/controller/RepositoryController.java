@@ -133,15 +133,15 @@ public class RepositoryController {
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "/createTrans")
 	protected void createTrans(@RequestParam String dir, @RequestParam String transName,@RequestParam String[] taskGroupArray) throws KettleException, IOException {
+		boolean isSuccess=false;
 		Repository repository = App.getInstance().getRepository();
 		RepositoryDirectoryInterface directory = null;
 		TransMeta transMeta = null;
-		SqlSession sqlSession=null;
+		SqlSession sqlSession=CarteClient.sessionFactory.openSession();
 		try {
 			directory = repository.findDirectory(dir);
 			if(directory == null)
 				directory = repository.getUserHomeDirectory();
-
 			if(repository.exists(transName, directory, RepositoryObjectType.TRANSFORMATION)) {
 				JsonUtils.fail("该转换已经存在，请重新输入！");
 				return;
@@ -152,9 +152,9 @@ public class RepositoryController {
 			transMeta.setName(transName);
 			transMeta.setRepositoryDirectory(directory);
 			repository.save(transMeta, "add: " + new Date(), null);
+			isSuccess=true;
 			//添加任务组记录
 			if(null!=taskGroupArray && taskGroupArray.length>0){
-				sqlSession=CarteClient.sessionFactory.openSession();
 				Integer taskId=Integer.valueOf(transMeta.getObjectId().getId());
 				for(String taskGroupName:taskGroupArray){
 					if(StringDateUtil.isEmpty(taskGroupName)){
@@ -182,8 +182,10 @@ public class RepositoryController {
 			sqlSession.rollback();
 			sqlSession.close();
 			//删除转换
-			ObjectId id = repository.getTransformationID(transName, directory);
-			repository.deleteTransformation(id);
+			if(isSuccess){
+				ObjectId id = repository.getTransformationID(transName, directory);
+				repository.deleteTransformation(id);
+			}
 			JsonUtils.fail("创建失败!");
 		}
 	}
@@ -192,11 +194,13 @@ public class RepositoryController {
 	@RequestMapping(method = RequestMethod.POST, value = "/createJob")
 	protected void createJob(@RequestParam String dir, @RequestParam String jobName,@RequestParam String[] taskGroupArray) throws KettleException, IOException {
 		Repository repository = App.getInstance().getRepository();
-		SqlSession sqlSession=null;
+		SqlSession sqlSession=CarteClient.sessionFactory.openSession();;
         RepositoryDirectoryInterface directory = null;
+		boolean isSuccess=false;
 		try{
+
              directory = repository.findDirectory(dir);
-                if(directory == null)
+			if(directory == null)
                 directory = repository.getUserHomeDirectory();
             if(repository.exists(jobName, directory, RepositoryObjectType.JOB)) {
                 JsonUtils.fail("该作业已经存在，请重新输入！");
@@ -208,10 +212,9 @@ public class RepositoryController {
 			jobMeta.setName(jobName);
 			jobMeta.setRepositoryDirectory(directory);
 			repository.save(jobMeta, "add: " + new Date(), null);
+			isSuccess=true;
 			//添加任务组记录
 			if(null!=taskGroupArray && taskGroupArray.length>0){
-				sqlSession=CarteClient.sessionFactory.openSession();
-
 				Integer taskId=Integer.valueOf(jobMeta.getObjectId().getId());
 				for(String taskGroupName:taskGroupArray){
 					if(StringDateUtil.isEmpty(taskGroupName)){
@@ -245,8 +248,10 @@ public class RepositoryController {
 			sqlSession.rollback();
 			sqlSession.close();
 			//删除作业
-			ObjectId id = repository.getJobId(jobName, directory);
-			repository.deleteJob(id);
+			if(isSuccess){
+				ObjectId id = repository.getJobId(jobName, directory);
+				repository.deleteJob(id);
+			}
 			JsonUtils.fail("作业创建失败!");
 		}
 	}
@@ -464,7 +469,7 @@ public class RepositoryController {
 		
 		out.close();
 		fos.close();
-		
+
 		JsonUtils.success(StringEscapeHelper.encode(file.getAbsolutePath()));
 	}
 	

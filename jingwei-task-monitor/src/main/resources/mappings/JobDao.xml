@@ -118,4 +118,8 @@
         j.MODIFIED_DATE as modifiedDate
         from  r_job j where j.ID_JOB = #{jobId}
     </select>
+
+    <update id="updateJobNameforJob" parameterType="java.lang.String">
+      UPDATE r_job SET NAME=#{1} WHERE NAME=#{0}
+    </update>
 </mapper>

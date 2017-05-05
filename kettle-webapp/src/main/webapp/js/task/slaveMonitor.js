@@ -1,7 +1,7 @@
 //展示节点监控的面板
 function showSlaveMonitorPanel(secondGuidePanel){
     var tBar=getTbarForSlaveMonitorPanel();
-    var divHtml="<div id='main' style='height:490px;width:800px;display:inline-block;'></div>";
+    var divHtml="<div id='main' style='height:450px;width:800px;display:inline-block;'></div>";
 
     var slaveMonitorPanel=new Ext.Panel({
         id:"slaveMonitorPanel",

@@ -18,4 +18,6 @@ public interface TransService {
     public List<TransformationEntity> getTransPath(List<TransformationEntity> items) throws Exception;
 
     public TransformationEntity getTransByName(String transName) throws Exception;
+
+    public boolean updateTransName(String oldName,String newName);
 }

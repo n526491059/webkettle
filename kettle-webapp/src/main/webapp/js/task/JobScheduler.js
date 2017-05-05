@@ -103,6 +103,7 @@ function generateSchedulerMonitorPanel(secondGuidePanel){
             ]
         }),
         bbar:new Ext.PagingToolbar({
+            cls: "bgColorCls",
             store:store,
             pageSize:15,
             displayInfo:true,
