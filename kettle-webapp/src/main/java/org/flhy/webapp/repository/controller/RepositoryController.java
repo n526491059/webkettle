@@ -179,6 +179,11 @@ public class RepositoryController {
 		} catch (Exception e) {
 			//出现异常回滚
 			e.printStackTrace();
+			if(e instanceof KettleException){
+				repository.disconnect();
+				repository.init( App.getInstance().meta);
+				repository.connect("admin", "admin");
+			}
 			sqlSession.rollback();
 			sqlSession.close();
 			//删除转换
@@ -351,8 +356,7 @@ public class RepositoryController {
 		RepositoryDirectoryInterface directory = null;
      try {
 			 directory = repository.findDirectory(dir);
-			if(directory == null)
-				directory = repository.getUserHomeDirectory();
+			if(directory == null) 	directory = repository.getUserHomeDirectory();
 			if(RepositoryObjectType.TRANSFORMATION.getTypeDescription().equals(type)) {
 				TransMeta transMeta = repository.loadTransformation(name, directory, null, true, null);
 				transMeta.setRepositoryDirectory(directory);
@@ -376,7 +380,7 @@ public class RepositoryController {
 			if(e instanceof KettleException){
 				Repository appRepo = App.getInstance().getRepository();
 				appRepo.disconnect();
-				appRepo.init( App.getInstance().meta);
+				appRepo.init(App.getInstance().meta);
 				appRepo.connect("admin", "admin");
 			}
 		}
@@ -384,9 +388,9 @@ public class RepositoryController {
 	
 	/**
 	 * 资源库浏览，生成树结构
-	 * 
-	 * @throws KettleException 
-	 * @throws IOException 
+	 *
+	 * @throws KettleException
+	 * @throws IOException
 	 */
 	@RequestMapping(method=RequestMethod.POST, value="/explorer")
 	protected @ResponseBody List explorer(@RequestParam String path, @RequestParam int loadElement) throws KettleException, IOException {
