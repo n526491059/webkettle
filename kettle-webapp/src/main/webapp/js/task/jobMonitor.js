@@ -86,7 +86,8 @@ function generateJobPanel(secondGuidePanel){
         id: "createDateForSearch",
         fieldLabel: "创建日期",
         width: 100,
-        format: "Y-m-d"
+        format: "Y-m-d",
+        emptyText:"创建时间"
     })
 
     var grid=new Ext.grid.GridPanel({

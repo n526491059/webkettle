@@ -75,7 +75,9 @@ function generateSchedulerMonitorPanel(secondGuidePanel){
     var JobNameField=new Ext.form.TextField({
         id:"inputJobName",
         width: 150,
-        value:inputJobName
+        value:inputJobName ,
+        emptyText:"任务名"
+
     })
 
     var jobSchedulerGrid=new Ext.grid.GridPanel({

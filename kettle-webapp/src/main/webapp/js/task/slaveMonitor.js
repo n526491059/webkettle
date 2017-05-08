@@ -75,7 +75,8 @@ function getTbarForSlaveMonitorPanel(){
         name: "createDate",
         fieldLabel: "创建日期",
         width: 100,
-        format: "Y-m-d"
+        format: "Y-m-d",
+        emptyText:"选择日期"
     })
     var toolBar=new Ext.Toolbar({
         buttons:[

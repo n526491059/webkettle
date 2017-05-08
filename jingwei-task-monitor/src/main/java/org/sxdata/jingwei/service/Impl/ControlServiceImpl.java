@@ -242,7 +242,7 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
                     if(transStatus.isRunning()){
                         item.setIsStart("正在运行");
                     }else if(transStatus.isPaused()){
-                        item.setIsStart("已暂停");
+                        item.setIsStart("暂停中");
                     }
                     items.add(item);
                 }

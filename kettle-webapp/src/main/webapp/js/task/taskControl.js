@@ -36,8 +36,9 @@ function showTaskControlPanel(){
                             return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='collectData()' id='transDetailButton' title='日志明细'/>&nbsp;&nbsp;"+
                                 "<img src='../../ui/images/i_transDetail.png' class='imgCls' onclick='showTransDetailWindow()' title='转换详情'/>&nbsp;&nbsp;"+
                                 "<img src='../../ui/images/i_shutDown.png' class='imgCls' onclick='stopJobOrTrans()' title='结束'/>&nbsp;&nbsp;"+
-                                "<img src='../../ui/images/i_pause.png' class='imgCls' onclick='pauseOrStart()' id='startTrans' title='暂停' style='display:none'/>&nbsp;&nbsp;"+
-                                "<img src='../../ui/images/i_start.png' class='imgCls' onclick='pauseOrStart()' id='pauseTrans' title='开始'/>&nbsp;&nbsp;";
+                                "<img src='../../ui/images/i_start.png' class='imgCls' onclick='pauseOrStart()' id='pauseTrans' title='开始'/>&nbsp;&nbsp;"
+                                +"<img src='../../ui/images/i_pause.png' class='imgCls' onclick='pauseOrStart()' id='startTrans' title='暂停' style='display:none'/>&nbsp;&nbsp;"
+                                ;
                         }else{
                             return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='collectData()' id='transDetailButton' title='日志明细'/>&nbsp;&nbsp;"+
                                 "<img src='../../ui/images/i_transDetail.png' class='imgCls' onclick='showTransDetailWindow()' title='转换详情'/>&nbsp;&nbsp;"+
