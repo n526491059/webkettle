@@ -1,5 +1,6 @@
 package org.flhy.webapp.job;
 
+import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.util.Date;
 import java.util.HashMap;
@@ -47,6 +48,8 @@ import org.w3c.dom.Element;
 
 import com.enterprisedt.net.ftp.FTPClient;
 import com.mxgraph.util.mxUtils;
+
+import javax.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping(value="/job")
@@ -169,7 +172,32 @@ public class JobGraphController {
 		repository.save(jobMeta, versionComment, null);
 		JsonUtils.success("作业保存成功！");
 	}
-	
+
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/stop")
+	protected JSONObject stop(@RequestParam String executionId,HttpServletResponse response) throws Exception {
+		JobExecutor jobExecutor = JobExecutor.getExecutor(executionId);
+		if(jobExecutor!=null && jobExecutor.getJob()==null){
+			response.setContentType("text/html;charset=utf-8");
+			PrintWriter out=response.getWriter();
+			out.write("faile");
+			out.flush();
+			out.close();
+			return null;
+		}
+		if(jobExecutor != null || jobExecutor.getJob()!=null) {
+			jobExecutor.getJob().stopAll();
+			while(!jobExecutor.isFinished())
+				Thread.sleep(500);
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("finished", jobExecutor.isFinished());
+			jsonObject.put("log", jobExecutor.getExecutionLog());
+			JobExecutor.remove(executionId);
+			return jsonObject;
+		}
+		return null;
+	}
+
 	/**
 	 * 新建环节
 	 * 

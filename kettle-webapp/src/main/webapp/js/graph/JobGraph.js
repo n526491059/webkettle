@@ -3,13 +3,17 @@ JobExecutor = Ext.extend(Ext.util.Observable, {
 	executionId: null,
 	
 	constructor: function() {
-		this.addEvents('beforerun', 'run', 'result');
+		this.addEvents('beforerun', 'run', 'result','stop');
 		
 		this.on('run', function(executionId) {
 			this.executionId = executionId;
 			this.loadResult();
 		}, this);
-		
+        this.on('stop', function(result) {
+            this.executionId = null;
+            this.fireEvent('result', result);
+            this.fireEvent('finish');
+        }, this);
 	},
 	
 	loadResult: function() {
@@ -31,7 +35,25 @@ JobExecutor = Ext.extend(Ext.util.Observable, {
 			failure: failureResponse
 		});
 	},
-
+    stop: function() {
+        var me = this;
+        if(this.executionId == null)
+            return;
+        Ext.Ajax.request({
+            url: GetUrl('job/stop.do'),
+            method: 'POST',
+            params: {executionId: this.executionId},
+            success: function(response) {
+                if(response.responseText=="faile"){
+                    Ext.MessageBox.alert("该作业为远程执行,请在任务监控模块进行停止!");
+                }else{
+                    var resObj = Ext.decode(response.responseText);
+                    me.fireEvent('stop', resObj);
+                }
+            },
+            failure: failureResponse
+        });
+    },
 	isRunning: function() {
 		return this.executionId != null;
 	}
@@ -45,17 +67,17 @@ JobGraph = Ext.extend(BaseGraph, {
 
 		var resultPanel = new JobResult({hidden: !this.showResult});
 
-		if(this.readOnly === false && this.Executable===false ) {
+        var jobExecutor = this.jobExecutor = new JobExecutor();
+        jobExecutor.on('beforerun', function(executor,defaultExecutionConfig) {
+            var dialog = new JobExecutionConfigurationDialog();
+            dialog.show(null, function() {
+                dialog.initData(defaultExecutionConfig);
+            });
+        });
+        jobExecutor.on('result', this.doResult, this);
+        if(this.readOnly === false && this.Executable===false ) {
 
-			var jobExecutor = this.jobExecutor = new JobExecutor();
-			jobExecutor.on('beforerun', function(executor,defaultExecutionConfig) {
-				var dialog = new JobExecutionConfigurationDialog();
-				dialog.show(null, function() {
-					dialog.initData(defaultExecutionConfig);
-				});
-			});
-			jobExecutor.on('result', this.doResult, this);
-			
+
 			this.tbar = [{
 				iconCls: 'save', scope: this, tooltip: '保存这个任务', handler: this.save
 			}, '-', {
@@ -69,15 +91,14 @@ JobGraph = Ext.extend(BaseGraph, {
 			}*/, '-', {
 				iconCls: 'show-results', scope: this, handler: this.showResultPanel
 			}];
+            var finish = function() {
+                var tb = this.getTopToolbar();
+                tb.find('iconCls', 'pause')[0].disable();
+                tb.find('iconCls', 'stop')[0].disable();
+            };
+            jobExecutor.on('finish', finish, this);
 		}else if(this.Executable===true&&this.readOnly === false){
-			var jobExecutor = this.jobExecutor = new JobExecutor();
-			jobExecutor.on('beforerun', function(executor,defaultExecutionConfig) {
-				var dialog = new JobExecutionConfigurationDialog();
-				dialog.show(null, function() {
-					dialog.initData(defaultExecutionConfig);
-				});
-			});
-			jobExecutor.on('result', this.doResult, this);
+
 			this.tbar = [{
 				iconCls: 'run', scope: this, tooltip: '运行这个任务', handler: this.run
 			}, {
@@ -176,7 +197,9 @@ JobGraph = Ext.extend(BaseGraph, {
 		});
 		
 	},
-	
+    stop: function() {
+        this.jobExecutor.stop();
+    },
 	showResultPanel: function() {
 		var resultPanel = this.layout.south.panel;
 		

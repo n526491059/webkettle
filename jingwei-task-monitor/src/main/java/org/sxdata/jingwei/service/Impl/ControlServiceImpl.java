@@ -354,7 +354,7 @@ public class ControlServiceImpl extends StopTransServlet implements ControlServi
                 JobExecutor jobExecutor = table.get(jobExecutorId);
                 if(jobExecutor.getExecutionId().equals(id)){
                     if(hostName.trim().equals("本地执行")){
-                        jobExecutor.getJob().stopAll();
+                        jobExecutor.stop();
                         jobExecutor.setIsClickStop(true);
                     }
                 }

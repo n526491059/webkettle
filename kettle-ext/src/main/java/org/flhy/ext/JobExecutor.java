@@ -286,7 +286,11 @@ public class JobExecutor implements Runnable {
 			session.close();
 		}
 	}
-
+	public void stop(){
+		if(null!=job){
+			job.stopAll();
+		}
+	}
 	public int previousNrItems;
 	public JSONArray getJobMeasure() throws Exception {
     	JSONArray jsonArray = new JSONArray();
