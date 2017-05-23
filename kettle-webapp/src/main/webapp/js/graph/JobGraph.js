@@ -211,7 +211,9 @@ JobGraph = Ext.extend(BaseGraph, {
 		var graph = this.getGraph(), me = this;
 		if(this.Executable==false && this.readOnly==false){
 			if(cell == null) {
-				menu.addItem('新建注释', null, function(){alert(1);}, null, null, true);
+                menu.addItem('新建注释', null, function(evt) {
+                    me.createNote(evt);
+                }, null, null, true);
 				menu.addItem('从剪贴板粘贴步骤', null, function(){alert(1);}, null, null, !mxClipboard.isEmpty());
 				menu.addSeparator(null);
 				menu.addItem('全选', null, function(){me.getGraph().selectVertices();}, null, null, true);
@@ -237,10 +239,10 @@ JobGraph = Ext.extend(BaseGraph, {
 					});
 				}, null, null, true);
 				menu.addSeparator(null);
-				menu.addItem('作业设置', null, function() {
-					var transDialog = new TransDialog();
-					transDialog.show();
-				}, null, null, true);
+				// menu.addItem('作业设置', null, function() {
+				// 	var transDialog = new TransDialog();
+				// 	transDialog.show();
+				// }, null, null, true);
 			} else if(cell.isVertex()) {
 				menu.addItem('新节点', null, function(){alert(1);}, null, null, true);
 				menu.addItem('编辑作业入口', null, function(){
