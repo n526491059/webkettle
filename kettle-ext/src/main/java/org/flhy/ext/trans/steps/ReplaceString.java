@@ -18,6 +18,8 @@ import org.w3c.dom.Element;
 
 import java.util.List;
 
+import static org.pentaho.di.trans.steps.replacestring.ReplaceStringMeta.*;
+
 /**
  * Created by pengpai on 2017/5/10.
  */
@@ -42,14 +44,13 @@ public class ReplaceString  extends AbstractStep {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
             fieldInStream[i] = jsonObject.optString("in_stream_name");
             fieldOutStream[i] = jsonObject.optString("out_stream_name");
-            useRegEx[i]= Integer.parseInt(jsonObject.optString("use_regex"));
+            useRegEx[i]= "Y".equalsIgnoreCase(jsonObject.optString("use_regex"))?USE_REGEX_YES:USE_REGEX_NO;
             replaceString[i] = jsonObject.optString("replace_string");
             replaceByString[i] = jsonObject.optString("replace_by_string");
-            String emptyString = jsonObject.optString("set_empty_string");
-            setEmptyString[i] = !Const.isEmpty(emptyString) && "Y".equalsIgnoreCase(emptyString);
+            setEmptyString[i] ="Y".equalsIgnoreCase(jsonObject.optString("set_empty_string"));
             replaceFieldByString[i] =jsonObject.optString("replace_field_by_string");
-            wholeWord[i] = Integer.parseInt(jsonObject.optString("whole_word"));
-            caseSensitive[i] = Integer.parseInt(jsonObject.optString("case_sensitive"));
+            wholeWord[i] = "Y".equalsIgnoreCase(jsonObject.optString("whole_word"))?WHOLE_WORD_YES:WHOLE_WORD_NO;
+            caseSensitive[i] =  "Y".equalsIgnoreCase(jsonObject.optString("case_sensitive"))?CASE_SENSITIVE_YES:CASE_SENSITIVE_NO;
         }
         replaceStringMeta.setFieldInStream(fieldInStream);
         replaceStringMeta.setFieldOutStream(fieldOutStream);
@@ -57,7 +58,7 @@ public class ReplaceString  extends AbstractStep {
         replaceStringMeta.setReplaceString(replaceString);
         replaceStringMeta.setReplaceByString(replaceByString);
         replaceStringMeta.setEmptyString(setEmptyString);
-        replaceStringMeta.setReplaceByString(replaceFieldByString);
+        replaceStringMeta.setFieldReplaceByString(replaceFieldByString);
         replaceStringMeta.setWholeWord(wholeWord);
         replaceStringMeta.setCaseSensitive(caseSensitive);
     }
@@ -68,26 +69,27 @@ public class ReplaceString  extends AbstractStep {
         Element e = doc.createElement(PropsUI.TRANS_STEP_NAME);
         ReplaceStringMeta replaceStringMeta = (ReplaceStringMeta) stepMetaInterface;
         JSONArray jsonArray = new JSONArray();
+
         String[] fieldInStream = replaceStringMeta.getFieldInStream();
         String[] fieldOutStream = replaceStringMeta.getFieldOutStream();
         int[] useRegEx = replaceStringMeta.getUseRegEx();
         String[] replaceString = replaceStringMeta.getReplaceString();
         String[] replaceByString = replaceStringMeta.getReplaceByString();
         boolean[] setEmptyString = replaceStringMeta.isSetEmptyString();
-        String[] replaceFieldByString = replaceStringMeta.getReplaceByString();
+        String[] replaceFieldByString = replaceStringMeta.getFieldReplaceByString();
         int[] wholeWord = replaceStringMeta.getWholeWord();
         int[] caseSensitive = replaceStringMeta.getCaseSensitive();
         for (int i = 0; i < fieldInStream.length; i++) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("in_stream_name", fieldInStream[i]);
             jsonObject.put("out_stream_name", fieldOutStream[i]);
-            jsonObject.put("use_regex", useRegEx[i]);
+            jsonObject.put("use_regex", useRegEx[i]==USE_REGEX_YES ? "Y" : "N");
             jsonObject.put("replace_string", replaceString[i]);
             jsonObject.put("replace_by_string", replaceByString[i]);
-            jsonObject.put("set_empty_string", setEmptyString[i]);
+            jsonObject.put("set_empty_string", setEmptyString[i]?"Y":"N");
             jsonObject.put("replace_field_by_string", replaceFieldByString[i]);
-            jsonObject.put("whole_word", wholeWord[i]);
-            jsonObject.put("case_sensitive", caseSensitive[i]);
+            jsonObject.put("whole_word", wholeWord[i]==WHOLE_WORD_YES ? "Y" : "N");
+            jsonObject.put("case_sensitive",caseSensitive[i]==CASE_SENSITIVE_YES ? "Y" : "N");
             jsonArray.add(jsonObject);
         }
         e.setAttribute("fields", jsonArray.toString());
