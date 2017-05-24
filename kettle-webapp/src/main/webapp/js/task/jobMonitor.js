@@ -143,9 +143,10 @@ function executeJob(){
         params: {taskName: path,type:'job'},
         success: function(response) {
             var resObj = Ext.decode(response.responseText);
-            var graphPanel = Ext.create({border: false, Executable: true },resObj.GraphType);
+            var graphPanel = Ext.create({border: false, Executable: true},resObj.GraphType);
             var dialog = new LogDetailDialog({
-                items: graphPanel
+                items: graphPanel,
+                title:"执行作业配置"
             });
             activeGraph = graphPanel;
             dialog.show(null, function() {
@@ -352,7 +353,7 @@ function showWindowByAssigned(jobId,jobPath,jobName,grid){
     var panelByAssigned=generateAllTaskGroupPanel(jobId,jobPath,jobName);
     var taskGroupAssignedWindow=new Ext.Window({
         id:"taskGroupAssignedWindow",
-        title:"<font size = '3px' >任务组分配</font>",
+        title:"<font size = '2.5px' >任务组分配</font>",
         bodyStyle:"background-color:white",
         width:455,
         height:570,

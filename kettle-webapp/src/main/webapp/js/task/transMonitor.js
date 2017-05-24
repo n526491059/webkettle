@@ -161,7 +161,8 @@ function executeTrans(){
             var resObj = Ext.decode(response.responseText);
             var graphPanel = Ext.create({border: false, Executable:true},resObj.GraphType);
             var dialog = new LogDetailDialog({
-                items: graphPanel
+                items: graphPanel,
+                title:"执行转换配置"
             });
             activeGraph = graphPanel;
             dialog.show(null, function() {
@@ -343,7 +344,7 @@ function showWindowForAssigned(transId,transPath,transName,flag){
     var panelByAssigned=AllTaskGroupPanel(transId,transPath,transName,flag);
     var taskGroupAssignedWindow=new Ext.Window({
         id:"assignedWindow",
-        title:"<font size = '3px' >任务组分配</font>",
+        title:"<font size = '2.5px' >任务组分配</font>",
         modal:true,
         bodyStyle:"background-color:white",
         width:455,
