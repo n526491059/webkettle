@@ -11,7 +11,7 @@
             j.CREATED_DATE as createDate,
             j.MODIFIED_USER as modifiedUser,
             j.MODIFIED_DATE as modifiedDate
-            from  r_job j
+            from (SELECT * FROM r_job ORDER BY CREATED_DATE DESC) j
             WHERE 1=1
         <if test='param3!=null and param3!=""'  >
             AND j.`NAME` IN

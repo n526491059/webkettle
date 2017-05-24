@@ -28,7 +28,6 @@ public class JobEntrySpecial extends AbstractJobEntry {
 		jobEntrySpecial.setDummy("Y".equalsIgnoreCase(cell.getAttribute("dummy")));
 		jobEntrySpecial.setRepeat("Y".equalsIgnoreCase(cell.getAttribute("repeat")));
 		jobEntrySpecial.setSchedulerType(Const.toInt( cell.getAttribute( "schedulerType" ),  org.pentaho.di.job.entries.special.JobEntrySpecial.NOSCHEDULING ));
-		
 		jobEntrySpecial.setIntervalSeconds( Const.toInt( cell.getAttribute( "intervalSeconds" ), 0 ) );
 		jobEntrySpecial.setIntervalMinutes( Const.toInt( cell.getAttribute( "intervalMinutes" ), 0 ) );
 		jobEntrySpecial.setHour( Const.toInt( cell.getAttribute( "hour" ), 0 ) );

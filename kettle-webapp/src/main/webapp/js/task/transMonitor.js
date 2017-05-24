@@ -333,13 +333,13 @@ function beforeAssigned(){
     var transId=record.get("transformationId");
     var transPath=record.get("directoryName");
     var transName=record.get("name");
-    showWindowForAssigned(transId,transPath,transName,grid,secondGuidePanel);
+    showWindowForAssigned(transId,transPath,transName,"");
 
 }
 
 //分配任务组 显示窗口
-function showWindowForAssigned(transId,transPath,transName,grid,secondGuidePanel){
-    var panelByAssigned=AllTaskGroupPanel(transId,transPath,transName);
+function showWindowForAssigned(transId,transPath,transName,flag){
+    var panelByAssigned=AllTaskGroupPanel(transId,transPath,transName,flag);
     var taskGroupAssignedWindow=new Ext.Window({
         id:"assignedWindow",
         title:"<font size = '3px' >任务组分配</font>",
@@ -351,11 +351,11 @@ function showWindowForAssigned(transId,transPath,transName,grid,secondGuidePanel
             panelByAssigned
         ]
     });
-    taskGroupAssignedWindow.show(grid);
+    taskGroupAssignedWindow.show();
 }
 
 //获取该用户下的所有任务组  并且设置任务组是否包含该转换的标识
-function AllTaskGroupPanel(transId,transPath,transName){
+function AllTaskGroupPanel(transId,transPath,transName,flag){
     var sm2=new Ext.grid.CheckboxSelectionModel();
     //节点列模型
     var taskGroupModel=new Ext.grid.ColumnModel([
@@ -399,7 +399,7 @@ function AllTaskGroupPanel(transId,transPath,transName){
                 {
                     text:"确认",
                     handler:function(){
-                        assignedGroupTask(transId,transPath,transName,taskGroupPanelByAssigned);
+                        assignedGroupTask(transId,transPath,transName,taskGroupPanelByAssigned,flag);
                     }
                 }
             ]
@@ -427,7 +427,7 @@ function AllTaskGroupPanel(transId,transPath,transName){
 }
 
 //分配任务组 访问后台
-function assignedGroupTask(transId,transPath,transName,taskGroupPanelByAssigned){
+function assignedGroupTask(transId,transPath,transName,taskGroupPanelByAssigned,flag){
     var view=taskGroupPanelByAssigned.getView();
     var rsm=taskGroupPanelByAssigned.getSelectionModel();
     var taskGroupNameArray=new Array();
@@ -441,9 +441,13 @@ function assignedGroupTask(transId,transPath,transName,taskGroupPanelByAssigned)
             url:"/taskGroup/assignedTaskGroup.do",
             success:function(response,config){
                 Ext.MessageBox.alert("任务组分配成功!");
-                var secondGuidePanel=Ext.getCmp("secondGuidePanel");
                 Ext.getCmp("assignedWindow").close();
-                generateTrans(secondGuidePanel);
+                if(flag=="G")
+                    document.getElementById("taskGroupAttrImg").onclick();
+                else{
+                    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+                    generateTrans(secondGuidePanel);
+                }
             },
             failure:function(response){
                 Ext.getCmp("assignedWindow").close();

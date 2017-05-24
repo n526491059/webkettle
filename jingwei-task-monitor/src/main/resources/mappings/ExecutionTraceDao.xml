@@ -19,7 +19,7 @@
         e.executionConfiguration as executionConfiguration,
         e.executionLog as executionLog,
          e.type as type
-      from (select * from task_execution_log ORDER BY startTime DESC) e WHERE 1=1
+      from (select * from task_execution_log ORDER BY endTime DESC) e WHERE 1=1
         <if test='param7!=null and param7!=""'>
             and  e.jobName IN
             (

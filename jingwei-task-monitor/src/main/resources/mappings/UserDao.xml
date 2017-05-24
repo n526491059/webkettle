@@ -40,7 +40,7 @@
         <if test='param5!=null'>
             AND d.USER_TYPE=#{4}
         </if>
-         limit #{0},#{1}
+        ORDER BY d.CREATE_DATE DESC limit #{0},#{1}
     </select>
 
     <select id="getUsers" resultType="org.sxdata.jingwei.entity.UserEntity">

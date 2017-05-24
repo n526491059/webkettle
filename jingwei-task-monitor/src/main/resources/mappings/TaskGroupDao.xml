@@ -7,7 +7,7 @@
             d.TASK_GROUP_NAME as taskGroupName,
             d.TASK_DESC as taskGroupDesc,
             d.CREATE_DATE as createDate
-        from d_task_group d
+        from  (SELECT * FROM d_task_group ORDER BY CREATE_DATE DESC) d
         WHERE 1=1
         <if test='param3!=null and param3!=""'>
             AND d.TASK_GROUP_NAME IN

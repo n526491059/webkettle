@@ -21,9 +21,9 @@ function showTaskGroupPanel(secondGuidePanel){
                 if(loginUserName=="admin" || loginUserTaskGroupPower==1){
                     return "<img src='../../ui/images/i_delete.png' class='imgCls' onclick='deleteTaskGroupAndAttributes()' title='删除任务组'/>&nbsp;&nbsp;"+
                         "<img src='../../ui/images/i_assigned.png' class='imgCls' onclick='beforeUpdateTaskGroup()' title='编辑'/>&nbsp;&nbsp;"+
-                        "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='beforeSelectTaskGroupDetail()' title='任务组详情'/>&nbsp;&nbsp;";
+                        "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='beforeSelectTaskGroupDetail()' title='任务组详情' id='taskGroupAttrImg'/>&nbsp;&nbsp;";
                 }else{
-                    return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='beforeSelectTaskGroupDetail()' title='任务组详情'/>&nbsp;&nbsp;";
+                    return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='beforeSelectTaskGroupDetail()' title='任务组详情' id='taskGroupAttrImg'/>&nbsp;&nbsp;";
                 }
             }
         }
@@ -138,29 +138,30 @@ function showTaskGroupPanel(secondGuidePanel){
 
 //删除功能  删除任务组并且移除任务组中的所有任务
 function deleteTaskGroupAndAttributes(){
-    var taskGroupPanel=Ext.getCmp("taskGroupPanel");
-    var view=taskGroupPanel.getView();
-    var rsm=taskGroupPanel.getSelectionModel();
-    var taskGroupNames=new Array();
-    for(var i=0;i<view.getRows().length;i++) {
-        if(rsm.isSelected(i)){
-            taskGroupNames.push(taskGroupPanel.getStore().getAt(i).get("taskGroupName"));
-        }
-    }
-    if(taskGroupNames.length<1){
-        Ext.MessageBox.alert("请至少选择一个需要删除的任务组");
-        return;
-    }else{
-        Ext.Ajax.request({
-            url:"/taskGroup/deleteTaskGroup.do",
-            success:function(response,config){
-                Ext.MessageBox.alert("result","删除成功!");
-                showTaskGroupPanel(Ext.getCmp("secondGuidePanel"));
-            },
-            failure:failureResponse,
-            params:{name:taskGroupNames}
-        })
-    }
+    var taskGroupName=Ext.getCmp("taskGroupPanel").getSelectionModel().getSelected().get("taskGroupName");//被选中的任务路径
+    //删除前先判断任务组前是否包含了任务
+    Ext.Ajax.request({
+        url:"/taskGroup/selectTaskGroup.do",
+        success:function(response,config){
+            var result=response.responseText;
+            if(result=="[]"){
+                //删除任务组
+                Ext.Ajax.request({
+                    url:"/taskGroup/deleteTaskGroup.do",
+                    success:function(response,config){
+                        Ext.MessageBox.alert("result","删除成功!");
+                        showTaskGroupPanel(Ext.getCmp("secondGuidePanel"));
+                    },
+                    failure:failureResponse,
+                    params:{name:taskGroupName}
+                })
+            }else{
+                Ext.MessageBox.alert("该任务组下存在任务,请至任务组详情功能中移除!");
+            }
+        },
+        failure:failureResponse,
+        params:{taskGroupName:taskGroupName}
+    })
 }
 
 //查看功能  查看前先获取唯一选中行的任务组名
@@ -209,7 +210,12 @@ function showSelectTaskGroupPanel(taskGroupName){
         {header:"任务ID",dataIndex:"taskId"},
         {header:"任务类型",dataIndex:"type"},
         {header:"任务名",dataIndex:"taskName"},
-        {header:"任务全目录名",dataIndex:"taskPath"}
+        {header:"任务全目录名",dataIndex:"taskPath"},
+        {header:"操作",dataIndex:"",menuDisabled:true,align:"center",
+            renderer:function(v){
+                return "<img src='../../ui/images/i_assigned.png' class='imgCls' onclick='taskGroupForAss()' title='分配任务组'/>&nbsp;&nbsp;"
+            }
+        }
     ]);
 
     var proxy=new Ext.data.HttpProxy({url:"/taskGroup/selectTaskGroup.do"});
@@ -669,3 +675,21 @@ function addTaskGroupEnd(flag){
             taskArray:JSON.stringify(taskArray),userGroupNameArray:userGroupNameArray}
     })
 }
+
+//任务组版块的分配任务组功能
+function taskGroupForAss(){
+    var grid=Ext.getCmp("taskGroupAttributesPanel");
+    var record=grid.getSelectionModel().getSelected();
+    var taskId=record.get("taskId");
+    var taskName=record.get("taskName");
+    var path=record.get("taskPath");
+    var type=record.get("type");
+    Ext.getCmp("taskGroupAttributesWindow").close();
+    if(type=="job"){
+        showWindowByAssigned(taskId,path,taskName,"G");
+    }else{
+        showWindowForAssigned(taskId,path,taskName,"G");
+    }
+}
+
+

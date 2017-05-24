@@ -85,7 +85,8 @@ function generateJobPanel(secondGuidePanel){
     var dateField=new Ext.form.DateField({
         id: "createDateForSearch",
         fieldLabel: "创建日期",
-        width: 100,
+        emptyText:"请选择创建日期..",
+        width: 120,
         format: "Y-m-d"
     })
 
@@ -190,7 +191,6 @@ function jobCompositionImg(){
                 var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
                 var decoder = new mxCodec(xmlDocument);
                 var node = xmlDocument.documentElement;
-
                 var graph = graphPanel.getGraph();
                 decoder.decode(node, graph.getModel());
                 graphPanel.setTitle(graph.getDefaultParent().getAttribute('name'));
@@ -344,12 +344,12 @@ function beforeAssignedTaskGroup(){
     var jobId=record.get("jobId");
     var jobPath=record.get("directoryName");
     var jobName=record.get("name");
-    showWindowByAssigned(jobId,jobPath,jobName,grid);
+    showWindowByAssigned(jobId,jobPath,jobName,"");
 }
 
 //展示分配任务组的窗口
-function showWindowByAssigned(jobId,jobPath,jobName,grid){
-    var panelByAssigned=generateAllTaskGroupPanel(jobId,jobPath,jobName);
+function showWindowByAssigned(jobId,jobPath,jobName,flag){
+    var panelByAssigned=generateAllTaskGroupPanel(jobId,jobPath,jobName,flag);
     var taskGroupAssignedWindow=new Ext.Window({
         id:"taskGroupAssignedWindow",
         title:"<font size = '3px' >任务组分配</font>",
@@ -361,11 +361,11 @@ function showWindowByAssigned(jobId,jobPath,jobName,grid){
             panelByAssigned
         ]
     });
-    taskGroupAssignedWindow.show(grid);
+    taskGroupAssignedWindow.show();
 }
 
 //获取该用户下的所有任务组  并且设置任务组是否包含该任务的标识
-function generateAllTaskGroupPanel(jobId,jobPath,jobName){
+function generateAllTaskGroupPanel(jobId,jobPath,jobName,flag){
     var sm2=new Ext.grid.CheckboxSelectionModel();
     //节点列模型
     var taskGroupModel=new Ext.grid.ColumnModel([
@@ -409,7 +409,7 @@ function generateAllTaskGroupPanel(jobId,jobPath,jobName){
                 {
                     text:"确认",
                     handler:function(){
-                        assignedTaskGroup(jobId,jobName,jobPath,taskGroupPanelByAssigned);
+                        assignedTaskGroup(jobId,jobName,jobPath,taskGroupPanelByAssigned,flag);
                     }
                 }
             ]
@@ -437,7 +437,7 @@ function generateAllTaskGroupPanel(jobId,jobPath,jobName){
 }
 
 //访问后台分配任务组
-function assignedTaskGroup(jobId,jobName,jobPath,taskGroupPanelByAssigned){
+function assignedTaskGroup(jobId,jobName,jobPath,taskGroupPanelByAssigned,flag){
     var view=taskGroupPanelByAssigned.getView();
     var rsm=taskGroupPanelByAssigned.getSelectionModel();
     var taskGroupNameArray=new Array();
@@ -450,10 +450,14 @@ function assignedTaskGroup(jobId,jobName,jobPath,taskGroupPanelByAssigned){
         Ext.Ajax.request({
             url:"/taskGroup/assignedTaskGroup.do",
             success:function(response,config){
-                Ext.MessageBox.alert("任务组分配成功!");
-                var secondGuidePanel=Ext.getCmp("secondGuidePanel");
                 Ext.getCmp("taskGroupAssignedWindow").close();
-                generateJobPanel(secondGuidePanel);
+                if(flag=="G")
+                    document.getElementById("taskGroupAttrImg").onclick();
+                else{
+                    var secondGuidePanel=Ext.getCmp("secondGuidePanel");
+                    generateJobPanel(secondGuidePanel);
+                }
+                Ext.MessageBox.alert("分配成功!");
             },
             failure:failureResponse,
             params:{taskId:jobId,taskName:jobName,taskPath:jobPath,type:"job",taskGroupNameArray:taskGroupNameArray}

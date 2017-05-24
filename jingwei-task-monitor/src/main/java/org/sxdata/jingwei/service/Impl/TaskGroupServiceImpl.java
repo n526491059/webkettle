@@ -158,12 +158,10 @@ public class TaskGroupServiceImpl implements TaskGroupService{
 
     @Override
     @Transactional
-    public void deleteTaskGroupAndAttributes(String[] names){
-        for(String name:names){
-            taskGroupDao.deleteTaskGroupAttributesByName(name.trim());
-            taskGroupDao.deleteTaskGroupByName(name.trim());
-            taskGroupDao.deleteUserTaskRelationByName(name);
-        }
+    public void deleteTaskGroupAndAttributes(String name){
+        taskGroupDao.deleteTaskGroupAttributesByName(name.trim());
+        taskGroupDao.deleteTaskGroupByName(name.trim());
+        taskGroupDao.deleteUserTaskRelationByName(name);
     }
 
     @Override

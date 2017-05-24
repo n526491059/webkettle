@@ -128,17 +128,20 @@ BaseGraph = Ext.extend(Ext.Panel, {
 			});
 		});
 
-		graph.addListener(mxEvent.DOUBLE_CLICK, function(sender, evt){  
-			var cell = evt.getProperty('cell');
-			if(cell && cell.isVertex()) {
-				if(cell.value.nodeName != 'NotePad') {
-					me.editCell(cell);
-				} else {
-					graph.startEditingAtCell(cell);
+		if(!this.readOnly && !this.Executable){
+			graph.addListener(mxEvent.DOUBLE_CLICK, function(sender, evt){
+				var cell = evt.getProperty('cell');
+				if(cell && cell.isVertex()) {
+					if(cell.value.nodeName != 'NotePad') {
+						me.editCell(cell);
+					} else {
+						graph.startEditingAtCell(cell);
+					}
+
 				}
-				
-			}
-		});
+			});
+		}
+
 		
 		this.fireEvent('initgraph', graph);
 		

@@ -23,7 +23,7 @@ public interface TaskGroupService {
 
     public String selectTaskGroupAttributesByName(String name) throws Exception;
 
-    public void deleteTaskGroupAndAttributes(String[] names) throws Exception;
+    public void deleteTaskGroupAndAttributes(String name) throws Exception;
 
     public List<TaskGroupEntity> isContainsTask(String taskName,String type,String userGroupName) throws Exception;
 

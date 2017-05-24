@@ -90,8 +90,8 @@ public class TaskGroupController {
     @ResponseBody
     protected void deleteTaskGroup(HttpServletRequest request,HttpServletResponse response) throws Exception{
         try{
-            String[] names=request.getParameterValues("name");
-            taskGroupService.deleteTaskGroupAndAttributes(names);
+            String name=request.getParameter("name");
+            taskGroupService.deleteTaskGroupAndAttributes(name);
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
             out.write("success");
@@ -121,7 +121,7 @@ public class TaskGroupController {
             if(null!=attr){
                 userGroupName=attr.getUserGroupName();
             }
-            String result=taskGroupService.getAllTaskGroupByLogin(start, limit, userGroupName,taskGroupName,createDate);
+            String result=taskGroupService.getAllTaskGroupByLogin(start, limit, userGroupName, taskGroupName, createDate);
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
             out.write(result);
@@ -252,4 +252,5 @@ public class TaskGroupController {
             throw new Exception(e.getMessage());
         }
     }
+
 }
