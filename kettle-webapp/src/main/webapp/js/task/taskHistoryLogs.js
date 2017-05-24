@@ -202,7 +202,8 @@ function getTbarForHistoryLog(statu,type,taskName){
         id:"crtDateForLogSearch",
         fieldLabel: "开始时间",
         width:100,
-        format: "Y-m-d"
+        format: "Y-m-d",
+        emptyText:"开始时间"
     });
     var searchButton=new Ext.Button({
         iconCls:"searchCls",

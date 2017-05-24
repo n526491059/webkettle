@@ -86,7 +86,8 @@ function generateTrans(secondGuidePanel){
         id: "crtDateForSearch",
         fieldLabel: "创建日期",
         width:100,
-        format: "Y-m-d"
+        format: "Y-m-d",
+        emptyText:"创建时间"
     })
 
    /* f=new Ext.form.FormPanel({

@@ -79,7 +79,8 @@ function showTaskGroupPanel(secondGuidePanel){
         fieldLabel: "创建日期",
         width: 100,
         value:chooseCreateDate,
-        format: "Y-m-d"
+        format: "Y-m-d",
+        emptyText:"创建时间"
     })
     var taskGroupPanel=new Ext.grid.GridPanel({
         id:"taskGroupPanel",
