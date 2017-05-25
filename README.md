@@ -5,6 +5,6 @@
 3. 数据库暂时只支持MySQL，本系统在MySQL5.5.20版本上测试，其他版本尚未测试
 
 
-1、本例使用Maven3.2.3构建，启动jetty后访问http://localhost:8080/kw
-2、支持IE9及以上、FireFox等浏览器，IE6-IE8需要做特殊化处理，其他浏览器未测试
+1. 本例使用Maven3.2.3构建，启动jetty后访问http://localhost:8080/kw
+2. 支持IE9及以上、FireFox等浏览器，IE6-IE8需要做特殊化处理，其他浏览器未测试
 ## 许可证
