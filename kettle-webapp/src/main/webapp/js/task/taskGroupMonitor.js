@@ -20,7 +20,7 @@ function showTaskGroupPanel(secondGuidePanel){
             renderer:function(v){
                 if(loginUserName=="admin" || loginUserTaskGroupPower==1){
                     return "<img src='../../ui/images/i_delete.png' class='imgCls' onclick='deleteTaskGroupAndAttributes()' title='删除任务组'/>&nbsp;&nbsp;"+
-                        "<img src='../../ui/images/i_assigned.png' class='imgCls' onclick='beforeUpdateTaskGroup()' title='编辑'/>&nbsp;&nbsp;"+
+                        "<img src='../../ui/images/i_editor.png' class='imgCls' onclick='beforeUpdateTaskGroup()' title='编辑'/>&nbsp;&nbsp;"+
                         "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='beforeSelectTaskGroupDetail()' title='任务组详情' id='taskGroupAttrImg'/>&nbsp;&nbsp;";
                 }else{
                     return "<img src='../../ui/images/i_detail.png' class='imgCls' onclick='beforeSelectTaskGroupDetail()' title='任务组详情' id='taskGroupAttrImg'/>&nbsp;&nbsp;";
