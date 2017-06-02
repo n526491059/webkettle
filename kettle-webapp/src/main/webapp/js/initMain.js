@@ -139,7 +139,7 @@ Ext.onReady(function() {
 //		});
 
 		var username=document.getElementById("loginUsername").value;
-		var loginInfo="<div style='display:inline-block;height:100%'><img src='../ui/images/i_headerLogo.png' style='margin:14px 40px;'/></div>" +
+		var loginInfo=//"<div style='display:inline-block;height:100%'><img src='../ui/images/i_headerLogo.png' style='margin:14px 40px;'/></div>" +
 			"<div class='header-button-Cls header-public-display'>"+
 			"<span onclick='loginOut()' class='header-operation-Cls'>退出登录</span><span class='header-split-Cls'>|</span><span onclick='updateThisPwd()' class='header-operation-Cls' id='updateThisPw'>修改密码</span></div>"+
 			"<div style='margin-bottom:5px;display: inline-block' class='header-loginInfo-Cls header-public-display'>欢迎您："+username+"</div>";

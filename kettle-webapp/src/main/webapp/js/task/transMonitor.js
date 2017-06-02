@@ -204,7 +204,8 @@ function  transCompositionImg(){
             var resObj = Ext.decode(response.responseText);
             var graphPanel = Ext.create({border: false, readOnly: true }, resObj.GraphType);
             var dialog = new LogDetailDialog({
-                items: graphPanel
+                items: graphPanel,
+                title:"结构图"
             });
             dialog.show(null, function() {
                 var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
