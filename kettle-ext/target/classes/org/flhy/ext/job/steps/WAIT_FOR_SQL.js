@@ -12,11 +12,11 @@ JobEntryWaitForSQLDialog = Ext.extend(KettleDialog, {
 			displayField: 'name',
 			valueField: 'name',
 			typeAhead: true,
-	        mode: 'local',
+	        mode: 'remote',
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
-			store: getActiveGraph().getDatabaseStore(),
+			store: getActiveGraph().getDatabaseStoreAll(),
 			value: cell.getAttribute('connection')
 		});
 		
@@ -38,7 +38,7 @@ JobEntryWaitForSQLDialog = Ext.extend(KettleDialog, {
 			}
 		});		
 		var wEditbutton =new Ext.Button({xtype: 'button', text: '编辑...', handler: function() {
-			var store = getActiveGraph().getDatabaseStore();
+			/*var store = getActiveGraph().getDatabaseStore();
 			store.each(function(item) {
 				if(item.get('name') == wConnection.getValue()) {
 					var databaseDialog = new DatabaseDialog();
@@ -47,6 +47,12 @@ JobEntryWaitForSQLDialog = Ext.extend(KettleDialog, {
 						databaseDialog.initDatabase(item.json);
 					});
 				}
+			});*/
+
+			var databaseDialog = new DatabaseDialog();
+			databaseDialog.on('create', onDatabaseCreate);
+			databaseDialog.show(null, function() {
+				databaseDialog.initTransDatabase(wConnection.getValue());
 			});
 		}});
 	

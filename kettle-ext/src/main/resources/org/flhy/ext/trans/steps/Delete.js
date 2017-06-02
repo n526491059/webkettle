@@ -11,11 +11,11 @@ DeleteDialog = Ext.extend(KettleDialog, {
 			displayField: 'name',
 			valueField: 'name',
 			typeAhead: true,
-	        mode: 'local',
+	        mode: 'remote',
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
-	        store: getActiveGraph().getDatabaseStore()
+	        store: getActiveGraph().getDatabaseStoreAll()
 		});
 		
 		var onDatabaseCreate = function(dialog) {
@@ -191,7 +191,7 @@ DeleteDialog = Ext.extend(KettleDialog, {
 	},
 	
 	selectSchema: function(wConnection, wSchema) {
-		var store = getActiveGraph().getDatabaseStore();
+		/*var store = getActiveGraph().getDatabaseStore();
 		store.each(function(item) {
 			if(item.get('name') == wConnection.getValue()) {
 				var dialog = new DatabaseExplorerDialog({includeElement: 1});
@@ -204,11 +204,20 @@ DeleteDialog = Ext.extend(KettleDialog, {
 				});
 				return false;
 			}
+		});*/
+		var dialog = new DatabaseExplorerDialog({includeElement: 1});
+		dialog.on('select', function(schema) {
+			wSchema.setValue(schema);
+			dialog.close();
 		});
+		dialog.show(null, function() {
+			dialog.initDatabase(wConnection.getValue());
+		});
+		return false;
 	},
 	
 	selectTable: function(wConnection, wSchema, wTable) {
-		var store = getActiveGraph().getDatabaseStore();
+		/*var store = getActiveGraph().getDatabaseStore();
 		store.each(function(item) {
 			if(item.get('name') == wConnection.getValue()) {
 				var dialog = new DatabaseExplorerDialog();
@@ -222,7 +231,18 @@ DeleteDialog = Ext.extend(KettleDialog, {
 				});
 				return false;
 			}
+		});*/
+
+		var dialog = new DatabaseExplorerDialog();
+		dialog.on('select', function(table, schema) {
+			wTable.setValue(table);
+			wSchema.setValue(schema);
+			dialog.close();
 		});
+		dialog.show(null, function() {
+			dialog.initDatabase(wConnection.getValue());
+		});
+		return false;
 	}
 	
 });

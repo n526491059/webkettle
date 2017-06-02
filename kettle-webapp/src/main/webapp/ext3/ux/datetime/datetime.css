@@ -59,6 +59,9 @@
 .refreshCls{
 	background-image:url(../../../ui/images/i_refresh.png) !important;
 }
+.databasesCls{
+	background-image:url(../../../ui/images/i_databases.png) !important;
+}
 .quatoCls{
 	background-image:url(../../../ui/images/i_quato.png) !important;
 }

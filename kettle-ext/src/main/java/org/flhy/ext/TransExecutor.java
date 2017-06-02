@@ -151,9 +151,10 @@ public class TransExecutor implements Runnable {
 		            trans.prepareExecution( args );
 					capturePreviewData(trans, transMeta.getSteps());
 		            initialized = true;
-		        } catch ( KettleException e ) {
+		        } catch (Exception e ) {
 		        	e.printStackTrace();
 		            checkErrorVisuals();
+					throw new Exception();
 		        }
 		        if ( trans.isReadyToStart() && initialized) {
 					trans.addTransListener(new TransAdapter() {
@@ -340,6 +341,7 @@ public class TransExecutor implements Runnable {
 		} finally {
 			finished = true;
 			SqlSession session= MybatisDaoSuppo.sessionFactory.openSession();
+			trace.setEndTime(new Date());
 			session.insert("org.sxdata.jingwei.dao.ExecutionTraceDao.addExecutionTrace",trace);
 			session.commit();
 			session.close();

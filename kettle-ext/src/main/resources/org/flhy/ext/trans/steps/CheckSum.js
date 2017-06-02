@@ -55,7 +55,6 @@ CheckSumDialog = Ext.extend(KettleDialog, {
 			data.resultfieldName = wResult.getValue();
 			data.compatibilityMode = wCompatibility.getValue() ? 'Y' : 'N';
 			data.fields = Ext.encode(store.toJson());
-			
 			return data;
 		};
 		

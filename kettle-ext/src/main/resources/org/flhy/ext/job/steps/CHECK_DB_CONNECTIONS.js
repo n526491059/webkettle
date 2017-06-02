@@ -39,11 +39,11 @@ JobEntryCheckDbConnectionsDialog = Ext.extend(KettleDialog, {
 					displayField: 'name',
 					valueField: 'name',
 					typeAhead: true,
-					mode: 'local',
+					mode: 'remote',
 			        forceSelection: true,
 			        triggerAction: 'all',
 			        selectOnFocus:true,
-					store: getActiveGraph().getDatabaseStore()
+					store: getActiveGraph().getDatabaseStoreAll()
 			    })
 			},{
 				header: '等待', dataIndex: 'waitfor', width: 100, editor: new Ext.form.TextField()

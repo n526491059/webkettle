@@ -5,17 +5,18 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 	closeAction: 'close',
 	modal: true,
 	layout: 'border',
+	operation:'',
 	initComponent: function() {
 		var deckOptionsBox = new ListView({
 			valueField: 'value',
 			store: new Ext.data.JsonStore({
 				fields: ['value','text'],
 				data: [
-				       {value: 0, text: '一般'}, 
-				       {value: 1, text: '高级'}, 
-				       {value: 2, text: '选项'},
-				       {value: 3, text: '连接池'},
-				       {value: 4, text: '集群'}]
+					{value: 0, text: '一般'},
+					{value: 1, text: '高级'},
+					{value: 2, text: '选项'},
+					{value: 3, text: '连接池'},
+					{value: 4, text: '集群'}]
 			}),
 			columns: [{
 				dataIndex: 'value', hidden: true
@@ -23,13 +24,13 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 				width: 1, dataIndex: 'text'
 			}]
 		});
-		
+
 		var normal = new NormalPanel();
 		var advance = new AdvancePanel();
 		var options = new OptionsPanel();
 		var pool = new PoolPanel();
 		var cluster = new ClusterPanel();
-		
+
 		var me = this;
 		this.initReposityDatabase = function(database) {
 			Ext.Ajax.request({
@@ -67,7 +68,7 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 				}
 			})
 		};
-		
+
 		this.initDatabase = function(dbinfo) {
 			normal.initData(dbinfo);
 			advance.initData(dbinfo);
@@ -75,17 +76,17 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 			pool.initData(dbinfo);
 			cluster.initData(dbinfo);
 		};
-		
+
 		this.getValue = function() {
 			var val = normal.getValue();
 			advance.getValue(val);
 			options.getValue(val);
 			pool.getValue(val);
 			cluster.getValue(val);
-			
+
 			return val;
 		};
-		
+
 		var content = new Ext.Panel({
 			region: 'center',
 			defaults: {border: false},
@@ -93,15 +94,15 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 			activeItem: 0,
 			items: [normal, advance, options, pool, cluster]
 		});
-		
+
 		deckOptionsBox.on('selectionchange', function(v) {
 			content.getLayout().setActiveItem(deckOptionsBox.getValue());
 		});
-		
+
 		this.on('afterrender', function() {
 			deckOptionsBox.setValue(0);
 		});
-		
+
 		this.items = [{
 			region: 'west',
 			width: 150,
@@ -109,7 +110,7 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 			autoScroll: true,
 			items: deckOptionsBox
 		}, content];
-		
+
 		var bCancel = new Ext.Button({
 			text: '取消', scope: this, handler: function() {
 				this.close();
@@ -140,8 +141,8 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 					params: {databaseInfo: Ext.encode(this.getValue())},
 					success: function(response) {
 						var records = Ext.decode(response.responseText);
-						
-						var grid = new DynamicEditorGrid({rowNumberer: true});	
+
+						var grid = new DynamicEditorGrid({rowNumberer: true});
 						var win = new Ext.Window({
 							title: '特征列表',
 							width: 1000,
@@ -151,7 +152,7 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 							items: grid
 						});
 						win.show();
-						
+
 						grid.loadMetaAndValue(records);
 					}
 				});
@@ -159,12 +160,12 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 		});
 		var bView = new Ext.Button({
 			text: '浏览', scope: this, handler: function() {
-				
+
 				var dialog = new DatabaseExplorerDialog();
 				dialog.show(null, function() {
-					dialog.initDatabase(this.getValue());
+					dialog.initDatabase(normal.getValue().name);
 				}, this);
-				
+
 			}
 		});
 		var bOk = new Ext.Button({
@@ -179,16 +180,34 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 							Ext.Msg.alert('系统提示', json.message);
 						} else {
 							me.fireEvent('create', me);
+							Ext.getBody().mask('正在保存，请稍后...', 'x-mask-loading');
+							Ext.Ajax.request({
+								url: GetUrl('trans/save.do'),
+								params: {graphXml: encodeURIComponent(activeGraph.toXml())},
+								method: 'POST',
+								success: function(response) {
+									try{
+										if(me.operation=='add'){
+											Ext.MessageBox.alert("Success","添加成功!");
+										}else{
+											Ext.MessageBox.alert("Success","已保存!");
+										}
+									}finally{
+										Ext.getBody().unmask();
+									}
+								},
+								failure: failureResponse
+							});
 						}
 					}
 				});
 			}
 		});
-		
+
 		this.bbar = ['->', bCancel, bTest, bFuture, bView, bOk];
-		
+
 		DatabaseDialog.superclass.initComponent.call(this);
-		
+
 		this.addEvents('create')
 	}
 });

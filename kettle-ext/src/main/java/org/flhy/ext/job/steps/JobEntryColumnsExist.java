@@ -24,7 +24,7 @@ public class JobEntryColumnsExist extends AbstractJobEntry {
 	@Override
 	public void decode(JobEntryInterface jobEntry, mxCell cell, List<DatabaseMeta> databases, IMetaStore metaStore) throws Exception {
 		org.pentaho.di.job.entries.columnsexist.JobEntryColumnsExist jobEntryColumnsExist = (org.pentaho.di.job.entries.columnsexist.JobEntryColumnsExist) jobEntry;
-		
+
 		jobEntryColumnsExist.setDatabase(DatabaseMeta.findDatabase(databases, cell.getAttribute("connection")));
 		jobEntryColumnsExist.setSchemaname(cell.getAttribute("schemaname"));
 		jobEntryColumnsExist.setTablename(cell.getAttribute("tablename"));

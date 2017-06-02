@@ -104,15 +104,18 @@ public class JobMetaCodec extends BaseGraphCodec {
 		Document doc = mxUtils.parseXml(graphXml);
 		codec.decode(doc.getDocumentElement(), graph.getModel());
 		mxCell root = (mxCell) graph.getDefaultParent();
-		
 		JobMeta jobMeta = new JobMeta();
+
 		decodeCommRootAttr(root, jobMeta);
+
 		jobMeta.setJobversion(root.getAttribute("job_version"));
 		int jobStatus = Const.toInt(root.getAttribute("job_status"), -1);
 		if(jobStatus >= 0)
 			jobMeta.setJobstatus(jobStatus);
-		
-		
+		if(jobMeta.getRepository() != null)
+			jobMeta.setSharedObjects(jobMeta.getRepository().readJobMetaSharedObjects(jobMeta));
+		else
+			jobMeta.setSharedObjects(jobMeta.readSharedObjects());
 		decodeDatabases(root, jobMeta);
 		decodeSlaveServers(root, jobMeta);
 		

@@ -90,6 +90,8 @@ JobGraph = Ext.extend(BaseGraph, {
 				iconCls: 'SlaveServer', scope: this, handler: this.showSlaves
 			}*/, '-', {
 				iconCls: 'show-results', scope: this, handler: this.showResultPanel
+			},{
+				iconCls: 'databasesCls', scope: this, handler: this.databaseConn,tooltip: '数据库连接'
 			}];
             var finish = function() {
                 var tb = this.getTopToolbar();
@@ -159,19 +161,24 @@ JobGraph = Ext.extend(BaseGraph, {
 	},
 	
 	save: function() {
+		Ext.getBody().mask('正在保存，请稍后...', 'x-mask-loading');
 		Ext.Ajax.request({
 			url: GetUrl('job/save.do'),
 			params: {graphXml: encodeURIComponent(this.toXml())},
 			method: 'POST',
 			success: function(response) {
-				decodeResponse(response, function(resObj) {
-					Ext.Msg.show({
-					   title: '系统提示',
-					   msg: resObj.message,
-					   buttons: Ext.Msg.OK,
-					   icon: Ext.MessageBox.INFO
+				try{
+					decodeResponse(response, function(resObj) {
+						Ext.Msg.show({
+							title: '系统提示',
+							msg: resObj.message,
+							buttons: Ext.Msg.OK,
+							icon: Ext.MessageBox.INFO
+						});
 					});
-				});
+				}finally{
+					Ext.getBody().unmask();
+				}
 			},
 			failure: failureResponse
 		});
@@ -183,19 +190,56 @@ JobGraph = Ext.extend(BaseGraph, {
 			Ext.Msg.alert('系统提示', '任务正在执行，请稍后...');
 			return;
 		}
-		
-		// 获取执行参数
-		Ext.Ajax.request({
-			url: GetUrl('job/initRun.do'),
-			method: 'POST',
-			params: {graphXml: this.toXml()},
-			success: function(response) {
-				var resObj = Ext.decode(response.responseText);
-				jobExecutor.fireEvent('beforerun', jobExecutor, resObj);
-			},
-			failure: failureResponse
-		});
-		
+		var graphXml=this.toXml();
+		if(this.Executable || this.readOnly){
+			Ext.Ajax.request({
+				url: GetUrl('job/initRun.do'),
+				method: 'POST',
+				params: {graphXml: graphXml},
+				success: function(response) {
+					var resObj = Ext.decode(response.responseText);
+					jobExecutor.fireEvent('beforerun', jobExecutor, resObj);
+				},
+				failure: failureResponse
+			});
+		}else{
+			//执行前先保存该作业
+			Ext.getBody().mask('正在保存，请稍后...', 'x-mask-loading');
+
+			Ext.Ajax.request({
+				url: GetUrl('job/save.do'),
+				params: {graphXml: encodeURIComponent(graphXml)},
+				method: 'POST',
+				success: function(response) {
+					var resp=response;
+					try{
+						// 获取执行参数
+						Ext.Ajax.request({
+							url: GetUrl('job/initRun.do'),
+							method: 'POST',
+							params: {graphXml: graphXml},
+							success: function(response) {
+								var resObj = Ext.decode(response.responseText);
+								jobExecutor.fireEvent('beforerun', jobExecutor, resObj);
+								decodeResponse(resp, function(resObj) {
+									Ext.Msg.show({
+										title: '系统提示',
+										msg: resObj.message,
+										buttons: Ext.Msg.OK,
+										icon: Ext.MessageBox.INFO
+									});
+								});
+							},
+							failure: failureResponse
+						});
+
+					}finally{
+						Ext.getBody().unmask();
+					}
+				},
+				failure: failureResponse
+			});
+		}
 	},
     stop: function() {
         this.jobExecutor.stop();
@@ -205,6 +249,17 @@ JobGraph = Ext.extend(BaseGraph, {
 		
 		resultPanel.setVisible( !resultPanel.isVisible() );
 		this.doLayout();
+	},
+	databaseConn:function(){
+		var grid=new DatabaseConnGrid();
+		grid.getColumnModel().setHidden(1,true);
+		var databaseConnW=new Ext.Window({
+			title:"连接管理",
+			width:750,
+			modal:true,
+			items:[grid]
+		});
+		databaseConnW.show();
 	},
 	
 	initContextMenu: function(menu, cell, evt) {
@@ -465,7 +520,6 @@ JobGraph = Ext.extend(BaseGraph, {
 	}
 	
 });
-
 Ext.reg('JobGraph', JobGraph);
 
 JobGraphScheduler = Ext.extend(BaseGraph, {
@@ -610,6 +664,106 @@ JobGraphScheduler = Ext.extend(BaseGraph, {
 	}
 
 });
-
 Ext.reg('JobGraphScheduler',JobGraphScheduler);
+
+
+
+DatabaseConnGrid = Ext.extend(Ext.grid.GridPanel, {
+	id:"DatabaseConnGrid",
+	height:470,
+	width:750,
+	viewConfig : {
+		forceFit : true //让grid的列自动填满grid的整个宽度，不用一列一列的设定宽度
+	},
+	closable:true,
+
+	initComponent: function() {
+		var me = this;
+		var cm=new Ext.grid.ColumnModel([
+			new Ext.grid.RowNumberer(),//行序号生成器,会为每一行生成一个行号
+			{header:"ID",dataIndex:"databaseId",align:"center"},
+			{header:"连接名",dataIndex:"name",align:"center"},
+			{header:"主机名",dataIndex:"hostName",tooltip:"这是创建时间",format:"y-M-d H:m:s",align:"center"},
+			{header:"端口",dataIndex:"port",align:"center",align:"center"},
+			{header:"数据库名",dataIndex:"databaseName",format:"y-M-d H:m:s",align:"center"},
+			{header:"数据库类型",dataIndex:"databaseType",align:"center"},
+			{header:"操作",dataIndex:"",menuDisabled:true,align:"center",
+				renderer:function(v){
+					return "<img src='../../ui/images/i_delete.png' class='imgCls' onclick='deleteConn()' title='删除连接'/>&nbsp;&nbsp;"+
+					"<img src='../../ui/images/i_editor.png' class='imgCls' onclick='editorConn()' title='修改连接'/>&nbsp;&nbsp;";
+				}
+			}
+		]);
+		var proxy=new Ext.data.HttpProxy({url:"/common/getDatabases.do"});
+		var human=Ext.data.Record.create([
+			{name:"databaseId",type:"string",mapping:"databaseId"},
+			{name:"name",type:"string",mapping:"name"},
+			{name:"hostName",type:"string",mapping:"hostName"},
+			{name:"port",type:"string",mapping:"port"},
+			{name:"databaseName",type:"string",mapping:"databaseName"},
+			{name:"databaseType",type:"string",mapping:"databaseType"}
+		])
+		var reader=new Ext.data.JsonReader({},human);
+		var store=new Ext.data.Store({
+			proxy:proxy,
+			reader:reader
+		})
+		store.load();
+		this.store=store;
+		this.colModel=cm;
+		this.tbar=new Ext.Toolbar({
+			buttons:[
+				{
+					iconCls:"addCls",
+					tooltip: '新增连接',
+					handler:function(){
+						var databaseDialog = new DatabaseDialog({operation:'add'});
+						databaseDialog.on('create', onDatabaseCreate);
+						databaseDialog.show(null, function() {
+							databaseDialog.initTransDatabase(null);
+						});
+					}
+				},{
+					iconCls:"refreshCls",
+					tooltip: '刷新',
+					handler:function(){
+						me.store.reload();
+					}
+				}
+
+			]
+		});
+		DatabaseConnGrid.superclass.initComponent.call(this);
+	}
+
+});
+function deleteConn(){
+	var grid=Ext.getCmp("DatabaseConnGrid");
+	var databaseId=grid.getSelectionModel().getSelected().get("databaseId");
+	Ext.Ajax.request({
+		url:"/common/deleteDatabaseConn.do",
+		success:function(response,config){
+			Ext.MessageBox.alert("提示","删除连接成功!");
+			grid.store.reload();
+		},
+		failure:failureResponse,
+		params:{id:databaseId}
+	});
+
+}
+function editorConn(){
+	var grid=Ext.getCmp("DatabaseConnGrid");
+	var databaseConnName=grid.getSelectionModel().getSelected().get("name");
+
+	var databaseDialog = new DatabaseDialog({operation:'editor'});
+	databaseDialog.on('create', onDatabaseCreate);
+	databaseDialog.show(null, function() {
+		databaseDialog.initTransDatabase(databaseConnName);
+	});
+}
+function onDatabaseCreate(dialog) {
+	getActiveGraph().onDatabaseMerge(dialog.getValue());
+	dialog.close();
+};
+Ext.reg('DatabaseConnGrid',DatabaseConnGrid);
 

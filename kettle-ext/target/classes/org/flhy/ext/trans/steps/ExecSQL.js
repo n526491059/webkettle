@@ -10,11 +10,11 @@ ExecSQLDialog = Ext.extend(KettleTabDialog, {
 			displayField: 'name',
 			valueField: 'name',
 			typeAhead: true,
-	        mode: 'local',
+	        mode: 'remote',
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
-			store: getActiveGraph().getDatabaseStore(),
+			store: getActiveGraph().getDatabaseStoreAll(),
 			value: cell.getAttribute('connection')
 		});
 		

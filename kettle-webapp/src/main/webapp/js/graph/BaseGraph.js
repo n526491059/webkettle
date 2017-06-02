@@ -369,7 +369,20 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		var node = enc.encode(this.getGraph().getModel());
 		return mxUtils.getPrettyXml(node);
 	},
-	
+
+	getDatabaseStoreAll: function() {
+		var proxy=new Ext.data.HttpProxy({url:"/common/getDatabases.do"});
+		var data=Ext.data.Record.create([
+			{name:"name",type:"String",mapping:"name"}
+		]);
+		var reader=new Ext.data.JsonReader({},data);
+		var store=new Ext.data.Store({
+			proxy:proxy,
+			reader:reader
+		});
+		return store;
+	},
+
 	getDatabaseStore: function() {
 		if(!this.databaseStore) {
 			this.databaseStore = new Ext.data.JsonStore({
@@ -379,10 +392,10 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		}
 		var graph = this.getGraph();
 		var root = graph.getDefaultParent(), data = [];
-		if(root.getAttribute('databases') != null)
+		if(root.getAttribute('databases') != null){
 			data = Ext.decode(root.getAttribute('databases'));
+		}
 		this.databaseStore.loadData(data);
-		
 		return this.databaseStore;
 	},
 	
@@ -400,10 +413,6 @@ BaseGraph = Ext.extend(Ext.Panel, {
 					data.push(db);
 			});
 		}
-			
-		store.loadData(data);
-		
-		return store;
 	},
 	
 	onDatabaseMerge: function(json) {

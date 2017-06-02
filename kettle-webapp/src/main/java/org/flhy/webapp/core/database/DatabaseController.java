@@ -18,10 +18,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.flhy.ext.core.database.DatabaseCodec;
 import org.flhy.ext.core.database.DatabaseType;
 import org.flhy.ext.repository.RepositoryCodec;
-import org.flhy.ext.utils.JSONArray;
-import org.flhy.ext.utils.JSONObject;
-import org.flhy.ext.utils.JsonUtils;
-import org.flhy.ext.utils.StringEscapeHelper;
+import org.flhy.ext.utils.*;
 import org.flhy.webapp.bean.DatabaseNode;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.DBCache;
@@ -48,6 +45,7 @@ import org.pentaho.di.repository.RepositoriesMeta;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryMeta;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.ui.core.database.dialog.SQLEditor;
 import org.pentaho.di.ui.repository.dialog.RepositoryDialogInterface;
 import org.pentaho.ui.database.Messages;
@@ -368,7 +366,7 @@ public class DatabaseController {
 	/**
 	 * 校验数据库环境，确定该数据库是否已经被初始化
 	 * 
-	 * @param reposityInfo
+	 * @param
 	 * @throws Exception
 	 */
 	@ResponseBody
@@ -553,10 +551,11 @@ public class DatabaseController {
 	 * @throws SQLException 
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/explorer")
-	protected @ResponseBody List explorer(@RequestParam String databaseInfo, @RequestParam String nodeId, @RequestParam String text, @RequestParam int includeElement) throws IOException, KettleException, SQLException {
-		
-		JSONObject databaseInfoJson = JSONObject.fromObject(databaseInfo);
-		DatabaseMeta databaseMeta = DatabaseCodec.decode(databaseInfoJson);
+	protected @ResponseBody List explorer(@RequestParam String transName,@RequestParam String databaseInfo, @RequestParam String nodeId, @RequestParam String text, @RequestParam int includeElement) throws IOException, KettleException, SQLException {
+		/*JSONObject databaseInfoJson = JSONObject.fromObject(databaseInfo);
+		DatabaseMeta databaseMeta = DatabaseCodec.decode(databaseInfoJson);*/
+		TransMeta tra= RepositoryUtils.loadTransByPath("/"+transName);
+		DatabaseMeta databaseMeta=tra.findDatabase(databaseInfo);
 		
 		ArrayList result = new ArrayList();
 		if(StringUtils.hasText(nodeId)) {

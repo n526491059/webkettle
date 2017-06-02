@@ -3,18 +3,17 @@ JobEntryColumnsExistDialog = Ext.extend(KettleDialog, {
 	width: 500,
 	height: 410,
 	initComponent: function() {
-		var me = this;
-		
+		var me = this,cell = getActiveGraph().getGraph().getSelectionCell();
 		var wConnection = new Ext.form.ComboBox({
 			flex: 1,
 			displayField: 'name',
 			valueField: 'name',
 			typeAhead: true,
-	        mode: 'local',
+	        mode: 'remote',
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
-	        store: getActiveGraph().getDatabaseStore(),
+	        store: getActiveGraph().getDatabaseStoreAll(),
 			value: cell.getAttribute('connection')
 		});
 		
@@ -34,7 +33,6 @@ JobEntryColumnsExistDialog = Ext.extend(KettleDialog, {
 		this.initData = function() {
 			var cell = this.getInitData();
 			JobEntryColumnsExistDialog.superclass.initData.apply(this, [cell]);
-			
 			wConnection.setValue(cell.getAttribute('connection'));
 			wSchema.setValue(cell.getAttribute('schemaname'));
 			wTable.setValue(cell.getAttribute('tablename'));
@@ -47,7 +45,6 @@ JobEntryColumnsExistDialog = Ext.extend(KettleDialog, {
 			data.schemaname = wSchema.getValue();
 			data.tablename = wTable.getValue();
 			data.fields = Ext.encode(store.toJson());
-			
 			return data;
 		};
 		
@@ -142,7 +139,7 @@ JobEntryColumnsExistDialog = Ext.extend(KettleDialog, {
 	},
 	
 	selectSchema: function(wConnection, wSchema) {
-		var store = getActiveGraph().getDatabaseStore();
+		/*var store = getActiveGraph().getDatabaseStore();
 		store.each(function(item) {
 			if(item.get('name') == wConnection.getValue()) {
 				var dialog = new DatabaseExplorerDialog({includeElement: 1});
@@ -155,11 +152,21 @@ JobEntryColumnsExistDialog = Ext.extend(KettleDialog, {
 				});
 				return false;
 			}
+		});*/
+		var dialog = new DatabaseExplorerDialog({includeElement: 1});
+		dialog.on('select', function(table, schema) {
+			wTable.setValue(table);
+			wSchema.setValue(schema);
+			dialog.close();
 		});
+		dialog.show(null, function() {
+			dialog.initDatabase(wConnection.getValue());
+		});
+		return false;
 	},
 	
 	selectTable: function(wConnection, wSchema, wTable) {
-		var store = getActiveGraph().getDatabaseStore();
+		/*var store = getActiveGraph().getDatabaseStore();
 		store.each(function(item) {
 			if(item.get('name') == wConnection.getValue()) {
 				var dialog = new DatabaseExplorerDialog();
@@ -173,7 +180,17 @@ JobEntryColumnsExistDialog = Ext.extend(KettleDialog, {
 				});
 				return false;
 			}
+		});*/
+		var dialog = new DatabaseExplorerDialog();
+		dialog.on('select', function(table, schema) {
+			wTable.setValue(table);
+			wSchema.setValue(schema);
+			dialog.close();
 		});
+		dialog.show(null, function() {
+			dialog.initDatabase(wConnection.getValue());
+		});
+		return false;
 	}
 });
 

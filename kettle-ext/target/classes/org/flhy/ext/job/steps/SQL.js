@@ -23,11 +23,11 @@ JobEntrySQLDialog = Ext.extend(KettleDialog, {
 			displayField: 'name',
 			valueField: 'name',
 			typeAhead: true,
-	        mode: 'local',
+	        mode: 'remote',
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
-			store: getActiveGraph().getDatabaseStore(),
+			store: getActiveGraph().getDatabaseStoreAll(),
 			value: cell.getAttribute('connection')
 		});
 		
@@ -41,7 +41,7 @@ JobEntrySQLDialog = Ext.extend(KettleDialog, {
 			var databaseDialog = new DatabaseDialog();
 			databaseDialog.on('create', onDatabaseCreate);
 			databaseDialog.show(null, function() {
-				databaseDialog.initJobDatabase(wConnection.getValue());
+				databaseDialog.initTransDatabase(wConnection.getValue());
 			});
 		}});
 	
