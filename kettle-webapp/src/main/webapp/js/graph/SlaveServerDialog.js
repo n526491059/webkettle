@@ -1,3 +1,4 @@
+
 SlaveServerDialog = Ext.extend(Ext.Window, {
 	title: '子服务器对话框',
 	width: 600,
@@ -67,7 +68,6 @@ SlaveServerDialog = Ext.extend(Ext.Window, {
 						password: wPassword.getValue(),
 						master: wMaster.getValue() ? 'Y' : 'N',
 						sslMode: 'N',
-
 						proxy_hostname: wProxyHost.getValue(),
 						proxy_port: wProxyPort.getValue(),
 						non_proxy_hosts: wNonProxyHosts.getValue()
@@ -91,7 +91,15 @@ SlaveServersDialog = Ext.extend(Ext.Window, {
 	layout: 'fit',
 	iconCls: 'SlaveServer',
 	initComponent: function() {
-		
+		/*var slaveServerStore = new Ext.data.JsonStore({
+			idProperty: 'name',
+			fields: ['id','name', 'hostname', 'port', 'webAppName', 'username', 'password', 'master'],
+			proxy: new Ext.data.HttpProxy({
+				url: '/slave/allSlaveToSlaveServer.do'
+			})
+		});
+		slaveServerStore.load();*/
+
 		var grid = this.items = new Ext.grid.GridPanel({
 			border: false,
 			tbar: [{
@@ -131,7 +139,7 @@ SlaveServersDialog = Ext.extend(Ext.Window, {
 					return v;
 				}
 			}],
-			store: getActiveGraph().getSlaveServerStore()
+			store:getActiveGraph.getSlaveServerStore()
 		});
 		SlaveServersDialog.superclass.initComponent.call(this);
 	}

@@ -75,8 +75,77 @@ function repositryOpenJob(secondGuidePanel,path,text){
 						ddGroup:'TreePanelDDGroup',
 						autoScroll: true,
 						animate: false,
-						rootVisible: false
+						rootVisible: false,
+						tbar:[
+							new Ext.form.TextField({
+								width:150,
+								emptyText:'请输入关键字检索',
+								enableKeyEvents: true,
+								listeners:{
+									keyup:function(node, event) {
+										findByKeyWordFiler(node, event);
+									},
+									scope: this
+								}
+							})
+						]
 					});
+
+					var treeFilter = new Ext.tree.TreeFilter(jobComponentTree, {
+						clearBlank : true,
+						autoClear : true
+					});
+					var timeOutId  = null;
+					var hiddenPkgs = [];
+					var findByKeyWordFiler = function(node, event) {
+
+						clearTimeout(timeOutId);// 清除timeOutId
+						jobComponentTree.expandAll();// 展开树节点
+						// 为了避免重复的访问后台，给服务器造成的压力，采用timeOutId进行控制，如果采用treeFilter也可以造成重复的keyup
+						timeOutId = setTimeout(function() {
+							// 获取输入框的值
+							var text = node.getValue();
+							// 根据输入制作一个正则表达式，'i'代表不区分大小写
+							var re = new RegExp(Ext.escapeRe(text), 'i');
+							// 先要显示上次隐藏掉的节点
+							Ext.each(hiddenPkgs, function(n) {
+								n.ui.show();
+							});
+							hiddenPkgs = [];
+							if (text != "") {
+								treeFilter.filterBy(function(n) {
+									// 只过滤叶子节点，这样省去枝干被过滤的时候，底下的叶子都无法显示
+									return !n.isLeaf() || re.test(n.text);
+								});
+								// 如果这个节点不是叶子，而且下面没有子节点，就应该隐藏掉
+								jobComponentTree.root.cascade(function(n) {
+									if(n.id!='0'){
+										if(!n.isLeaf() &&judge(n,re)==false&& !re.test(n.text)){
+											hiddenPkgs.push(n);
+											n.ui.hide();
+										}
+									}
+								});
+							} else {
+								treeFilter.clear();
+								return;
+							}
+						}, 500);
+					}
+
+					// 过滤不匹配的非叶子节点或者是叶子节点
+					var judge =function(n,re){
+						var str=false;
+						n.cascade(function(n1){
+							if(n1.isLeaf()){
+								if(re.test(n1.text)){ str=true;return; }
+							} else {
+								if(re.test(n1.text)){ str=true;return; }
+							}
+						});
+						return str;
+					};
+
 					var graphPanel = Ext.create({repositoryId: path, region: 'center',id:'jobBodyPanel'}, 'JobGraph');
 					secondGuidePanel.add({
 						layout: 'border',
@@ -127,8 +196,77 @@ function repositryOpenTrans(secondGuidePanel,path,text){
 						ddGroup:'TreePanelDDGroup',
 						autoScroll: true,
 						animate: false,
-						rootVisible: false
+						rootVisible: false,
+						tbar:[
+							new Ext.form.TextField({
+								width:150,
+								emptyText:'请输入关键字检索',
+								enableKeyEvents: true,
+								listeners:{
+									keyup:function(node, event) {
+										findByKeyWordFiler(node, event);
+									},
+									scope: this
+								}
+							})
+						]
 					});
+
+					var treeFilter = new Ext.tree.TreeFilter(transComponentTree, {
+						clearBlank : true,
+						autoClear : true
+					});
+					var timeOutId  = null;
+					var hiddenPkgs = [];
+					var findByKeyWordFiler = function(node, event) {
+
+						clearTimeout(timeOutId);// 清除timeOutId
+						transComponentTree.expandAll();// 展开树节点
+						// 为了避免重复的访问后台，给服务器造成的压力，采用timeOutId进行控制，如果采用treeFilter也可以造成重复的keyup
+						timeOutId = setTimeout(function() {
+							// 获取输入框的值
+							var text = node.getValue();
+							// 根据输入制作一个正则表达式，'i'代表不区分大小写
+							var re = new RegExp(Ext.escapeRe(text), 'i');
+							// 先要显示上次隐藏掉的节点
+							Ext.each(hiddenPkgs, function(n) {
+								n.ui.show();
+							});
+							hiddenPkgs = [];
+							if (text != "") {
+								treeFilter.filterBy(function(n) {
+									// 只过滤叶子节点，这样省去枝干被过滤的时候，底下的叶子都无法显示
+									return !n.isLeaf() || re.test(n.text);
+								});
+								// 如果这个节点不是叶子，而且下面没有子节点，就应该隐藏掉
+								transComponentTree.root.cascade(function(n) {
+									if(n.id!='0'){
+										if(!n.isLeaf() &&judge(n,re)==false&& !re.test(n.text)){
+											hiddenPkgs.push(n);
+											n.ui.hide();
+										}
+									}
+								});
+							} else {
+								treeFilter.clear();
+								return;
+							}
+						}, 500);
+					}
+
+					// 过滤不匹配的非叶子节点或者是叶子节点
+					var judge =function(n,re){
+						var str=false;
+						n.cascade(function(n1){
+							if(n1.isLeaf()){
+								if(re.test(n1.text)){ str=true;return; }
+							} else {
+								if(re.test(n1.text)){ str=true;return; }
+							}
+						});
+						return str;
+					};
+
 					var graphPanel = Ext.create({repositoryId: path, region: 'center',id:'bodyPanelForTrans'}, 'TransGraph');
 					secondGuidePanel.add({
 						layout: 'border',
@@ -222,7 +360,7 @@ GuidePanel = Ext.extend(Ext.Panel,{
                         text : "<font size = '3px' style='margin-left:7px'>平&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;台</font>",icon:'ui/images/i_platform.png', cls:'nav-node',
                         children:[
                             {id:"platformMonitor",text:"<font size = '2px' style='margin-left:9px;'>平台概况</font>",cls:"navl",leaf:true,icon:'ui/images/i_platform.png'},
-                        ]
+                        ],id:"moduleIdTwo"
                     },{
 						text : "<font size = '3px' style='margin-left:7px'>任&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;务</font>",icon:'ui/images/i_task.png', cls:'nav-node',
 						children:[
@@ -267,12 +405,12 @@ GuidePanel = Ext.extend(Ext.Panel,{
 					var rootnodes = fristGuidePanel.getRootNode().childNodes;   //获取主节点
 					for(var i=0;i<rootnodes.length;i++){  //从节点中取出子节点依次遍历
 						var rootnode = rootnodes[i];
-						if(rootnode.id=="taskIdTwo"){
+						if(rootnode.id=="moduleIdTwo"){
 							rootnode.expand();
 							var leafNodes=rootnode.childNodes;
 							for(var k=0;k<leafNodes.length;k++){
 								var leafNode=leafNodes[k];
-								if(leafNode.id=="jobMonitor"){
+								if(leafNode.id=="platformMonitor"){
 									leafNode.fireEvent("click",leafNode)
 								}
 							}
@@ -319,6 +457,10 @@ GuidePanel = Ext.extend(Ext.Panel,{
 			if(timeIntervalByTaskControl!=""){
 				clearInterval(timeIntervalByTaskControl);
 				timeIntervalByTaskControl="";
+			}
+			if(moduleViewInterval!=""){
+				clearInterval(moduleViewInterval);
+				moduleViewInterval="";
 			}
 			if(node.text == "<font size = '2px' style='margin-left:9px;'>新建转换</font>")
 			{
@@ -471,6 +613,8 @@ GuidePanel = Ext.extend(Ext.Panel,{
 				generateUserGroupPanel(secondGuidePanel);
 			}else if(node.text=="<font size = '2px' style='margin-left:9px;'>任务历史日志</font>"){
 				showHistoryLogPanel(secondGuidePanel);
+			}else if(node.text=="<font size = '2px' style='margin-left:9px;'>平台概况</font>"){
+				showModuleView(secondGuidePanel);
 			}
 		});
 

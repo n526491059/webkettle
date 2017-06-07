@@ -97,7 +97,7 @@ function showLogInfo(){
             var executionLog=trace.executionLog;
             var status=trace.status;
             var windowHTML="";
-            if(status!="系统调度失败"){
+            if(status!="系统调度失败" && status!="程序错误"){
                 var logJSON=eval("("+executionLog+")");
                 for(var item in logJSON){
                     if(item=="log"){
@@ -133,43 +133,46 @@ function showConfigInfo(){
         success:function(response,config){
             var trace=response.responseText;
             var executionConfiguration=Ext.decode(trace).executionConfiguration;
-            var configJSON=eval("("+executionConfiguration+")");
             var windowHTML="";
-            for(var item in configJSON){
-                if(item=="parameters" || item=="variables" || item=="arguments"){
-                    var array=configJSON[item];
-                    var twoInfo="";
-                    for(var i=0;i<array.length;i++){
-                        var attr=array[i];
-                        for(var item2 in attr){
-                            twoInfo+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+item2+":"+attr[item2]+"<br/>"
-                        }
-                    }
-                    if(item=="parameters"){
-                        windowHTML+="命名参数:"+"<br/>"+twoInfo+"<br/>";
-                    }else if(item=="variables"){
-                        windowHTML+="变量:"+"<br/>"+twoInfo+"<br/>";
-                    }else if(item=="arguments"){
-                        windowHTML+="位置参数:"+"<br/>"+twoInfo+"<br/>";
-                    }
-                }else if(item=="safe_mode"){
-                    windowHTML+="是否使用安全模式"+":"+"<br/>"+configJSON[item]+"<br/><br/>";
-                }else if(item=="log_level"){
-                    windowHTML+="日志级别"+":"+"<br/>"+configJSON[item]+"<br/><br/>";
-                }else if(item=="group"){
-                    var array=configJSON[item];
-                    if(array=="暂未分配任务组"){
-                        windowHTML+="所属任务组"+":"+"<br/>"+array+"<br/><br/>";
-                    }else{
+            if(null!=executionConfiguration && executionConfiguration!=""){
+                var configJSON=eval("("+executionConfiguration+")");
+                for(var item in configJSON){
+                    if(item=="parameters" || item=="variables" || item=="arguments"){
+                        var array=configJSON[item];
                         var twoInfo="";
                         for(var i=0;i<array.length;i++){
                             var attr=array[i];
-                            twoInfo+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+(i+1)+":"+attr+"<br/>";
+                            for(var item2 in attr){
+                                twoInfo+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+item2+":"+attr[item2]+"<br/>"
+                            }
                         }
-                        windowHTML+="所属任务组:"+"<br/>"+twoInfo+"<br/>";
+                        if(item=="parameters"){
+                            windowHTML+="命名参数:"+"<br/>"+twoInfo+"<br/>";
+                        }else if(item=="variables"){
+                            windowHTML+="变量:"+"<br/>"+twoInfo+"<br/>";
+                        }else if(item=="arguments"){
+                            windowHTML+="位置参数:"+"<br/>"+twoInfo+"<br/>";
+                        }
+                    }else if(item=="safe_mode"){
+                        windowHTML+="是否使用安全模式"+":"+"<br/>"+configJSON[item]+"<br/><br/>";
+                    }else if(item=="log_level"){
+                        windowHTML+="日志级别"+":"+"<br/>"+configJSON[item]+"<br/><br/>";
+                    }else if(item=="group"){
+                        var array=configJSON[item];
+                        if(array=="暂未分配任务组"){
+                            windowHTML+="所属任务组"+":"+"<br/>"+array+"<br/><br/>";
+                        }else{
+                            var twoInfo="";
+                            for(var i=0;i<array.length;i++){
+                                var attr=array[i];
+                                twoInfo+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+(i+1)+":"+attr+"<br/>";
+                            }
+                            windowHTML+="所属任务组:"+"<br/>"+twoInfo+"<br/>";
+                        }
                     }
                 }
             }
+
             var configDetailWindow=new Ext.Window({
                 title:"参数详情",
                 width:500,

@@ -277,16 +277,19 @@ public class TransMetaCodec extends BaseGraphCodec {
 		
 		TransMeta transMeta = new TransMeta();
 		decodeCommRootAttr(root, transMeta);
-		transMeta.setTransstatus(Const.toInt( root.getAttribute( "trans_status" ), -1 ));
+		transMeta.setTransstatus(Const.toInt(root.getAttribute("trans_status"), -1));
 		transMeta.setTransversion(root.getAttribute("trans_version"));
-		
+
+
 		if(transMeta.getRepository() != null)
 			transMeta.setSharedObjects(transMeta.getRepository().readTransSharedObjects( transMeta ));
 		else
 			transMeta.setSharedObjects(transMeta.readSharedObjects());
-		
+
+
 		transMeta.importFromMetaStore();
-		
+
+
 		decodeDatabases(root, transMeta);
 		decodeNote(graph, transMeta);
 		

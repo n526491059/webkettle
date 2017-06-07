@@ -10,6 +10,7 @@ import java.util.List;
  * Created by cRAZY on 2017/2/28.
  */
 public interface SlaveService {
+    public Integer getAllSlaveSize();
 
     public List<SlaveEntity> getAllSlave(String userGroupName) throws Exception;
 
@@ -17,7 +18,7 @@ public interface SlaveService {
 
     public PageforBean findSlaveByPageInfo(Integer start,Integer limit,String userGroupName) throws Exception;
 
-    public void deleteSlave(String[] items) throws Exception;
+    public void deleteSlave(Integer slaveId) throws Exception;
 
     public String slaveTest(String hostName) throws Exception;
 
@@ -32,4 +33,8 @@ public interface SlaveService {
     public String slaveQuatoHTMLText(String quatoType,String maxOrAvg,String chooseDate,String userGroupName) throws Exception;
 
     public String addSlave(HttpServletRequest request) throws Exception;
+
+    public SlaveEntity getSlaveByHostName(Integer id) throws Exception;
+
+    public String updateSlave(HttpServletRequest request) throws Exception;
 }

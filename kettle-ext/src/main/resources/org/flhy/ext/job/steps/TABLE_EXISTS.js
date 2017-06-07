@@ -3,18 +3,17 @@ JobEntryTableExistsDialog = Ext.extend(KettleDialog, {
 	width: 450,
 	height: 210,
 	initComponent: function() {
-		var me = this;
-		
+		var me = this,cell = getActiveGraph().getGraph().getSelectionCell();
 		var wConnection = new Ext.form.ComboBox({
 			flex: 1,
 			displayField: 'name',
 			valueField: 'name',
 			typeAhead: true,
-	        mode: 'local',
+	        mode: 'remote',
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
-	        store: getActiveGraph().getDatabaseStore(),
+	        store: getActiveGraph().getDatabaseStoreAll(),
 			value: cell.getAttribute('connection')
 		});
 		
@@ -95,7 +94,7 @@ JobEntryTableExistsDialog = Ext.extend(KettleDialog, {
 	},
 	
 	selectSchema: function(wConnection, wSchema) {
-		var store = getActiveGraph().getDatabaseStore();
+		/*var store = getActiveGraph().getDatabaseStore();
 		store.each(function(item) {
 			if(item.get('name') == wConnection.getValue()) {
 				var dialog = new DatabaseExplorerDialog({includeElement: 1});
@@ -108,11 +107,20 @@ JobEntryTableExistsDialog = Ext.extend(KettleDialog, {
 				});
 				return false;
 			}
+		});*/
+		var dialog = new DatabaseExplorerDialog({includeElement: 1});
+		dialog.on('select', function(schema) {
+			wSchema.setValue(schema);
+			dialog.close();
 		});
+		dialog.show(null, function() {
+			dialog.initDatabase(wConnection.getValue());
+		});
+		return false;
 	},
 	
 	selectTable: function(wConnection, wSchema, wTable) {
-		var store = getActiveGraph().getDatabaseStore();
+		/*var store = getActiveGraph().getDatabaseStore();
 		store.each(function(item) {
 			if(item.get('name') == wConnection.getValue()) {
 				var dialog = new DatabaseExplorerDialog();
@@ -126,7 +134,17 @@ JobEntryTableExistsDialog = Ext.extend(KettleDialog, {
 				});
 				return false;
 			}
+		});*/
+		var dialog = new DatabaseExplorerDialog();
+		dialog.on('select', function(table, schema) {
+			wTable.setValue(table);
+			wSchema.setValue(schema);
+			dialog.close();
 		});
+		dialog.show(null, function() {
+			dialog.initDatabase(wConnection.getValue());
+		});
+		return false;
 	}
 });
 

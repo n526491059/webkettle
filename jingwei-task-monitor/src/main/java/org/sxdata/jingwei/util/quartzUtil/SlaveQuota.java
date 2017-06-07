@@ -15,6 +15,7 @@ import java.util.List;
  * Created by cRAZY on 2017/3/17.
  */
 public class SlaveQuota {
+
     //每隔N分钟采集节点指标的具体业务方法(已在配置文件中整合Spring会自动调用)
     public static void quotaSlaveInfoRepeat() throws Exception{
         SqlSession session=CarteClient.sessionFactory.openSession();
@@ -49,7 +50,7 @@ public class SlaveQuota {
              result+=session.insert("org.sxdata.jingwei.dao.CarteInfoDao.insertCarteInfo", carteInfoEntity);
         }
         session.commit();
-        System.out.println("定时采集节点指标信息成功!共更新→"+result+"条数据@");
+        System.out.println("定时采集节点指标信息成功!共更新→" + result + "条数据");
         session.close();
     }
 }

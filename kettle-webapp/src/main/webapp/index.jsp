@@ -139,5 +139,6 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/slaveMonitor.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/taskGroupMonitor.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/taskHistoryLogs.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/moduleView.js"></script>
 	</body>
 </html>

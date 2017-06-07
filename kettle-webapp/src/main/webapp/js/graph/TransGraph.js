@@ -403,14 +403,16 @@ TransGraph = Ext.extend(BaseGraph, {
                 iconCls: 'check', scope: this, tooltip: '校验这个转换', handler: this.check
             }, {
                 iconCls: 'SQLbutton', scope: this, tooltip: '产生需要运行这个转换的SQL', handler: this.getSQL
-            }, '-', {
+            }, '-', /*{
                 iconCls: 'SlaveServer', scope: this, handler: this.showSlaves
-            }, {
+            }, */{
                 iconCls: 'ClusterSchema', scope: this, handler: this.clusterSchema
             }, {
                 iconCls: 'PartitionSchema', scope: this, handler: this.partitionSchema
             }, '-', {
                 iconCls: 'show-results', scope: this, handler: this.showResultPanel
+            },{
+                iconCls: 'databasesCls', scope: this, handler: this.databaseConn,tooltip: '数据库连接'
             }];
         }else if(this.Executable==true && this.readOnly==false){
             this.tbar = [{
@@ -504,19 +506,24 @@ TransGraph = Ext.extend(BaseGraph, {
      *
      */
     save: function() {
+        Ext.getBody().mask('正在保存，请稍后...', 'x-mask-loading');
         Ext.Ajax.request({
             url: GetUrl('trans/save.do'),
             params: {graphXml: encodeURIComponent(this.toXml())},
             method: 'POST',
             success: function(response) {
-                decodeResponse(response, function(resObj) {
-                    Ext.Msg.show({
-                        title: '系统提示',
-                        msg: resObj.message,
-                        buttons: Ext.Msg.OK,
-                        icon: Ext.MessageBox.INFO
+                try{
+                    decodeResponse(response, function(resObj) {
+                        Ext.Msg.show({
+                            title: '系统提示',
+                            msg: resObj.message,
+                            buttons: Ext.Msg.OK,
+                            icon: Ext.MessageBox.INFO
+                        });
                     });
-                });
+                }finally{
+                    Ext.getBody().unmask();
+                }
             },
             failure: failureResponse
         });
@@ -529,18 +536,52 @@ TransGraph = Ext.extend(BaseGraph, {
             return;
         }
 
-        // 获取执行参数
-        Ext.Ajax.request({
-            url: GetUrl('trans/initRun.do'),
-            method: 'POST',
-            params: {graphXml: this.toXml()},
-            success: function(response) {
-                var resObj = Ext.decode(response.responseText);
-                transExecutor.fireEvent('beforerun', transExecutor, resObj);
-            },
-            failure: failureResponse
-        });
-
+        var graphXml=this.toXml();
+        if(this.Executable || this.readOnly){
+            Ext.Ajax.request({
+                url: GetUrl('trans/initRun.do'),
+                method: 'POST',
+                params: {graphXml: graphXml},
+                success: function(response) {
+                    var resObj = Ext.decode(response.responseText);
+                    transExecutor.fireEvent('beforerun', transExecutor, resObj);
+                },
+                failure: failureResponse
+            });
+        }else{
+            Ext.getBody().mask('正在保存，请稍后...', 'x-mask-loading');
+            Ext.Ajax.request({
+                url: GetUrl('trans/save.do'),
+                params: {graphXml: encodeURIComponent(graphXml)},
+                method: 'POST',
+                success: function(response) {
+                    var resp=response;
+                    try{
+                        Ext.Ajax.request({
+                            url: GetUrl('trans/initRun.do'),
+                            method: 'POST',
+                            params: {graphXml: graphXml},
+                            success: function(response) {
+                                var resObj = Ext.decode(response.responseText);
+                                transExecutor.fireEvent('beforerun', transExecutor, resObj);
+                                decodeResponse(resp, function(resObj) {
+                                    Ext.Msg.show({
+                                        title: '系统提示',
+                                        msg: resObj.message,
+                                        buttons: Ext.Msg.OK,
+                                        icon: Ext.MessageBox.INFO
+                                    });
+                                });
+                            },
+                            failure: failureResponse
+                        });
+                    }finally{
+                        Ext.getBody().unmask();
+                    }
+                },
+                failure: failureResponse
+            });
+        }
     },
 
     pause: function() {
@@ -592,6 +633,17 @@ TransGraph = Ext.extend(BaseGraph, {
 
         resultPanel.setVisible( !resultPanel.isVisible() );
         this.doLayout();
+    },
+    databaseConn:function(){
+        var grid=new DatabaseConnGrid();
+        grid.getColumnModel().setHidden(1,true);
+        var databaseConnW=new Ext.Window({
+            title:"连接管理",
+            width:750,
+            modal:true,
+            items:[grid]
+        });
+        databaseConnW.show();
     },
 
 	/*

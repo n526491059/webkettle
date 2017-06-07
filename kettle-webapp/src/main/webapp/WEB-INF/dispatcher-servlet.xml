@@ -130,7 +130,7 @@
 			<ref bean="jobDetail" />
 		</property>
 		<property name="cronExpression">
-			<value>0 0/15 * * * ?</value>
+			<value>0 0/15 * * * ? </value>
 		</property>
 	</bean>
 	<!--调度工厂  * 0/30 * * * ?  0/5 * * * * ?-->

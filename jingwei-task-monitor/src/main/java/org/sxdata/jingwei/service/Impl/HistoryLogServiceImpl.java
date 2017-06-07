@@ -50,20 +50,22 @@ public class HistoryLogServiceImpl implements HistoryLogService{
         ExecutionTraceEntity trace=executionTraceDao.getTraceById(id);
         //增加所属任务组属性
         String config=trace.getExecutionConfiguration();
-        JSONObject json=JSONObject.fromObject(config);
-        List<TaskGroupAttributeEntity> groups=groupDao.getTaskGroupByTaskName(trace.getJobName(),trace.getType());
-        if(null!=groups && groups.size()>0){
-            String[] groupNames=new String[groups.size()];
-            for(int i=0;i<groups.size();i++){
-                TaskGroupAttributeEntity group=groups.get(i);
-                groupNames[i]=group.getTaskGroupName();
+        if(null!=config){
+            JSONObject json=JSONObject.fromObject(config);
+            List<TaskGroupAttributeEntity> groups=groupDao.getTaskGroupByTaskName(trace.getJobName(),trace.getType());
+            if(null!=groups && groups.size()>0){
+                String[] groupNames=new String[groups.size()];
+                for(int i=0;i<groups.size();i++){
+                    TaskGroupAttributeEntity group=groups.get(i);
+                    groupNames[i]=group.getTaskGroupName();
+                }
+                json.put("group",groupNames);
+            }else{
+                json.put("group","暂未分配任务组");
             }
-            json.put("group",groupNames);
-        }else{
-            json.put("group","暂未分配任务组");
+            trace.setExecutionConfiguration(json.toString());
+            trace.setExecutionLog(trace.getExecutionLog().replaceAll("\\\\n","<br/>"));
         }
-        trace.setExecutionConfiguration(json.toString());
-        trace.setExecutionLog(trace.getExecutionLog().replaceAll("\\\\n","<br/>"));
         return JSONObject.fromObject(trace).toString();
     }
 }

@@ -1,6 +1,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.sxdata.jingwei.dao.JobSchedulerDao">
 
+
     <!--获得所有的定时作业-->
     <select id="getAllTimerJob" resultType="org.sxdata.jingwei.entity.JobTimeSchedulerEntity">
         select
@@ -17,7 +18,18 @@
             d.DAYOFMONTH as dayofmonth,
             d.executionConfig as executionConfig,
             d.username as username
-          from d_timerscheduler d
+          from d_timerscheduler d WHERE 1=1
+        <if test='_parameter!=null and _parameter!=""'  >
+            and  d.JOB_NAME IN
+            (
+              select TASK_NAME from d_task_group_member_attribute
+              WHERE TASK_GROUP_NAME IN
+                (
+                  select TASK_GROUP_NAME from d_user_group_tasks_relation
+                  WHERE USER_GROUP_NAME=#{userGroupName}
+                ) and type="job"
+            )
+        </if>
     </select>
 
     <!--分页形式获得所有的定时作业 附带条件查询-->

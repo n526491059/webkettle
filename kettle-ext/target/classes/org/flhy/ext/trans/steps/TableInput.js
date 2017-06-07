@@ -12,11 +12,11 @@ TableInputDialog = Ext.extend(KettleDialog, {
 			displayField: 'name',
 			valueField: 'name',
 			typeAhead: true,
-	        mode: 'local',
+	        mode: 'remote',
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
-			store: getActiveGraph().getDatabaseStore(),
+			store: getActiveGraph().getDatabaseStoreAll(),
 			name: 'connection',
 			value: cell.getAttribute('connection')
 		});
@@ -73,7 +73,7 @@ TableInputDialog = Ext.extend(KettleDialog, {
 					fieldLabel: '数据库连接',
 					items: [wConnection, {
 						xtype: 'button', text: '编辑...', handler: function() {
-							var databaseDialog = new DatabaseDialog();
+							var databaseDialog = new DatabaseDialog({operation:'editor'});
 							databaseDialog.on('create', onDatabaseCreate);
 							databaseDialog.show(null, function() {
 								databaseDialog.initTransDatabase(wConnection.getValue());
@@ -81,7 +81,7 @@ TableInputDialog = Ext.extend(KettleDialog, {
 						}
 					}, {
 						xtype: 'button', text: '新建...', handler: function() {
-							var databaseDialog = new DatabaseDialog();
+							var databaseDialog = new DatabaseDialog({operation:'add'});
 							databaseDialog.on('create', onDatabaseCreate);
 							databaseDialog.show(null, function() {
 								databaseDialog.initTransDatabase(null);
@@ -108,14 +108,13 @@ TableInputDialog = Ext.extend(KettleDialog, {
 	},
 	
 	selectTable: function(wConnection, wSQL) {
-		var store = getActiveGraph().getDatabaseStore();
+		/*var store = getActiveGraph().getDatabaseStore();
 		store.each(function(item) {
 			if(item.get('name') == wConnection.getValue()) {
 				var dialog = new DatabaseExplorerDialog();
 				dialog.on('select', function(table, schema) {
 					wSQL.setValue('select * from ' + schema + '.' + table);
 					dialog.close();
-					
 					Ext.Msg.show({
 						   title:'系统提示',
 						   msg: '你想在SQL里面包含字段名吗？',
@@ -140,7 +139,35 @@ TableInputDialog = Ext.extend(KettleDialog, {
 				});
 				return false;
 			}
+		});*/
+
+		var dialog = new DatabaseExplorerDialog();
+		dialog.on('select', function(table, schema) {
+			wSQL.setValue('select * from ' + schema + '.' + table);
+			dialog.close();
+			Ext.Msg.show({
+				title:'系统提示',
+				msg: '你想在SQL里面包含字段名吗？',
+				buttons: Ext.Msg.YESNO,
+				icon: Ext.MessageBox.QUESTION,
+				fn: function(bId) {
+					if(bId == 'yes') {
+						var store = getActiveGraph().tableFields(wConnection.getValue(), schema, table, function(store) {
+							var data = [];
+							store.each(function(rec) {
+								data.push('\n\t' + rec.get('name'));
+							});
+							wSQL.setValue('select ' + data.join(',') + '\n from ' + schema + '.' + table);
+						});
+						store.load();
+					}
+				}
+			});
 		});
+		dialog.show(null, function() {
+			dialog.initDatabase(wConnection.getValue());
+		});
+		return false;
 	}
 	
 });

@@ -224,6 +224,7 @@ Ext.onReady(function() {
 	 setTimeout(function(){
 		 Ext.get('loading').hide();
 		 Ext.get('loading-mask').fadeOut();
+		 moduleViewData();
 	 }, 250);
 
 });

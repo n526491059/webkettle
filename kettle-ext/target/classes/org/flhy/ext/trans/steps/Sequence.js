@@ -13,11 +13,11 @@ SequenceDialog = Ext.extend(KettleDialog, {
 			valueField: 'name',
 			typeAhead: true,
 			disabled: true,
-	        mode: 'local',
+	        mode: 'remote',
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
-			store: getActiveGraph().getDatabaseStore()
+			store: getActiveGraph().getDatabaseStoreAll()
 		});
 		var wSchema = new Ext.form.TextField({ flex: 1, disabled: true});
 		var wSeqname = new Ext.form.TextField({ flex: 1, disabled: true});
@@ -162,7 +162,7 @@ SequenceDialog = Ext.extend(KettleDialog, {
 	},
 	
 	selectSchema: function(wConnection, wSchema) {
-		var store = getActiveGraph().getDatabaseStore();
+		/*var store = getActiveGraph().getDatabaseStore();
 		store.each(function(item) {
 			if(item.get('name') == wConnection.getValue()) {
 				var dialog = new DatabaseExplorerDialog({includeElement: 1});
@@ -175,7 +175,16 @@ SequenceDialog = Ext.extend(KettleDialog, {
 				});
 				return false;
 			}
+		});*/
+		var dialog = new DatabaseExplorerDialog({includeElement: 1});
+		dialog.on('select', function(schema) {
+			wSchema.setValue(schema);
+			dialog.close();
 		});
+		dialog.show(null, function() {
+			dialog.initDatabase(wConnection.getValue());
+		});
+		return false;
 	}
 });
 
