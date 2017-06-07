@@ -366,7 +366,7 @@ public class DatabaseController {
 	/**
 	 * 校验数据库环境，确定该数据库是否已经被初始化
 	 * 
-	 * @param
+	 * @param connection
 	 * @throws Exception
 	 */
 	@ResponseBody
