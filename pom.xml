@@ -39,36 +39,49 @@
 			<version>0.7.1</version>
 		</dependency>
 
-		<!--<dependency>
-			<groupId>org.pentaho.di</groupId>
+		<!--kettle dependency start-->
+		<dependency>
+			<groupId>pentaho-kettle</groupId>
 			<artifactId>kettle-core</artifactId>
-			<version>6.0.1</version>
-		</dependency>-->
-		<!--<dependency>
-			<groupId>org.pentaho.di</groupId>
+			<version>7.1.0.0-12</version>
+		</dependency>
+		<dependency>
+			<groupId>pentaho-kettle</groupId>
 			<artifactId>kettle-dbdialog</artifactId>
-			<version>6.0.1</version>
+			<version>7.1.0.0-12</version>
 		</dependency>
 		<dependency>
-			<groupId>org.pentaho.di</groupId>
+			<groupId>pentaho-kettle</groupId>
 			<artifactId>kettle-engine</artifactId>
-			<version>6.0.1</version>
+			<version>7.1.0.0-12</version>
 		</dependency>
 		<dependency>
-			<groupId>org.pentaho.di</groupId>
+			<groupId>pentaho</groupId>
 			<artifactId>metastore</artifactId>
-			<version>6.0.1</version>
+			<version>7.1.0.0-12</version>
 		</dependency>
 		<dependency>
-			<groupId>org.pentaho.di</groupId>
+			<groupId>pentaho-kettle</groupId>
 			<artifactId>kettle-ui-swt</artifactId>
-			<version>6.0.1</version>
+			<version>7.1.0.0-12</version>
 		</dependency>
 		<dependency>
-			<groupId>org.pentaho.di</groupId>
+			<groupId>pentaho</groupId>
 			<artifactId>pentaho-vfs-browser</artifactId>
-			<version>6.0.1</version>
-		</dependency>-->
+			<version>7.1.0.0-12</version>
+		</dependency>
+		<dependency>
+			<groupId>pentaho-kettle</groupId>
+			<artifactId>kettle-sap-plugin</artifactId>
+			<version>7.1.0.0-12</version>
+		</dependency>
+		<dependency>
+			<groupId>pentaho-kettle</groupId>
+			<artifactId>kettle-json-plugin</artifactId>
+			<version>7.1.0.0-12</version>
+		</dependency>
+		<!--kettle dependency end-->
+
 		<dependency>
 			<groupId>com.mxgraph</groupId>
 			<artifactId>mxgraph-all</artifactId>
@@ -270,6 +283,7 @@
 			<artifactId>jxl</artifactId>
 			<version>2.6.12</version>
 		</dependency>
+
 
 	</dependencies>
 	
