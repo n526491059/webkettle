@@ -14,7 +14,7 @@ import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.database.GenericDatabaseMeta;
 import org.pentaho.di.core.database.MSSQLServerNativeDatabaseMeta;
 import org.pentaho.di.core.database.PartitionDatabaseMeta;
-import org.pentaho.di.core.database.SAPR3DatabaseMeta;
+import org.pentaho.di.core.database.sap.SAPR3DatabaseMeta;
 import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.core.exception.KettleDatabaseException;
 import org.springframework.util.StringUtils;

@@ -1,7 +1,6 @@
 package org.flhy.ext.job.steps;
 
 import java.util.List;
-
 import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.job.step.AbstractJobEntry;
 import org.flhy.ext.utils.JSONArray;
@@ -25,17 +24,17 @@ public class JobEntryCheckDbConnections extends AbstractJobEntry {
 	@Override
 	public void decode(JobEntryInterface jobEntry, mxCell cell, List<DatabaseMeta> databases, IMetaStore metaStore) throws Exception {
 		org.pentaho.di.job.entries.checkdbconnection.JobEntryCheckDbConnections jobEntryCheckDbConnections = (org.pentaho.di.job.entries.checkdbconnection.JobEntryCheckDbConnections) jobEntry;
-		
+
 		String fields = cell.getAttribute("connections");
 		JSONArray jsonArray = JSONArray.fromObject(fields);
-		jobEntryCheckDbConnections.connections = new DatabaseMeta[jsonArray.size()];
-		jobEntryCheckDbConnections.waittimes = new int[jsonArray.size()];
-		jobEntryCheckDbConnections.waitfors = new String[jsonArray.size()];
+		jobEntryCheckDbConnections.setConnections(new DatabaseMeta[jsonArray.size()]);
+		jobEntryCheckDbConnections.setWaittimes(new int[jsonArray.size()]);
+		jobEntryCheckDbConnections.setWaitfors(new String[jsonArray.size()]);
 		for(int i=0; i<jsonArray.size(); i++) {
 			JSONObject jsonObject = jsonArray.getJSONObject(i);
-			jobEntryCheckDbConnections.connections[i] = DatabaseMeta.findDatabase(databases, jsonObject.optString("name"));
-			jobEntryCheckDbConnections.waittimes[i] = jobEntryCheckDbConnections.getWaitTimeByDesc( Const.NVL(jsonObject.optString("waittime"), "" ) );
-			jobEntryCheckDbConnections.waitfors[i] = jsonObject.optString("waitfor");
+			jobEntryCheckDbConnections.getConnections()[i] = DatabaseMeta.findDatabase(databases, jsonObject.optString("name"));
+			jobEntryCheckDbConnections.getWaittimes()[i] = jobEntryCheckDbConnections.getWaitTimeByDesc( Const.NVL(jsonObject.optString("waittime"), "" ) );
+			jobEntryCheckDbConnections.getWaitfors()[i] = jsonObject.optString("waitfor");
 		}
 	}
 
@@ -51,8 +50,8 @@ public class JobEntryCheckDbConnections extends AbstractJobEntry {
 			for(int j=0; j<connections.length; j++) {
 				JSONObject jsonObject = new JSONObject();
 				jsonObject.put("name", connections[j].getName());
-				jsonObject.put("waittime", jobEntryCheckDbConnections.unitTimeCode[jobEntryCheckDbConnections.waittimes[j]]);
-				jsonObject.put("waitfor", jobEntryCheckDbConnections.waitfors[j]);
+				jsonObject.put("waittime", jobEntryCheckDbConnections.unitTimeCode[jobEntryCheckDbConnections.getWaittimes()[j]]);
+				jsonObject.put("waitfor", jobEntryCheckDbConnections.getWaitfors()[j]);
 				jsonArray.add(jsonObject);
 			}
 		}

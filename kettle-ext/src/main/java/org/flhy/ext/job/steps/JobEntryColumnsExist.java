@@ -17,6 +17,7 @@ import org.w3c.dom.Element;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.util.mxUtils;
 
+
 @Component("COLUMNS_EXIST")
 @Scope("prototype")
 public class JobEntryColumnsExist extends AbstractJobEntry {
@@ -31,10 +32,10 @@ public class JobEntryColumnsExist extends AbstractJobEntry {
 		
 		
 		JSONArray jsonArray = JSONArray.fromObject(cell.getAttribute("fields"));
-		jobEntryColumnsExist.arguments= new String[jsonArray.size()];
+		jobEntryColumnsExist.setArguments(new String[jsonArray.size()]);
 		for(int i=0; i<jsonArray.size(); i++) {
 			JSONObject jsonObject = jsonArray.getJSONObject(i);
-			jobEntryColumnsExist.arguments[i] = jsonObject.optString("field");
+			jobEntryColumnsExist.getArguments()[i] = jsonObject.optString("field");
 		}
 	}
 
@@ -50,10 +51,10 @@ public class JobEntryColumnsExist extends AbstractJobEntry {
 		e.setAttribute("tablename", jobEntryColumnsExist.getTablename());
 		
 		JSONArray jsonArray = new JSONArray();
-		if(jobEntryColumnsExist.arguments != null) {
-			for(int j=0; j<jobEntryColumnsExist.arguments.length; j++) {
+		if(jobEntryColumnsExist.getArguments() != null) {
+			for(int j=0; j< jobEntryColumnsExist.getArguments().length; j++) {
 				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("field", jobEntryColumnsExist.arguments[j]);
+				jsonObject.put("field", jobEntryColumnsExist.getArguments()[j]);
 				jsonArray.add(jsonObject);
 			}
 		}

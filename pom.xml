@@ -39,12 +39,12 @@
 			<version>0.7.1</version>
 		</dependency>
 
-		<dependency>
+		<!--<dependency>
 			<groupId>org.pentaho.di</groupId>
 			<artifactId>kettle-core</artifactId>
 			<version>6.0.1</version>
-		</dependency>
-		<dependency>
+		</dependency>-->
+		<!--<dependency>
 			<groupId>org.pentaho.di</groupId>
 			<artifactId>kettle-dbdialog</artifactId>
 			<version>6.0.1</version>
@@ -68,7 +68,7 @@
 			<groupId>org.pentaho.di</groupId>
 			<artifactId>pentaho-vfs-browser</artifactId>
 			<version>6.0.1</version>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>com.mxgraph</groupId>
 			<artifactId>mxgraph-all</artifactId>
@@ -285,6 +285,21 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>jdk1.8</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<jdk>1.8</jdk>
+			</activation>
+			<properties>
+				<maven.compiler.source>1.8</maven.compiler.source>
+				<maven.compiler.target>1.8</maven.compiler.target>
+				<maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+			</properties>
+		</profile>
+	</profiles>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

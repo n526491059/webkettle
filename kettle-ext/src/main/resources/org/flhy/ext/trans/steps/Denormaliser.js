@@ -4,7 +4,6 @@ Denormaliser = Ext.extend(KettleDialog, {
     height: 600,
     initComponent: function() {
         var me = this, cell = getActiveGraph().getGraph().getSelectionCell();
-
         var typeStore = new Ext.data.JsonStore({
             fields: ['type'],
             proxy: new Ext.data.HttpProxy({
