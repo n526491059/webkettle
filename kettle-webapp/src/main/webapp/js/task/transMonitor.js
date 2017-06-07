@@ -539,7 +539,7 @@ function powerExecute(path,powerFlag){
     Ext.Ajax.request({
         url:"/task/powerExecute.do",
         success:function(response,config){
-            Ext.MessageBox.alert("result","已执行")
+            Ext.MessageBox.alert("result","已在→\""+response.responseText+"\"节点上执行")
         },
         failure:failureResponse,
         params:{path:path,powerFlag:powerFlag}

@@ -25,5 +25,7 @@ public class CommonServiceImpl implements CommonService{
     public void deleteDatabaseConn(Integer id) {
         cDao.deleteDatabaseAttr(id);
         cDao.deleteDatabaseMeta(id);
+        cDao.deleteJobDatabase(id);
+        cDao.deleteTransDatabase(id);
     }
 }

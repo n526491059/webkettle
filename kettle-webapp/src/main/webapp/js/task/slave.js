@@ -225,6 +225,13 @@ function slaveManager(secondGuidePanel){
                     handler:function(){
                         addSlave();
                     }
+                },"-",
+                {
+                    iconCls:"editorCls",
+                    tooltip: '修改节点',
+                    handler:function(){
+                        updateSlave(slaveGridPanel);
+                    }
                 }
             ]
         }),
@@ -469,14 +476,11 @@ function showTestResultByWindow(jsonString,slaveGridPanel){
 function deleteSlave(slaveGridPanel,secondGuidePanel){
     //获取被选中的行记录
     var recordList=slaveGridPanel.getSelectionModel().getSelections();
-    var slaveIdArray=new Array();
-    if(recordList.length<1){
-        Ext.MessageBox.alert("请至少选择一个需要删除的节点");
+    if(recordList.length!=1){
+        Ext.MessageBox.alert("请选择一个需要删除的节点");
         return;
     }else{
-        for(var i=0;i<recordList.length;i++){
-            slaveIdArray.push(recordList[i].get("slaveId"));
-        }
+        var slaveId=recordList[0].get("slaveId");
         Ext.Ajax.request({
             url:"/slave/deleteSlave.do",
             success:function(response,config){
@@ -484,26 +488,52 @@ function deleteSlave(slaveGridPanel,secondGuidePanel){
                 slaveManager(Ext.getCmp("secondGuidePanel"));
             },
             failure:failureResponse,
-            params:{items:slaveIdArray}
+            params:{slaveId:slaveId}
         });
     }
 }
 
 //新增节点
 function addSlave(){
-    var slaveServerWindow=new SlaveServerDialog();
-    slaveServerWindow.show(Ext.getCmp("slaveGridPanel"));
+    var slaveServerWindow=new SlaveServerWin({flag:"add"});
+    slaveServerWindow.show();
+}
+
+function updateSlave(grid){
+    //获取被选中的行记录
+    var recordList=grid.getSelectionModel().getSelections();
+    if(recordList.length!=1){
+        Ext.MessageBox.alert("请选择一个需要修改的节点");
+        return;
+    }else{
+        var slaveId=grid.getSelectionModel().getSelected().get("slaveId");
+        Ext.Ajax.request({
+            url:"/slave/getSlaveServerInfo.do",
+            success:function(response,config){
+                var result=Ext.decode(response.responseText);
+                var slaveServerWindow=new SlaveServerWin({flag:"update"});
+                slaveServerWindow.show(null, function() {
+                    slaveServerWindow.initData(result)
+                });
+            },
+            failure:failureResponse,
+            params:{slaveId:slaveId}
+        })
+    }
 }
 
 //新增-修改节点的弹窗
-SlaveServerDialog = Ext.extend(Ext.Window, {
-    title: '子服务器对话框',
+SlaveServerWin = Ext.extend(Ext.Window, {
+    title: '节点服务器',
     width: 600,
     height: 350,
     modal: true,
     layout: 'fit',
     iconCls: 'SlaveServer',
+    flag:'',
     initComponent: function() {
+        var me=this;
+        var wSlaveId=new Ext.form.TextField({fieldLabel: '节点id', anchor: '-20',hidden:true});
         var wName = new Ext.form.TextField({fieldLabel: '服务器名称', anchor: '-20'});
         var wHostname = new Ext.form.TextField({fieldLabel: '主机名称或IP地址', anchor: '-20'});
         var wPort = new Ext.form.TextField({fieldLabel: '端口号(如果不写就是80端口)', anchor: '-20'});
@@ -526,7 +556,7 @@ SlaveServerDialog = Ext.extend(Ext.Window, {
                     title: '服务',
                     xtype: 'KettleForm',
                     labelWidth: 200,
-                    items: [wName, wHostname, wPort, wWebAppName, wUsername, wPassword, wMaster]
+                    items: [wSlaveId,wName, wHostname, wPort, wWebAppName, wUsername, wPassword, wMaster]
                 },{
                     title: '代理',
                     xtype: 'KettleForm',
@@ -547,6 +577,7 @@ SlaveServerDialog = Ext.extend(Ext.Window, {
             wProxyHost.setValue(data.proxy_hostname);
             wProxyPort.setValue(data.proxy_port);
             wNonProxyHosts.setValue(data.non_proxy_hosts);
+            wSlaveId.setValue(data.slaveId);
         };
 
         this.bbar = ['->', {
@@ -555,75 +586,95 @@ SlaveServerDialog = Ext.extend(Ext.Window, {
             handler: function() {
                 var data = {
                     name: wName.getValue(),
-                    hostname: wHostname.getValue(),
+                    hostName: wHostname.getValue(),
                     port: wPort.getValue(),
-                    webAppName: wWebAppName.getValue(),
+                    webappName: wWebAppName.getValue(),
                     username: wUsername.getValue(),
                     password: wPassword.getValue(),
                     master: wMaster.getValue() ? 'Y' : 'N',
                     sslMode: 'N',
-                    proxy_hostname: wProxyHost.getValue(),
-                    proxy_port: wProxyPort.getValue(),
-                    non_proxy_hosts: wNonProxyHosts.getValue()
+                    proxyHostname: wProxyHost.getValue(),
+                    proxyPort: wProxyPort.getValue(),
+                    nonproxyHosts: wNonProxyHosts.getValue(),
+                    slaveId:wSlaveId.getValue()==""?0:wSlaveId.getValue()
                 };
-                if(loginUserType==1){
+                if(me.flag=="add"){
+                    if(loginUserType==1){
+                        Ext.Ajax.request({
+                            url:"/slave/addSlave.do",
+                            success:function(response,config){
+                                if(response.responseText=="Y"){
+                                    Ext.MessageBox.alert("新增成功!");
+                                    this.close();
+                                    slaveManager(Ext.getCmp("secondGuidePanel"));
+                                }else{
+                                    Ext.MessageBox.alert("添加失败,已存在相同节点!");
+                                    me.close();
+                                }
+                            },
+                            failure:failureResponse,
+                            params:{slaveServer:JSON.stringify(data),userType:1}
+                        })
+                    }else{
+                        me.close();
+                        var item=allUserGroupPanel();
+                        var userGroupChooseWindow=new Ext.Window({
+                            title:"请为该节点分配可见用户组",
+                            width:400,
+                            height:480,
+                            modal:true,
+                            items:[item],
+                            tbar:new Ext.Toolbar({
+                                buttons: [
+                                    {
+                                        text:"确认",
+                                        handler:function(){
+                                            //获取被选中的行记录
+                                            var recordList=item.getSelectionModel().getSelections();
+                                            var userGroupNameArray=new Array();
+                                            for(var i=0;i<recordList.length;i++){
+                                                userGroupNameArray.push(recordList[i].get("userGroupName"));
+                                            }
+                                            Ext.Ajax.request({
+                                                url:"/slave/addSlave.do",
+                                                success:function(response,config){
+                                                    if(response.responseText=="Y"){
+                                                        Ext.MessageBox.alert("新增成功!");
+                                                        userGroupChooseWindow.close();
+                                                        slaveManager(Ext.getCmp("secondGuidePanel"));
+                                                    }else{
+                                                        Ext.MessageBox.alert("新增失败,该端口已经配置节点!");
+                                                        userGroupChooseWindow.close();
+                                                    }
+                                                },
+                                                failure:failureResponse,
+                                                params:{slaveServer:JSON.stringify(data),userGroupArray:userGroupNameArray,userType:0}
+                                            })
+                                        }
+                                    }
+                                ]
+                            })
+                        });
+                        userGroupChooseWindow.show();
+                    }
+                }else{
                     Ext.Ajax.request({
-                        url:"/slave/addSlave.do",
+                        url:"/slave/updateSlaveServer.do",
                         success:function(response,config){
                             if(response.responseText=="Y"){
-                                Ext.MessageBox.alert("新增成功!");
-                                this.close();
+                                Ext.MessageBox.alert("修改成功!");
+                                me.close();
                                 slaveManager(Ext.getCmp("secondGuidePanel"));
                             }else{
-                                Ext.MessageBox.alert("添加失败,已存在相同节点!");
-                                this.close();
+                                Ext.MessageBox.alert("修改失败,已存在相同节点!");
+                                me.close();
                             }
                         },
                         failure:failureResponse,
                         params:{slaveServer:JSON.stringify(data),userType:1}
                     })
-                }else{
-                    this.close();
-                    var item=allUserGroupPanel();
-                    var userGroupChooseWindow=new Ext.Window({
-                        title:"请为该节点分配可见用户组",
-                        width:400,
-                        height:480,
-                        modal:true,
-                        items:[item],
-                        tbar:new Ext.Toolbar({
-                            buttons: [
-                                {
-                                    text:"确认",
-                                    handler:function(){
-                                        //获取被选中的行记录
-                                        var recordList=item.getSelectionModel().getSelections();
-                                        var userGroupNameArray=new Array();
-                                        for(var i=0;i<recordList.length;i++){
-                                            userGroupNameArray.push(recordList[i].get("userGroupName"));
-                                        }
-                                        Ext.Ajax.request({
-                                            url:"/slave/addSlave.do",
-                                            success:function(response,config){
-                                                if(response.responseText=="Y"){
-                                                    Ext.MessageBox.alert("新增成功!");
-                                                    userGroupChooseWindow.close();
-                                                    slaveManager(Ext.getCmp("secondGuidePanel"));
-                                                }else{
-                                                    Ext.MessageBox.alert("新增失败,改端口已经配置节点!");
-                                                    userGroupChooseWindow.close();
-                                                }
-                                            },
-                                            failure:failureResponse,
-                                            params:{slaveServer:JSON.stringify(data),userGroupArray:userGroupNameArray,userType:0}
-                                        })
-                                    }
-                                }
-                            ]
-                        })
-                    });
-                    userGroupChooseWindow.show();
                 }
+
             }
         }];
         SlaveServerDialog.superclass.initComponent.call(this);

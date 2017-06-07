@@ -207,7 +207,7 @@ public class CarteTaskManager {
 		JobServiceImpl js=new JobServiceImpl();
 		//获取session对象查询所有定时作业
 		SqlSession session=bean.openSession();
-		List<JobTimeSchedulerEntity> jobsTimer=session.selectList("org.sxdata.jingwei.dao.JobSchedulerDao.getAllTimerJob");
+		List<JobTimeSchedulerEntity> jobsTimer=session.selectList("org.sxdata.jingwei.dao.JobSchedulerDao.getAllTimerJob","");
 		if(jobsTimer==null || jobsTimer.size()<1){
 			System.out.println("当前暂无定时作业");
 		}else{

@@ -16,4 +16,8 @@ public interface CommonDao {
     public void deleteDatabaseAttr(Integer id);
 
     public void deleteDatabaseMeta(Integer id);
+
+    public void deleteJobDatabase(Integer id);
+
+    public void deleteTransDatabase(Integer id);
 }

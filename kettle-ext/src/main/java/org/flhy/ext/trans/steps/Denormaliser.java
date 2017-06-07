@@ -12,6 +12,8 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.denormaliser.DenormaliserMeta;
 import org.pentaho.di.trans.steps.denormaliser.DenormaliserTargetField;
 import org.pentaho.metastore.api.IMetaStore;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -19,14 +21,16 @@ import java.util.List;
 
 /**
  * Created by cRAZY on 2017/5/27.
- * 行转列
+ * 列转行
  */
+@Component("Denormaliser")
+@Scope("prototype")
 public class Denormaliser extends AbstractStep {
     @Override
     public void decode(StepMetaInterface stepMetaInterface, mxCell cell, List<DatabaseMeta> databases, IMetaStore metaStore) throws Exception {
         DenormaliserMeta denor=(DenormaliserMeta)stepMetaInterface;
         denor.setKeyField(cell.getAttribute("key_field"));
-        String group=cell.getAttribute("fields");
+        String group=cell.getAttribute("group");
         String fields=cell.getAttribute("fields");
         JSONArray groupJSONArray= JSONArray.fromObject(group);
         JSONArray fieldsJSONArray=JSONArray.fromObject(fields);

@@ -10,7 +10,7 @@ import java.util.List;
  */
 @Repository
 public interface JobSchedulerDao {
-    public List<JobTimeSchedulerEntity> getAllTimerJob();
+    public List<JobTimeSchedulerEntity> getAllTimerJob(String userGroupName);
 
     public void addTimerJob(JobTimeSchedulerEntity job);
 

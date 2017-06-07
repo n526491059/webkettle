@@ -378,7 +378,7 @@ public class TaskController {
             //输出结果返回给客户端
             response.setContentType("text/html;charset=utf-8");
             PrintWriter out=response.getWriter();
-            out.write("......");
+            out.write(minSlave.getHostName());
             out.flush();
             out.close();
         }

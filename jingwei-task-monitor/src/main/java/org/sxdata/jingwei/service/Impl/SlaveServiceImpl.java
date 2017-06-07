@@ -45,6 +45,11 @@ public class SlaveServiceImpl implements SlaveService {
     @Autowired
     protected UserGroupDao userGroupDao;
 
+    @Override
+    public Integer getAllSlaveSize() {
+        return slaveDao.getAllSlave("").size();
+    }
+
     public String[] getXvalue(List<CarteInfoEntity> items) throws Exception{
         String[] xValue=new String[items.size()];
         for(int i=0;i<items.size();i++){
@@ -713,12 +718,12 @@ public class SlaveServiceImpl implements SlaveService {
     }
 
     @Override
-    public void deleteSlave(String[] items) throws Exception {
-        for(String item:items){
-            ObjectId objectId=new LongObjectId(Integer.valueOf(item));
-            App.getInstance().getRepository().deleteSlave(objectId);
-
-        }
+    public void deleteSlave(Integer slaveId) throws Exception {
+       /* ObjectId objectId=new LongObjectId(slaveId);
+        App.getInstance().getRepository().deleteSlave(objectId);*/
+        slaveDao.deleteTransSlave(slaveId);
+        slaveDao.deleteSlaveUserGroup(slaveId);
+        slaveDao.deleteSlaveServer(slaveId);
     }
 
 
@@ -763,52 +768,26 @@ public class SlaveServiceImpl implements SlaveService {
     @Override
     public String addSlave(HttpServletRequest request) throws Exception{
         String result="Y";
-        //解析json参数
-        String slaveServer=request.getParameter("slaveServer");
-        JSONObject json=JSONObject.fromObject(slaveServer);
-        String name=(String)json.get("name");
-        String hostname=(String)json.get("hostname");
-        String port=(String)json.get("port");
-        String webAppName=(String)json.get("webAppName");
-        String username=(String)json.get("username");
-        String password = Encr.encryptPasswordIfNotUsingVariables((String) json.get("password"));
-        String master1=(String)json.get("master");
-        char master;
-        if(master1.equals("Y"))
-            master='Y';
-        else
-            master='N';
-        String proxyHostname=(String)json.get("proxy_hostname");
-        String proxy_port=(String)json.get("proxy_port");
-        String nonproxyHosts=(String)json.get("non_proxy_hosts");
-        //判断是否该节点是否已经配置
-        List<SlaveEntity> items=slaveDao.getAllSlave("");
-        for(SlaveEntity item:items){
-            if(item.getHostName().equals(hostname) && item.getPort().equals(port)){
-                result="N";
-                return result;
-            }
-        }
-        Integer typeId=Integer.valueOf(request.getParameter("userType"));
-        SlaveEntity slave=new SlaveEntity();
+        JSONObject json=JSONObject.fromObject(request.getParameter("slaveServer"));
+        SlaveEntity slave=(SlaveEntity)JSONObject.toBean(json,SlaveEntity.class);
+        slave.setPassword(KettleEncr.encryptPassword(slave.getPassword()));
         Integer id=slaveDao.selectMaxId();
         if(null==id)
             id=1;
         else
             id+=1;
         slave.setSlaveId(id);
-        slave.setName(name);
-        slave.setHostName(hostname);
-        slave.setPort(port);
-        slave.setWebappName(webAppName);
-        slave.setUsername(username);
-        slave.setPassword(password);
-        slave.setMaster(master);
-        slave.setProxyHostname(proxyHostname);
-        slave.setProxyPort(proxy_port);
-        slave.setNonproxyHosts(nonproxyHosts);
-        //判断添加节点的是admin还是普通管理员
+        //判断是否存在相同的节点
+        List<SlaveEntity> items=slaveDao.getAllSlave("");
+        for(SlaveEntity item:items){
+            if(item.getHostName().equals(slave.getHostName()) && item.getPort().equals(slave.getPort())){
+                result="N";
+                return result;
+            }
+        }
         slaveDao.addSlave(slave);
+        //判断添加节点的是admin还是普通管理员
+        Integer typeId=Integer.valueOf(request.getParameter("userType"));
         if(typeId==1){
             UserGroupAttributeEntity attr=(UserGroupAttributeEntity)request.getSession().getAttribute("userInfo");
             String userGroupName=attr.getUserGroupName();
@@ -830,5 +809,35 @@ public class SlaveServiceImpl implements SlaveService {
             }
         }
         return result;
+    }
+
+    @Override
+    public String updateSlave(HttpServletRequest request) throws Exception {
+        String result="Y";
+        JSONObject json=JSONObject.fromObject(request.getParameter("slaveServer"));
+        SlaveEntity targetSlave=(SlaveEntity)JSONObject.toBean(json,SlaveEntity.class);
+        targetSlave.setPassword(KettleEncr.encryptPassword(targetSlave.getPassword()));
+        //判断是否存在相同节点
+        List<SlaveEntity> items=slaveDao.getAllSlave("");
+        for(SlaveEntity item:items){
+            if(item.getSlaveId().toString().equals(targetSlave.getSlaveId().toString())){
+                continue;
+            }
+            if(item.getHostName().equals(targetSlave.getHostName()) && item.getPort().equals(targetSlave.getPort())){
+                result="N";
+                return result;
+            }
+            if(item.getName().equals(targetSlave.getName())){
+                result="N";
+                return result;
+            }
+        }
+        slaveDao.updateSlaveServer(targetSlave);
+        return result;
+    }
+
+    @Override
+    public SlaveEntity getSlaveByHostName(Integer id) throws Exception {
+        return slaveDao.getSlaveById(id);
     }
 }

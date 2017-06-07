@@ -360,7 +360,7 @@ GuidePanel = Ext.extend(Ext.Panel,{
                         text : "<font size = '3px' style='margin-left:7px'>平&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;台</font>",icon:'ui/images/i_platform.png', cls:'nav-node',
                         children:[
                             {id:"platformMonitor",text:"<font size = '2px' style='margin-left:9px;'>平台概况</font>",cls:"navl",leaf:true,icon:'ui/images/i_platform.png'},
-                        ]
+                        ],id:"moduleIdTwo"
                     },{
 						text : "<font size = '3px' style='margin-left:7px'>任&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;务</font>",icon:'ui/images/i_task.png', cls:'nav-node',
 						children:[
@@ -405,12 +405,12 @@ GuidePanel = Ext.extend(Ext.Panel,{
 					var rootnodes = fristGuidePanel.getRootNode().childNodes;   //获取主节点
 					for(var i=0;i<rootnodes.length;i++){  //从节点中取出子节点依次遍历
 						var rootnode = rootnodes[i];
-						if(rootnode.id=="taskIdTwo"){
+						if(rootnode.id=="moduleIdTwo"){
 							rootnode.expand();
 							var leafNodes=rootnode.childNodes;
 							for(var k=0;k<leafNodes.length;k++){
 								var leafNode=leafNodes[k];
-								if(leafNode.id=="jobMonitor"){
+								if(leafNode.id=="platformMonitor"){
 									leafNode.fireEvent("click",leafNode)
 								}
 							}
@@ -457,6 +457,10 @@ GuidePanel = Ext.extend(Ext.Panel,{
 			if(timeIntervalByTaskControl!=""){
 				clearInterval(timeIntervalByTaskControl);
 				timeIntervalByTaskControl="";
+			}
+			if(moduleViewInterval!=""){
+				clearInterval(moduleViewInterval);
+				moduleViewInterval="";
 			}
 			if(node.text == "<font size = '2px' style='margin-left:9px;'>新建转换</font>")
 			{
@@ -609,6 +613,8 @@ GuidePanel = Ext.extend(Ext.Panel,{
 				generateUserGroupPanel(secondGuidePanel);
 			}else if(node.text=="<font size = '2px' style='margin-left:9px;'>任务历史日志</font>"){
 				showHistoryLogPanel(secondGuidePanel);
+			}else if(node.text=="<font size = '2px' style='margin-left:9px;'>平台概况</font>"){
+				showModuleView(secondGuidePanel);
 			}
 		});
 

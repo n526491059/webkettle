@@ -160,7 +160,6 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 		});
 		var bView = new Ext.Button({
 			text: '浏览', scope: this, handler: function() {
-
 				var dialog = new DatabaseExplorerDialog();
 				dialog.show(null, function() {
 					dialog.initDatabase(normal.getValue().name);

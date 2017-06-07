@@ -24,4 +24,12 @@ public interface SlaveDao {
     public void addSlave(SlaveEntity slave);
 
     public Integer selectMaxId();
+
+    public void deleteTransSlave(Integer slaveId);
+
+    public void deleteSlaveUserGroup(Integer slaveId);
+
+    public void deleteSlaveServer(Integer slaveId);
+
+    public void updateSlaveServer(SlaveEntity slave);
 }

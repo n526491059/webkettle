@@ -457,7 +457,6 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		if(cell.getAttribute('slaveServers') != null)
 			data = Ext.decode(cell.getAttribute('slaveServers'));
 		this.slaveServerStore.loadData(data);
-		
 		return this.slaveServerStore;
 	},
 	

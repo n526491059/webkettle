@@ -41,10 +41,15 @@ public class SchedulerServiceImpl implements SchedulerService {
     @Autowired
     UserDao userDao;
 
+    @Override
+    public List<JobTimeSchedulerEntity> getSchedulerJobByLogin(String userGroupName) {
+        return schedulerDao.getAllTimerJob(userGroupName);
+    }
+
     //判断是否在数据库中已经存在相同类型 相同执行周期的同一个作业
     public boolean judgeJobIsAlike(JobTimeSchedulerEntity willAddJobTimer) throws Exception{
         boolean flag=false;
-        List<JobTimeSchedulerEntity> jobs=schedulerDao.getAllTimerJob();
+        List<JobTimeSchedulerEntity> jobs=schedulerDao.getAllTimerJob("");
 
         if(jobs!=null && jobs.size()>=1){
             //遍历查找是否有作业名与用户选择的作业名相同的作业

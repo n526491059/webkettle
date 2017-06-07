@@ -5,6 +5,7 @@ import org.flhy.ext.utils.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.sxdata.jingwei.bean.PageforBean;
 import org.sxdata.jingwei.dao.UserGroupDao;
@@ -13,6 +14,7 @@ import org.sxdata.jingwei.entity.UserGroupAttributeEntity;
 import org.sxdata.jingwei.entity.UserGroupEntity;
 import org.sxdata.jingwei.service.SlaveService;
 import org.sxdata.jingwei.service.UserGroupService;
+import org.sxdata.jingwei.util.TaskUtil.KettleEncr;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +32,47 @@ public class SlaveController {
     @Autowired
     protected SlaveService slaveService;
 
+    //修改节点服务信息前 先获得需要修改的节点的信息
+    @RequestMapping(value="/getSlaveServerInfo")
+    @ResponseBody
+    protected void getSlaveServerInfo(HttpServletResponse response,HttpServletRequest request,@RequestParam String slaveId) throws Exception{
+        try{
+            SlaveEntity slave=slaveService.getSlaveByHostName(Integer.valueOf(slaveId));
+            JSONObject json=new JSONObject();
+            json.put("name",slave.getName());
+            json.put("hostname",slave.getHostName());
+            json.put("port",slave.getPort());
+            json.put("webAppName",slave.getWebappName());
+            json.put("username",slave.getUsername());
+            json.put("password", KettleEncr.decryptPasswd(slave.getPassword()));
+            json.put("master", slave.getMaster());
+            json.put("slaveId",slave.getSlaveId());
+            response.setContentType("text/html;charset=utf-8");
+            PrintWriter out=response.getWriter();
+            out.write(json.toString());
+            out.flush();
+            out.close();
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    //修改节点服务
+    @RequestMapping(value="/updateSlaveServer")
+    @ResponseBody
+    protected void updateSlaveServer(HttpServletResponse response,HttpServletRequest request) throws Exception{
+        try{
+            String result=slaveService.updateSlave(request);
+            PrintWriter out=response.getWriter();
+            out.write(result);
+            out.flush();
+            out.close();
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
+        }
+    }
 
     //获得节点信息 以panel形式显示
     @RequestMapping(value="/getSlave")
@@ -139,10 +182,9 @@ public class SlaveController {
     //删除节点
     @RequestMapping(value="/deleteSlave")
     @ResponseBody
-    protected  void deleteSlave(HttpServletResponse response,HttpServletRequest request) throws Exception{
+    protected  void deleteSlave(HttpServletResponse response,HttpServletRequest request,@RequestParam String slaveId) throws Exception{
         try{
-            String[] items=request.getParameterValues("items");
-            slaveService.deleteSlave(items);
+            slaveService.deleteSlave(Integer.valueOf(slaveId));
             PrintWriter out=response.getWriter();
             out.write("{success:true}");
             out.flush();

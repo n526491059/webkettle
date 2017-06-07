@@ -18,7 +18,6 @@ DatabaseExplorerDialog = Ext.extend(Ext.Window, {
 		});
 		
 		this.initDatabase = function(databaseInfo) {
-			alert(databaseInfo);
 			var loader = new Ext.tree.TreeLoader({
 				dataUrl: GetUrl('database/explorer.do'),
 				baseParams: {databaseInfo: /*Ext.encode(databaseInfo)*/databaseInfo, includeElement: this.includeElement,transName:activeGraph.title}

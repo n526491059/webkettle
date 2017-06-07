@@ -20,4 +20,12 @@
     <delete id="deleteDatabaseAttr" parameterType="java.lang.Integer">
       DELETE FROM r_database_attribute WHERE ID_DATABASE=#{id}
     </delete>
+
+    <delete id="deleteJobDatabase" parameterType="java.lang.Integer">
+        DELETE FROM r_jobentry_database WHERE ID_DATABASE=#{id}
+    </delete>
+
+    <delete id="deleteTransDatabase" parameterType="java.lang.Integer">
+        DELETE FROM r_step_database WHERE ID_DATABASE=#{id}
+    </delete>
 </mapper>
