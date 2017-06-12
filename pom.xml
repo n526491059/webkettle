@@ -80,6 +80,13 @@
 			<artifactId>kettle-json-plugin</artifactId>
 			<version>7.1.0.0-12</version>
 		</dependency>
+
+		<dependency>
+			<groupId>pentaho</groupId>
+			<artifactId>pentaho-big-data-kettle-plugins-hdfs</artifactId>
+			<version>7.0.0.2-52</version>
+		</dependency>
+
 		<!--kettle dependency end-->
 
 		<dependency>
@@ -272,6 +279,7 @@
 			<artifactId>httpclient</artifactId>
 			<version>4.2.5</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
@@ -283,7 +291,6 @@
 			<artifactId>jxl</artifactId>
 			<version>2.6.12</version>
 		</dependency>
-
 
 	</dependencies>
 	

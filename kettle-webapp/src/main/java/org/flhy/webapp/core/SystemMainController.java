@@ -64,25 +64,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(value="/system")
 public class SystemMainController {
-	
+
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/steps")
-	protected void steps() throws ServletException, IOException {
+		protected void steps() throws ServletException, IOException {
 		JSONArray jsonArray = new JSONArray();
 		
 		PluginRegistry registry = PluginRegistry.getInstance();
 		final List<PluginInterface> baseSteps = registry.getPlugins(StepPluginType.class);
 		final List<String> baseCategories = registry.getCategories(StepPluginType.class);
-
 		int i=0;
 		for (String baseCategory : baseCategories) {
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("id", "category" + i++);
-			jsonObject.put("text", baseCategory);
-			jsonObject.put("icon", SvgImageUrl.getUrl(BasePropertyHandler.getProperty( "Folder_image" )));
-			jsonObject.put("cls", "nav-node");
-			JSONArray children = new JSONArray();
-
 			List<PluginInterface> sortedCat = new ArrayList<PluginInterface>();
 			for (PluginInterface baseStep : baseSteps) {
 				if (baseStep.getCategory().equalsIgnoreCase(baseCategory)) {
@@ -94,7 +86,28 @@ public class SystemMainController {
 					return p1.getName().compareTo(p2.getName());
 				}
 			});
+			//若一级菜单下的叶子节点全部未实现则不显示出来
+			boolean contains=false;
 			for (PluginInterface p : sortedCat) {
+				if(PluginFactory.containBean(p.getIds()[0])){
+					contains=true;
+				}
+			}
+			if(!contains)
+				continue;
+
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("id", "category" + i++);
+			jsonObject.put("text", baseCategory);
+			jsonObject.put("icon", SvgImageUrl.getUrl(BasePropertyHandler.getProperty( "Folder_image" )));
+			jsonObject.put("cls", "nav-node");
+			JSONArray children = new JSONArray();
+
+
+			for (PluginInterface p : sortedCat) {
+				if(!PluginFactory.containBean(p.getIds()[0]))
+					continue;
+
 				String pluginName = p.getName();
 				String pluginDescription = p.getDescription();
 				
@@ -116,6 +129,38 @@ public class SystemMainController {
 			jsonObject.put("children", children);
 			jsonArray.add(jsonObject);
 		}
+		//big data
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("id", "category" + i++);
+		jsonObject.put("text", "big data");
+		jsonObject.put("icon", SvgImageUrl.getUrl(BasePropertyHandler.getProperty( "Folder_image" )));
+		jsonObject.put("cls", "nav-node");
+		JSONArray children = new JSONArray();
+		//HadoopFileInput
+		JSONObject child1 = new JSONObject();
+		child1.put("id", "step" + i++);
+		child1.put("text", PluginFactory.containBean("HadoopFileInput") ? "Hadoop File Input" : "<font color='red'>" + "Hadoop File Input" + "</font>");
+		child1.put("pluginId", "HadoopFileInput");
+		child1.put("icon","ui/images/HDI.svg?scale=32");
+		child1.put("dragIcon","ui/images/HDI.svg?scale=32");
+		child1.put("cls", "nav");
+		child1.put("qtip","i18n:org.pentaho.di.trans.step:BaseStep.TypeLongDesc.HadoopFileInput");
+		child1.put("leaf", true);
+		children.add(child1);
+		//HadoopFileOutput
+		JSONObject child2 = new JSONObject();
+		child2.put("id", "step" + i++);
+		child2.put("text", PluginFactory.containBean("HadoopFileOutput") ? "Hadoop File Output" : "<font color='red'>" + "Hadoop File Output" + "</font>");
+		child2.put("pluginId", "HadoopFileOutput");
+		child2.put("icon","ui/images/HDO.svg?scale=32");
+		child2.put("dragIcon","ui/images/HDO.svg?scale=32");
+		child2.put("cls", "nav");
+		child2.put("qtip","i18n:org.pentaho.di.trans.step:BaseStep.TypeLongDesc.HadoopFileOutput");
+		child2.put("leaf", true);
+		children.add(child2);
+		jsonObject.put("children", children);
+		jsonArray.add(jsonObject);
+
 		JsonUtils.response(jsonArray);
 	}
 	
@@ -130,7 +175,26 @@ public class SystemMainController {
 
 		int i=0;
 		for (String baseCategory : baseCategories) {
-			
+
+			List<PluginInterface> sortedCat = new ArrayList<PluginInterface>();
+			for (PluginInterface baseJobEntry : baseJobEntries) {
+				if ( baseJobEntry.getIds()[ 0 ].equals( JobMeta.STRING_SPECIAL ) )
+					continue;
+
+				if (baseJobEntry.getCategory().equalsIgnoreCase(baseCategory)) {
+					sortedCat.add(baseJobEntry);
+				}
+			}
+			//判断该一级节点下是否包含已经完成的主键字段
+			boolean contains=false;
+			for (PluginInterface p : sortedCat) {
+				if(PluginFactory.containBean(p.getIds()[0])){
+					contains=true;
+				}
+			}
+			if(!contains)
+				continue;
+
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("id", "category" + i++);
 			jsonObject.put("text", baseCategory);
@@ -138,7 +202,6 @@ public class SystemMainController {
 			jsonObject.put("cls", "nav-node");
 			JSONArray children = new JSONArray();
 
-			List<PluginInterface> sortedCat = new ArrayList<PluginInterface>();
 			if ( baseCategory.equalsIgnoreCase( JobEntryPluginType.GENERAL_CATEGORY ) ) {
 				JobEntryCopy startEntry = JobMeta.createStartEntry();
 				JSONObject child = new JSONObject();
@@ -164,23 +227,18 @@ public class SystemMainController {
 				child.put("leaf", true);
 				children.add(child);
 		    }
-			for (PluginInterface baseJobEntry : baseJobEntries) {
-				if ( baseJobEntry.getIds()[ 0 ].equals( JobMeta.STRING_SPECIAL ) ) 
-					continue;
-				
-				if (baseJobEntry.getCategory().equalsIgnoreCase(baseCategory)) {
-					sortedCat.add(baseJobEntry);
-				}
-			}
+
 			Collections.sort(sortedCat, new Comparator<PluginInterface>() {
 				public int compare(PluginInterface p1, PluginInterface p2) {
 					return p1.getName().compareTo(p2.getName());
 				}
 			});
 			for (PluginInterface p : sortedCat) {
+				if(!PluginFactory.containBean(p.getIds()[0]))
+					continue;
 				String pluginName = p.getName();
 				String pluginDescription = p.getDescription();
-				
+
 				JSONObject child = new JSONObject();
 				child.put("id", "step" + i++);
 				child.put("text", PluginFactory.containBean(p.getIds()[0]) ? pluginName : "<font color='red'>" + pluginName + "</font>");

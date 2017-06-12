@@ -12,6 +12,7 @@ import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.Props;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.logging.KettleLogStore;
+import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -32,7 +33,7 @@ public class SystemLoadListener implements ServletContextListener {
 			System.out.println("开启carte服务线程...");
 			CarteTaskManager.startThread(1);//启动1个线程处理执行carte服务
 			// 日志缓冲不超过5000行，缓冲时间不超过720秒
-			KettleLogStore.init( 5000, 720 );
+			KettleLogStore.init(5000, 720);
 			KettleEnvironment.init();
 //			Props.init( Props.TYPE_PROPERTIES_KITCHEN );
 			PropsUI.init( "KettleWebConsole", Props.TYPE_PROPERTIES_KITCHEN );

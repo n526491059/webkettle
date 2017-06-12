@@ -36,7 +36,7 @@ Denormaliser = Ext.extend(KettleDialog, {
 
         this.saveData = function(){
             var data = {
-                group:Ext.encode(groupFieldStore.toJson()),
+                typefield:Ext.encode(groupFieldStore.toJson()),
                 key_field:wKeyField.getValue(),
                 fields:Ext.encode(fieldStore.toJson())
             };

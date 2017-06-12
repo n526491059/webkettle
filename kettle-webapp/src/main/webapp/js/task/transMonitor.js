@@ -192,6 +192,7 @@ function transPowerExecute(){
 
 //转换结构图
 function  transCompositionImg(){
+
     var grid=Ext.getCmp("transPanel");
     var secondGuidePanel=Ext.getCmp("secondGuidePanel");
     var taskName=grid.getSelectionModel().getSelected().get("directoryName");//被选中的任务路径
