@@ -37,7 +37,7 @@
 - 会话管理：Spring-Session 
 - 日志管理：Log4j
 - 前端框架：EXTJS3.4+MXGraph2.3
-- 项目管理: Maven3.1
+- 项目管理: Maven3.2.3
 - ETL底层引擎:kettle7.0
 
 # 说明
