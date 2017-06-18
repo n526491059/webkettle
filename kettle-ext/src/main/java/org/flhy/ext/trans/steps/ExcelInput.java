@@ -79,7 +79,13 @@ public class ExcelInput extends AbstractStep{
             field.setType(jsonObject.optString("type"));
             field.setLength(Const.toInt(jsonObject.optString("length"), -1));
             field.setPrecision(Const.toInt(jsonObject.optString("precision"), -1));
-            field.setTrimType(Const.toInt(jsonObject.optString("precision"), -1));
+            String repeat=jsonObject.optString("repeat");
+            field.setTrimType(ExcelOutput.getIndex(ExcelInputMeta.type_trim_code,jsonObject.optString("trim_type")));
+            field.setRepeated(null==repeat?false:repeat.equalsIgnoreCase("Y"));
+            field.setFormat(jsonObject.optString("format"));
+            field.setCurrencySymbol(jsonObject.optString("currency"));
+            field.setDecimalSymbol(jsonObject.optString("decimal"));
+            field.setGroupSymbol(jsonObject.optString("group"));
 
             inputFields[i]=field;
         }

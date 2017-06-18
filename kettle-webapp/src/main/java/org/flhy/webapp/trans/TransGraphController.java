@@ -433,14 +433,14 @@ public class TransGraphController {
 	    	variableMap.put( fields[idx], data[idx].toString() );
 	    }
 
-	    executionConfiguration.setVariables( variableMap );
+	    executionConfiguration.setVariables(variableMap);
 	    executionConfiguration.getUsedVariables( transMeta );
 	    executionConfiguration.getUsedArguments(transMeta, App.getInstance().getArguments());
-	    executionConfiguration.setReplayDate( null );
-	    executionConfiguration.setRepository( App.getInstance().getRepository() );
-	    executionConfiguration.setSafeModeEnabled( false );
+	    executionConfiguration.setReplayDate(null);
+	    executionConfiguration.setRepository(App.getInstance().getRepository());
+	    executionConfiguration.setSafeModeEnabled(false);
 
-	    executionConfiguration.setLogLevel( DefaultLogLevel.getLogLevel() );
+	    executionConfiguration.setLogLevel(DefaultLogLevel.getLogLevel());
 		
 		// Fill the parameters, maybe do this in another place?
 		Map<String, String> params = executionConfiguration.getParams();
@@ -533,6 +533,7 @@ public class TransGraphController {
 	    }
 
 		PluginRegistry registry = PluginRegistry.getInstance();
+
 		PluginInterface stepPlugin = registry.findPluginWithId(StepPluginType.class, pluginId);
 		if (stepPlugin != null) {
 			StepMetaInterface info = (StepMetaInterface) registry.loadClass(stepPlugin);
@@ -572,7 +573,7 @@ public class TransGraphController {
 		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
 		
 		JSONArray jsonArray = new JSONArray();
-		StepMeta stepinfo = transMeta.findStep( URLDecoder.decode(stepName, "utf-8") );
+		StepMeta stepinfo = transMeta.findStep(URLDecoder.decode(stepName, "utf-8"));
 		List<StepMeta> steps = transMeta.findPreviousSteps(stepinfo);
 		for(StepMeta stepMeta : steps) {
 			JSONObject jsonObject = new JSONObject();

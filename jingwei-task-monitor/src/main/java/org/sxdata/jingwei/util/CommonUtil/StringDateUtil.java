@@ -14,6 +14,13 @@ import java.util.*;
 public class StringDateUtil {
     public static Map<String,HttpSession> allSession=new HashMap<String,HttpSession>();
 
+    //首字符大写
+    public static String firstLetterUpp(String source){
+        char[] cs=source.toCharArray();
+        cs[0]-=32;
+        return String.valueOf(cs);
+    }
+
     //为json-lib日期返回正常的指定格式
     public static JsonConfig configJson(String datePattern) {
         JsonConfig config = new JsonConfig();

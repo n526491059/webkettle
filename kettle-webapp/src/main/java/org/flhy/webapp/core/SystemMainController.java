@@ -23,6 +23,7 @@ import org.flhy.ext.utils.SvgImageUrl;
 import org.flhy.webapp.bean.Ext3Node;
 import org.pentaho.di.core.Condition;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.annotations.Step;
 import org.pentaho.di.core.compress.CompressionProviderFactory;
 import org.pentaho.di.core.logging.LogLevel;
 import org.pentaho.di.core.plugins.JobEntryPluginType;
@@ -63,13 +64,27 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(value="/system")
-public class SystemMainController {
+public class SystemMainController{
+	/*public static JSONObject getStepAnnotationInfo(Class step,int index){
+		if(!step.isAnnotationPresent(Step.class))
+			return null;
+		Step s=(Step)step.getAnnotation(Step.class);
+		JSONObject json=new JSONObject();
+		json.put("id", "step" +index);
+		json.put("text", PluginFactory.containBean(s.id()) ? s.name() : "<font color='red'>" + s.name() + "</font>");
+		json.put("pluginId",s.id());
+		json.put("icon","ui/images/"+s.image()+"?scale=32");
+		json.put("dragIcon","ui/images/"+s.image()+"?scale=32");
+		json.put("cls", "nav");
+		json.put("qtip",s.categoryDescription());
+		json.put("leaf", true);
+		return  json;
+	}*/
 
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/steps")
 		protected void steps() throws ServletException, IOException {
 		JSONArray jsonArray = new JSONArray();
-		
 		PluginRegistry registry = PluginRegistry.getInstance();
 		final List<PluginInterface> baseSteps = registry.getPlugins(StepPluginType.class);
 		final List<String> baseCategories = registry.getCategories(StepPluginType.class);
@@ -89,9 +104,8 @@ public class SystemMainController {
 			//若一级菜单下的叶子节点全部未实现则不显示出来
 			boolean contains=false;
 			for (PluginInterface p : sortedCat) {
-				if(PluginFactory.containBean(p.getIds()[0])){
+				if(PluginFactory.containBean(p.getIds()[0]))
 					contains=true;
-				}
 			}
 			if(!contains)
 				continue;
@@ -144,7 +158,7 @@ public class SystemMainController {
 		child1.put("icon","ui/images/HDI.svg?scale=32");
 		child1.put("dragIcon","ui/images/HDI.svg?scale=32");
 		child1.put("cls", "nav");
-		child1.put("qtip","i18n:org.pentaho.di.trans.step:BaseStep.TypeLongDesc.HadoopFileInput");
+		child1.put("qtip","HadoopFileInputPlugin.Description");
 		child1.put("leaf", true);
 		children.add(child1);
 		//HadoopFileOutput
