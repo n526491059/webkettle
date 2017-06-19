@@ -44,8 +44,7 @@ public class SvgImageUrl {
 		
 		if(!imageFile.startsWith("ui/images/"))
 			imageFile = "ui/images/" + imageFile;
-		
-		return imageFile + "?scale=" + scale; 
+		return imageFile + "?scale=" + scale;
 	}
 	
 	public static BufferedImage createImage(int scale) {

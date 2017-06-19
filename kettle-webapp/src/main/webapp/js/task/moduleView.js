@@ -3,10 +3,10 @@ var moduleViewInterval="";
 function showModuleView(secondGuidePanel){
     secondGuidePanel.removeAll(true);
     var windowHTML="<div id='moduleTitle' style='height:50px; margin-bottom:5px;position:relative;'><span style='position:absolute;left:430px;top:10px;font-size:32px;color:#2f9adb'>平台概况视图</span></div>"+
-        "<div id='module1' style='height:320px;width:350px;display:inline-block;'>1</div>"+
-        "<div id='module2' style='height:320px;width:350px;display:inline-block;'>2</div>"+
-        "<div id='module3' style='height:320px;width:350px;display:inline-block;'>3</div>"+
-        "<div id='module4' style='height:320px;width:350px;margin-left:350px;'>4</div>";
+        "<div style='height:330px;display:inline-block;position:relative;'><div id='module1' style='height:300px;width:250px;display:inline-block;border-right:1px dashed #2f9adb;'></div><div style='position:absolute;top:230px;left:70px;'>运行中作业数</div></div>"+
+        "<div style='height:330px;display:inline-block;position:relative;'><div id='module2' style='height:300px;width:250px;display:inline-block;border-right:1px dashed #2f9adb'></div><div style='position:absolute;top:230px;left:70px;'>运行中转换数</div></div>"+
+        "<div style='height:330px;display:inline-block;position:relative;'><div id='module3' style='height:300px;width:250px;display:inline-block;border-right:1px dashed #2f9adb'></div><div style='position:absolute;top:230px;left:100px;'>节点数</div></div>"+
+        "<div style='height:330px;display:inline-block;position:relative;'><div id='module4' style='height:300px;width:250px;display:inline-block;'></div><div style='position:absolute;top:230px;left:80px;'>定时作业数</div></div>";
     var viewModulePanel=new Ext.Panel({
         title:"<font size = '3px' >平台概况</font>",
         width:1100,
@@ -121,5 +121,5 @@ function moduleViewData(){
             failure:failureResponse,
             params:{}
         });
-    },5000);
+    },50000);
 }

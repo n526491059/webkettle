@@ -78,7 +78,7 @@ public class ExcelOutput extends AbstractStep{
 
 
         excel.setTemplateEnabled(cell.getAttribute("enabled").equalsIgnoreCase("Y"));
-            excel.setTemplateAppend(cell.getAttribute("append").equalsIgnoreCase("Y"));
+        excel.setTemplateAppend(cell.getAttribute("append").equalsIgnoreCase("Y"));
         excel.setTemplateFileName(cell.getAttribute("filename"));
 
         String fields=cell.getAttribute("fields");
