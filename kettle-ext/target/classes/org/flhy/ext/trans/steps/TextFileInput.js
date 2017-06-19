@@ -1,3 +1,4 @@
+
 TextFileInputDialog = Ext.extend(KettleTabDialog, {
 	width: 700,
 	height: 600,

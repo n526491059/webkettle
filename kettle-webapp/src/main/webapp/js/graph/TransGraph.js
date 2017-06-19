@@ -413,6 +413,8 @@ TransGraph = Ext.extend(BaseGraph, {
                 iconCls: 'show-results', scope: this, handler: this.showResultPanel
             },{
                 iconCls: 'databasesCls', scope: this, handler: this.databaseConn,tooltip: '数据库连接'
+            },{
+                iconCls: 'show-results', scope: this, handler: this.showHoopCluster
             }];
         }else if(this.Executable==true && this.readOnly==false){
             this.tbar = [{
@@ -633,6 +635,19 @@ TransGraph = Ext.extend(BaseGraph, {
 
         resultPanel.setVisible( !resultPanel.isVisible() );
         this.doLayout();
+    },
+    showHoopCluster:function(){
+        var hadoopClusterGrid=new HadoopClusterGrid();
+        var carteInfoWindow=new Ext.Window({
+            title:"Hadoop Cluster",
+            width:480,
+            height:360,
+            autoScroll: true,
+            bodyStyle:"background-color:white",
+            modal:true,
+            items:[hadoopClusterGrid]
+        });
+        carteInfoWindow.show();
     },
     databaseConn:function(){
         var grid=new DatabaseConnGrid();

@@ -30,7 +30,7 @@ import java.util.List;
 @Component("ExcelOutput")
 @Scope("prototype")
 public class ExcelOutput extends AbstractStep{
-    private Integer getIndex(String[] sources,String target){
+    public static Integer getIndex(String[] sources,String target){
         Integer result=0;
         if(null==target || target.equals("")){
             result=0;

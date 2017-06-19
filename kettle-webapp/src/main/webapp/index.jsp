@@ -140,5 +140,6 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/taskGroupMonitor.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/taskHistoryLogs.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/moduleView.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/task/hadoopCluster.js"></script>
 	</body>
 </html>
