@@ -109,6 +109,7 @@ public class TransGraphController {
 	protected void save(@RequestParam String graphXml) throws Exception {
 		Repository repository=null;
 		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+		System.out.println(StringEscapeHelper.decode(graphXml));
 		AbstractMeta transMeta = codec.decode(StringEscapeHelper.decode(graphXml));
 		repository= App.getInstance().getRepository();
 		ObjectId existingId = repository.getTransformationID( transMeta.getName(), transMeta.getRepositoryDirectory() );

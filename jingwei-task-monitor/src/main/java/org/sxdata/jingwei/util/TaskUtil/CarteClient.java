@@ -35,15 +35,15 @@ public class CarteClient implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        BasicDataSource dataSource=(BasicDataSource)applicationContext.getBean("dataSource");
-        sessionFactory=(DefaultSqlSessionFactory)applicationContext.getBean("sqlSessionFactory");
-        String url=dataSource.getUrl();
-        int a=url.lastIndexOf("/");
-        int b=url.indexOf("?");
-        databaseName=url.substring(a+1,b);
-        int c=url.indexOf("/");
-        int d=url.lastIndexOf(":");
-        hostName=url.substring(c+2,d);
+            BasicDataSource dataSource=(BasicDataSource)applicationContext.getBean("dataSource");
+            sessionFactory=(DefaultSqlSessionFactory)applicationContext.getBean("sqlSessionFactory");
+            String url=dataSource.getUrl();
+            int a=url.lastIndexOf("/");
+            int b=url.indexOf("?");
+            databaseName=url.substring(a+1,b);
+            int c=url.indexOf("/");
+            int d=url.lastIndexOf(":");
+            hostName=url.substring(c+2,d);
 
         try{
             //开启作业定时
