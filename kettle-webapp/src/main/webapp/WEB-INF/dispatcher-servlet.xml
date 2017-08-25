@@ -61,9 +61,9 @@
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 		<!--192.168.1.201:3306   hadoop-->
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url" value="jdbc:mysql://192.168.1.201:3306/kettle?characterEncoding=gbk&amp;autoReconnect=true" />
+		<property name="url" value="jdbc:mysql://localhost:3306/kettle" />
 		<property name="username" value="root" />
-		<property name="password" value="hadoop"/>
+		<property name="password" value="rootroot"/>
 	</bean>
 
 

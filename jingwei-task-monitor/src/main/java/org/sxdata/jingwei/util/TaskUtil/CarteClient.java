@@ -39,8 +39,7 @@ public class CarteClient implements ApplicationContextAware {
             sessionFactory=(DefaultSqlSessionFactory)applicationContext.getBean("sqlSessionFactory");
             String url=dataSource.getUrl();
             int a=url.lastIndexOf("/");
-            int b=url.indexOf("?");
-            databaseName=url.substring(a+1,b);
+            databaseName=url.substring(a+1,url.length());
             int c=url.indexOf("/");
             int d=url.lastIndexOf(":");
             hostName=url.substring(c+2,d);

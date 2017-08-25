@@ -44,13 +44,7 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.flhy</groupId>
-			<artifactId>kettle-scheduler</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>org.sxdata.jingwei</groupId>
 			<artifactId>jingwei-task-monitor</artifactId>

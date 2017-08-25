@@ -8,7 +8,6 @@
 	<modules>
 		<module>kettle-webapp</module>
 		<module>kettle-ext</module>
-		<module>kettle-scheduler</module>
 		<module>jingwei-task-monitor</module>
 	</modules>
 

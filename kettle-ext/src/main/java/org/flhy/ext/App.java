@@ -16,6 +16,8 @@ import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.logging.LogLevel;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.job.JobExecutionConfiguration;
+import org.pentaho.di.repository.LongObjectId;
+import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryMeta;
@@ -153,7 +155,7 @@ public class App implements ApplicationContextAware {
 			String port = url.substring(url.lastIndexOf(":") + 1, url.lastIndexOf("/"));
 			String dbName = url.substring(url.lastIndexOf("/") + 1);
 			
-			dbMeta.setName("defaultDatabase");
+			dbMeta.setName("192.168.1.201_kettle");
 			dbMeta.setDBName(dbName);
 			dbMeta.setDatabaseType("MYSQL");
 			dbMeta.setAccessType(0);
@@ -162,15 +164,18 @@ public class App implements ApplicationContextAware {
 			dbMeta.setDBPort(port);
 			dbMeta.setUsername(dataSource.getUsername());
 			dbMeta.setPassword(dataSource.getPassword());
-
-			dbMeta.addExtraOption(dbMeta.getPluginId(), "characterEncoding", "gbk");
+			ObjectId objectId = new LongObjectId(100);
+			dbMeta.setObjectId(objectId);
+			dbMeta.setShared(true);
+			dbMeta.addExtraOption(dbMeta.getPluginId(), "characterEncoding", "utf8");
 			dbMeta.addExtraOption(dbMeta.getPluginId(), "useUnicode", "true");
 			dbMeta.addExtraOption(dbMeta.getPluginId(), "autoReconnect", "true");
 			meta = new KettleDatabaseRepositoryMeta();
-			meta.setName("defaultRepository");
-			meta.setId("defaultRepository");
+			meta.setName("192.168.1.201_kettle");
+			meta.setId("KettleDatabaseRepository");
 			meta.setConnection(dbMeta);
-			
+			meta.setDescription("192.168.1.201_kettle");
+
 			repository.init(meta);
 			repository.connect("admin", "admin");
 			this.repository = repository;

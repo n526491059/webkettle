@@ -30,7 +30,6 @@ import org.flhy.ext.core.database.DatabaseCodec;
 import org.flhy.ext.trans.TransExecutionConfigurationCodec;
 import org.flhy.ext.trans.step.StepEncoder;
 import org.flhy.ext.utils.*;
-import org.flhy.scheduler.beans.ExecutionTrace;
 import org.flhy.webapp.utils.GetSQLProgress;
 import org.flhy.webapp.utils.SearchFieldsProgress;
 import org.flhy.webapp.utils.TransPreviewProgress;
