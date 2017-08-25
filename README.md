@@ -1,6 +1,6 @@
 
 
-#  JingWeiETL产品介绍
+#  webKettleETL产品介绍
 -------------------------    
    
 
@@ -43,7 +43,7 @@ ETL任务的执行引擎节点管理
 精卫平台的用户权限管理系统
 ![输入图片说明](https://git.oschina.net/uploads/images/2017/0613/141826_599b8f09_1097305.png "在这里输入图片标题")
 
-#  JingWeiETL技术实现
+#  webKettleETL技术实现
 ------------------------- 
 - 精卫ETL是基于流行的ETL工具kettle开发的B/S架构版本的ETL产品,所使用的底层引擎是调用kettle的api
 - ETL任务以元数据的方式储存在资源库里面,精卫通过读取资源库元数据,对元数据进行解析后可将ETL任务通过MXGraph展现至B/S架构的精卫系统中,实现了在B/S架构上面开发ETL任务的功能,属于精卫系统的模型开发模块功能.
@@ -55,9 +55,10 @@ ETL任务的执行引擎节点管理
 ![输入图片说明](https://git.oschina.net/uploads/images/2017/0613/110502_61484bf4_1097305.png "在这里输入图片标题")
 
 
-#  JingWeiETL整体功能流程
+# webKettleETL整体功能流程
 --------------------------
 ![输入图片说明](https://git.oschina.net/uploads/images/2017/0613/110741_c24e49f7_1097305.png "在这里输入图片标题")
+![输入图片说明](https://git.oschina.net/uploads/images/2017/0825/094017_0fbeada5_1097305.png "屏幕截图.png")
 #技术选型
 --------------------------
 
@@ -78,6 +79,7 @@ ETL任务的执行引擎节点管理
 4. 本例使用Maven3.2.3构建，启动服务器后访问http://localhost:8080/
 5. 支持IE9及以上、FireFox等浏览器，IE6-IE8需要做特殊化处理，其他浏览器未测试
 6. jdk版本需要1.8以上
+7. 感谢wind1373290大神提供webkettle原版代码和技术支持,希望能借社区的力量把该项目发扬光大
 
 
 
