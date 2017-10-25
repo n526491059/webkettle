@@ -167,6 +167,7 @@ public class JobExecutor implements Runnable {
 				errCount = job.getErrors();
 			} else if (executionConfiguration.isExecutingRemotely()) {
 				carteObjectId = Job.sendToSlaveServer( jobMeta, executionConfiguration, App.getInstance().getRepository(), App.getInstance().getMetaStore() );
+
 				SlaveServer remoteSlaveServer = executionConfiguration.getRemoteServer();
 				boolean running = true;
 				while(running) {
